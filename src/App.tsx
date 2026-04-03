@@ -100,7 +100,7 @@ const STICKER_POSITIONS_MOBILE = [
 
 function LandingPage() {
   const navigate = useNavigate();
-  const [isDownloading, setIsDownloading] = useState(false);
+
 
   const [loadedSchoolLogos, setLoadedSchoolLogos] = useState<string[]>([]);
   const [activeStickers, setActiveStickers] = useState<{ logo: string; position: any; id: string }[]>([]);
@@ -319,7 +319,7 @@ function LandingPage() {
               <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                 <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
               </svg>
-              <span className="btn-text">Get for Windows</span>
+              <span className="btn-text">Coming Soon</span>
             </button>
           </div>
 
@@ -618,18 +618,15 @@ function LandingPage() {
             >
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <div className="btn-wrapper">
-                  <button
+                    <button
                     className="btn"
                     tabIndex={0}
-                    onMouseDown={() => setIsDownloading(true)}
-                    onMouseUp={() => setIsDownloading(false)}
-                    onMouseLeave={() => setIsDownloading(false)}
                     onClick={() => navigate('/pricing')}
                   >
                     <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                       <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
                     </svg>
-                    <span className="btn-text">{isDownloading ? 'Downloading' : 'Get Viszmo Free'}</span>
+                    <span className="btn-text">Coming Soon</span>
                   </button>
                 </div>
 

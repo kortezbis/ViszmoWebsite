@@ -65,7 +65,7 @@ const FeatureListItem = ({ icon: Icon, text }: { icon: any, text: string }) => (
 
 export const FeaturesPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isDownloading, setIsDownloading] = useState(false);
+
 
     return (
         <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-[#0ea5e9]/10 overflow-x-hidden">
@@ -409,15 +409,12 @@ export const FeaturesPage = () => {
                                     <button
                                         className="btn"
                                         tabIndex={0}
-                                        onMouseDown={() => setIsDownloading(true)}
-                                        onMouseUp={() => setIsDownloading(false)}
-                                        onMouseLeave={() => setIsDownloading(false)}
                                         onClick={() => setIsModalOpen(true)}
                                     >
                                         <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                                             <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
                                         </svg>
-                                        <span className="btn-text">{isDownloading ? 'Downloading' : 'Get Viszmo Free'}</span>
+                                        <span className="btn-text">Coming Soon</span>
                                     </button>
                                 </div>
 

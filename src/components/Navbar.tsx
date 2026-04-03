@@ -33,7 +33,7 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                         onClick={onOpenModal}
                         className="hover:opacity-80 transition-opacity cursor-pointer flex items-center gap-1.5"
                     >
-                        <span>Download App</span>
+                        <span>Coming Soon</span>
                     </button>
 
                     {/* Explore Dropdown */}
@@ -116,7 +116,7 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                             <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                                 <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
                             </svg>
-                            <span className="btn-text">Get for Windows</span>
+                            <span className="btn-text">Coming Soon</span>
                         </button>
                     </div>
                 </div>
@@ -160,7 +160,7 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                                     }}
                                     className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100 flex items-center justify-between text-left w-full cursor-pointer"
                                 >
-                                    <span>Download App</span>
+                                    <span>Coming Soon</span>
                                     <div className="w-1.5 h-1.5 rounded-full bg-[#0ea5e9]/20" />
                                 </button>
 
@@ -192,7 +192,7 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                                         <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                                             <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
                                         </svg>
-                                        <span className="btn-text">Get for Windows</span>
+                                        <span className="btn-text">Coming Soon</span>
                                     </button>
                                 </div>
                             </div>
