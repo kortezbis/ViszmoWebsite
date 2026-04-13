@@ -1,16 +1,19 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Folder, FolderPlus, Check, ChevronRight } from 'lucide-react';
-import type { Folder as FolderType } from '../contexts/DecksContext';
+import { X, Folder, Plus, Check } from 'lucide-react';
+import { useState } from 'react';
 
 interface MoveDeckModalProps {
     isOpen: boolean;
     onClose: () => void;
     deckName: string;
-    folders: FolderType[];
-    currentFolderId?: number | null;
+    folders: Array<{
+        id: number;
+        name: string;
+        color: string;
+    }>;
+    currentFolderId: number | null;
     onMove: (folderId: number | null) => void;
-    onCreateFolder?: () => void;
+    onCreateFolder: () => void;
 }
 
 export function MoveDeckModal({
@@ -22,9 +25,9 @@ export function MoveDeckModal({
     onMove,
     onCreateFolder
 }: MoveDeckModalProps) {
-    const [selectedFolderId, setSelectedFolderId] = useState<number | null>(currentFolderId ?? null);
+    const [selectedFolderId, setSelectedFolderId] = useState<number | null>(currentFolderId);
 
-    const handleMove = () => {
+    const handleConfirmMove = () => {
         onMove(selectedFolderId);
         onClose();
     };
@@ -50,11 +53,16 @@ export function MoveDeckModal({
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 border-b border-border">
-                            <div>
-                                <h2 className="text-xl font-bold text-foreground">Move to Folder</h2>
-                                <p className="text-sm text-foreground-secondary mt-1 line-clamp-1">
-                                    {deckName}
-                                </p>
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center">
+                                    <Folder className="w-5 h-5 text-brand-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-foreground">Move Deck</h2>
+                                    <p className="text-xs text-foreground-secondary truncate max-w-[200px]">
+                                        Moving "{deckName}"
+                                    </p>
+                                </div>
                             </div>
                             <button
                                 onClick={onClose}
@@ -65,106 +73,91 @@ export function MoveDeckModal({
                         </div>
 
                         {/* Body */}
-                        <div className="p-4 max-h-[400px] overflow-y-auto">
-                            {/* No Folder Option */}
-                            <button
-                                onClick={() => setSelectedFolderId(null)}
-                                className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all mb-2 ${selectedFolderId === null
-                                        ? 'bg-brand-primary/10 border-2 border-brand-primary'
-                                        : 'bg-background-elevated border-2 border-transparent hover:border-border'
+                        <div className="p-6 max-h-[400px] overflow-y-auto">
+                            <div className="space-y-2">
+                                {/* Root Option */}
+                                <button
+                                    onClick={() => setSelectedFolderId(null)}
+                                    className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                                        selectedFolderId === null
+                                            ? 'bg-brand-primary/5 border-brand-primary'
+                                            : 'bg-background border-border hover:border-brand-primary/50'
                                     }`}
-                            >
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedFolderId === null ? 'bg-brand-primary/20' : 'bg-surface'
-                                    }`}>
-                                    <ChevronRight className={`w-6 h-6 ${selectedFolderId === null ? 'text-brand-primary' : 'text-foreground-muted'
-                                        }`} />
-                                </div>
-                                <div className="flex-1 text-left">
-                                    <span className={`font-bold ${selectedFolderId === null ? 'text-brand-primary' : 'text-foreground'
-                                        }`}>
-                                        No Folder
-                                    </span>
-                                    <p className="text-xs text-foreground-secondary">
-                                        Remove from folder (root level)
-                                    </p>
-                                </div>
-                                {selectedFolderId === null && (
-                                    <div className="w-6 h-6 rounded-full bg-brand-primary flex items-center justify-center">
-                                        <Check className="w-4 h-4 text-white" />
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center">
+                                            <Folder className="w-5 h-5 text-foreground-muted" />
+                                        </div>
+                                        <span className="font-bold text-foreground">Library (Root)</span>
                                     </div>
-                                )}
-                            </button>
-
-                            {/* Folder Options */}
-                            {folders.length > 0 ? (
-                                <div className="space-y-2">
-                                    {folders.map((folder) => (
-                                        <button
-                                            key={folder.id}
-                                            onClick={() => setSelectedFolderId(folder.id)}
-                                            className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${selectedFolderId === folder.id
-                                                    ? 'bg-brand-primary/10 border-2 border-brand-primary'
-                                                    : 'bg-background-elevated border-2 border-transparent hover:border-border'
-                                                }`}
-                                        >
-                                            <div className={`w-12 h-12 rounded-xl ${folder.color} bg-opacity-20 flex items-center justify-center`}>
-                                                <Folder className={`w-6 h-6 ${folder.color.replace('bg-', 'text-')}`} />
-                                            </div>
-                                            <div className="flex-1 text-left">
-                                                <span className={`font-bold ${selectedFolderId === folder.id ? 'text-brand-primary' : 'text-foreground'
-                                                    }`}>
-                                                    {folder.name}
-                                                </span>
-                                            </div>
-                                            {selectedFolderId === folder.id && (
-                                                <div className="w-6 h-6 rounded-full bg-brand-primary flex items-center justify-center">
-                                                    <Check className="w-4 h-4 text-white" />
-                                                </div>
-                                            )}
-                                            {currentFolderId === folder.id && selectedFolderId !== folder.id && (
-                                                <span className="text-xs text-foreground-muted font-medium px-2 py-1 bg-surface rounded-full">
-                                                    Current
-                                                </span>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <div className="w-16 h-16 mx-auto bg-surface-active rounded-full flex items-center justify-center mb-4">
-                                        <Folder className="w-8 h-8 text-foreground-muted" />
-                                    </div>
-                                    <p className="text-foreground-secondary mb-4">No folders yet</p>
-                                    {onCreateFolder && (
-                                        <button
-                                            onClick={() => {
-                                                onClose();
-                                                onCreateFolder();
-                                            }}
-                                            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary/10 text-brand-primary font-bold rounded-xl hover:bg-brand-primary/20 transition-colors"
-                                        >
-                                            <FolderPlus className="w-4 h-4" />
-                                            Create Folder
-                                        </button>
+                                    {selectedFolderId === null && (
+                                        <div className="w-6 h-6 rounded-full bg-brand-primary flex items-center justify-center">
+                                            <Check className="w-4 h-4 text-white" />
+                                        </div>
                                     )}
-                                </div>
-                            )}
+                                </button>
+
+                                {folders.map((folder) => (
+                                    <button
+                                        key={folder.id}
+                                        onClick={() => setSelectedFolderId(folder.id)}
+                                        className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                                            selectedFolderId === folder.id
+                                                ? 'bg-brand-primary/5 border-brand-primary'
+                                                : 'bg-background border-border hover:border-brand-primary/50'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div
+                                                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                                                style={{ backgroundColor: `${folder.color}20` }}
+                                            >
+                                                <Folder className="w-5 h-5" style={{ color: folder.color }} />
+                                            </div>
+                                            <span className="font-bold text-foreground truncate max-w-[180px]">
+                                                {folder.name}
+                                            </span>
+                                        </div>
+                                        {selectedFolderId === folder.id && (
+                                            <div className="w-6 h-6 rounded-full bg-brand-primary flex items-center justify-center">
+                                                <Check className="w-4 h-4 text-white" />
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
+
+                                {/* Create Folder Button in list */}
+                                <button
+                                    onClick={() => {
+                                        onClose();
+                                        onCreateFolder();
+                                    }}
+                                    className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed border-border hover:border-brand-primary hover:bg-surface-hover/50 group transition-all"
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-surface group-hover:bg-brand-primary group-hover:text-white flex items-center justify-center transition-colors">
+                                        <Plus className="w-5 h-5" />
+                                    </div>
+                                    <span className="font-bold text-foreground-secondary group-hover:text-brand-primary">
+                                        Create New Folder
+                                    </span>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Footer */}
-                        <div className="flex gap-3 p-6 border-t border-border">
+                        <div className="p-6 border-t border-border flex gap-3 bg-surface">
                             <button
                                 onClick={onClose}
-                                className="flex-1 px-6 py-3 bg-surface-hover text-foreground font-bold rounded-xl hover:bg-surface-active transition-colors"
+                                className="flex-1 px-6 py-3 bg-surface-hover text-foreground font-bold rounded-xl hover:bg-surface-active transition-colors text-sm"
                             >
                                 Cancel
                             </button>
                             <button
-                                onClick={handleMove}
+                                onClick={handleConfirmMove}
                                 disabled={selectedFolderId === currentFolderId}
-                                className="flex-1 px-6 py-3 bg-brand-primary text-white font-bold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-6 py-3 bg-brand-primary text-white font-bold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-lg shadow-brand-primary/25"
                             >
-                                Move
+                                Move Here
                             </button>
                         </div>
                     </motion.div>

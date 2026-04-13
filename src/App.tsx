@@ -16,7 +16,7 @@ import { SignupPage } from './pages/SignupPage';
 import { OnboardingModal } from './components/OnboardingModal';
 import { useProfile } from './contexts/ProfileContext';
 import DashboardApp from './dashboard/DashboardApp';
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // HowItWorksPage import removed as file is missing
@@ -29,6 +29,7 @@ import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { ContactUsPage } from './pages/ContactUsPage';
 import { HelpCenterPage } from './pages/HelpCenterPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 
 
 // List of school logo filenames
@@ -680,6 +681,7 @@ export default function App() {
 
         <Route path="/login/*" element={<LoginPage />} />
         <Route path="/signup/*" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         <Route path="/account" element={
           <>

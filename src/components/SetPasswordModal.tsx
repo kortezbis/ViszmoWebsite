@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -44,11 +45,17 @@ export const SetPasswordModal = ({ isOpen, onClose }: SetPasswordModalProps) => 
 
         setIsSaving(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const { error: updateError } = await supabase.auth.updateUser({ password });
 
+        if (updateError) {
+            setError(updateError.message);
+        } else {
+            onClose();
+            setPassword('');
+            setConfirmPassword('');
+        }
+        
         setIsSaving(false);
-        onClose();
     };
 
     return (

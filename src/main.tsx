@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
-import { ClerkAuthProvider } from './lib/clerk'
 import { ProfileProvider } from './contexts/ProfileContext'
+import { AuthProvider } from './lib/auth'
 
 // Ensure root element exists
 const rootElement = document.getElementById('root')
@@ -19,10 +19,10 @@ document.body.style.padding = '0'
 
 createRoot(rootElement).render(
   <StrictMode>
-    <ClerkAuthProvider>
+    <AuthProvider>
       <ProfileProvider>
         <App />
       </ProfileProvider>
-    </ClerkAuthProvider>
+    </AuthProvider>
   </StrictMode>,
 )

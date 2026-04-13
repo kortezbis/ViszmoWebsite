@@ -9,7 +9,7 @@ export const PrivacyPolicyPage = () => {
             <section className="space-y-4">
                 <h2 className="text-xl font-bold text-slate-900">1. Data Minimization</h2>
                 <p>
-                    Viszmo follows a strict data minimization policy. We only collect the bare minimum information required to operate our AI study tools and secure your account.
+                    Viszmo follows a strict data minimization policy. We only collect the bare minimum information required to operate our AI study tools on Windows and iOS.
                 </p>
             </section>
 
@@ -19,7 +19,7 @@ export const PrivacyPolicyPage = () => {
                     Your privacy is our priority. When using the "Analyze Screen" or "Scan" features:
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
-                    <li><strong>Local Capture:</strong> The screenshot is captured locally on your Windows device.</li>
+                    <li><strong>Local Capture:</strong> The screenshot or image is captured locally on your Windows or iOS device.</li>
                     <li><strong>Secure Transmission:</strong> The extracted text or image is sent securely to our encrypted AI processing servers.</li>
                     <li><strong>Immediate Deletion:</strong> All raw screen data and temporary files are discarded immediately after processing. We do not store your screenshots or analyzed images unless you explicitly choose to save them to your library.</li>
                 </ul>

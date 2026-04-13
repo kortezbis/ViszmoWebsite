@@ -9,7 +9,7 @@ export const TermsOfServicePage = () => {
             <section className="space-y-4">
                 <h2 className="text-xl font-bold text-slate-900">1. Agreement to Terms</h2>
                 <p>
-                    By accessing or using Viszmo ("the Service"), you agree to be bound by these Terms of Service. Viszmo is an AI study assistant designed for Windows 10 and Windows 11.
+                    By accessing or using Viszmo ("the Service"), you agree to be bound by these Terms of Service. Viszmo is an AI study assistant available on Windows, iOS, and mobile platforms.
                 </p>
             </section>
 
@@ -21,6 +21,7 @@ export const TermsOfServicePage = () => {
                 <ul className="list-disc pl-5 space-y-2">
                     <li><strong>Usage Limits:</strong> Access to certain AI features may be subject to daily or monthly limits depending on your plan.</li>
                     <li><strong>All Purchases Final:</strong> Due to the nature of digital services and AI processing costs, all subscription purchases and upgrades are final and non-refundable.</li>
+                    <li><strong>Platform-Specific Terms:</strong> Purchases made through the Apple App Store are subject to Apple's standard terms and refund policies.</li>
                 </ul>
             </section>
 

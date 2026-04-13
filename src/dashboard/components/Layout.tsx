@@ -3,8 +3,9 @@ import { useDebug } from '../contexts/DebugContext';
 import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '../contexts/SidebarContext';
-import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
+import { useAuth } from '../../lib/auth';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 import {
     BookOpen,
@@ -55,7 +56,14 @@ function Sidebar({
     onSelectMode,
     hideSidebar,
 }: SidebarProps) {
+    const { userEmail, userName, userImageUrl, signOut } = useAuth();
+    const navigate = useNavigate();
     const location = useLocation();
+
+    const handleLogout = async () => {
+        await signOut();
+        navigate('/');
+    };
     const { debugEmpty, toggleDebugEmpty } = useDebug();
     const { resolvedTheme, toggleTheme } = useTheme();
     const [showAllModes, setShowAllModes] = useState(false);
@@ -71,10 +79,11 @@ function Sidebar({
         >
             {/* Logo & Toggle */}
             <div className={`h-16 flex items-center border-border ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
-                <div className={`overflow-hidden transition-all duration-200 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-                    <img src="/viszmofull.png" alt="Viszmo" className="h-8 object-contain invert dark:invert-0" />
+                <div className={`flex items-center gap-3 overflow-hidden transition-all duration-200 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                    <img src="/viszmo.png" alt="Viszmo" className="h-8 w-8 object-contain" />
+                    <img src="/viszmofull.png" alt="Viszmo" className="h-6 object-contain invert dark:invert-0" />
                 </div>
-                {isCollapsed && <img src="/dashimages/viszmo.png" alt="V" className="h-20 w-20 object-contain invert dark:invert-0" />}
+                {isCollapsed && <img src="/viszmo.png" alt="V" className="h-10 w-10 object-contain" />}
             </div>
 
             {/* Floating Toggle Button */}
@@ -282,12 +291,16 @@ function Sidebar({
                             >
                                 <div className="px-3 py-2 border-b border-black/5 dark:border-white/5 mb-1.5 mx-1">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold shadow-sm">
-                                            K
+                                        <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold shadow-sm overflow-hidden">
+                                            {userImageUrl ? (
+                                                <img src={userImageUrl} alt={userName || ''} className="w-full h-full object-cover" />
+                                            ) : (
+                                                (userName?.[0] || userEmail?.[0] || 'U').toUpperCase()
+                                            )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold text-foreground truncate">Kortez</p>
-                                            <p className="text-xs text-foreground-secondary truncate font-medium">kevjohnson032@gmail.com</p>
+                                            <p className="text-sm font-bold text-foreground truncate">{userName || 'User'}</p>
+                                            <p className="text-xs text-foreground-secondary truncate font-medium">{userEmail}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -344,7 +357,10 @@ function Sidebar({
 
                                 <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1.5 mx-1"></div>
 
-                                <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors rounded-xl">
+                                <button 
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors rounded-xl"
+                                >
                                     <LogOut className="w-4 h-4" />
                                     Log Out
                                 </button>
@@ -359,12 +375,16 @@ function Sidebar({
                         className={`sidebar-item w-full group relative mb-2 ${isCollapsed ? 'justify-center' : ''} ${isUserMenuOpen ? 'sidebar-item-active' : ''}`}
                         title={isCollapsed ? "My Account" : ""}
                     >
-                        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
-                            <img
-                                src="https://lh3.googleusercontent.com/ogw/AF2bJyh-dG0s0XyX_zX0X0X0X0X0X0X0X0X0X0X0X0=s32-c-mo"
-                                alt="Profile"
-                                className="w-full h-full object-cover"
-                            />
+                        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border shadow-sm bg-brand-primary/10 flex items-center justify-center text-[10px] font-bold text-brand-primary">
+                            {userImageUrl ? (
+                                <img
+                                    src={userImageUrl}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                (userName?.[0] || userEmail?.[0] || 'U').toUpperCase()
+                            )}
                         </div>
                         {!isCollapsed && (
                             <span className="font-medium">

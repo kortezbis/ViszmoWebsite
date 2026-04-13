@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Menu, X as XIcon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from './Logo';
-import { useClerkSession, UserButton } from '../lib/clerk';
+import { useAuth, UserButton } from '../lib/auth';
 import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
@@ -13,7 +13,7 @@ interface NavbarProps {
 export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) => {
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const { isSignedIn } = useClerkSession();
+    const { isSignedIn } = useAuth();
     const [showExploreMenu, setShowExploreMenu] = useState(false);
 
     const handleSignIn = () => {

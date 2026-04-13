@@ -219,10 +219,15 @@
     --btn-color-l: 48%;
     color: #ffffff;
 
+    /* Glass Effect */
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+
     /* Cluely-Inspired Radial Background (Adapted to Blue Theme) */
     background: radial-gradient(115% 115% at 10% 20%,
-            hsla(var(--btn-color-h), var(--btn-color-s), var(--btn-color-l), 1) 0%,
-            hsla(var(--btn-color-h), var(--btn-color-s), 40%, 1) 100%);
+            hsla(var(--btn-color-h), var(--btn-color-s), var(--btn-color-l), 0.85) 0%,
+            hsla(var(--btn-color-h), var(--btn-color-s), 40%, 0.8) 100%);
 
     /* Complex Native Shadow Stack - Merging Cluely's depth with our Color */
     box-shadow:
@@ -274,11 +279,12 @@
 .btn-white {
     /* White Gradient Background */
     background: radial-gradient(115% 115% at 10% 20%,
-            rgb(255, 255, 255) 0%,
-            rgb(241, 245, 249) 100%);
+            rgba(255, 255, 255, 0.7) 0%,
+            rgba(241, 245, 249, 0.6) 100%);
 
     /* Dark Text */
     color: #0f172a;
+    border-color: rgba(255, 255, 255, 0.8);
 
     /* Subtle Gray Shadow Stack */
     box-shadow:
