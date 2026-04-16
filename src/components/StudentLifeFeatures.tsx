@@ -221,33 +221,6 @@ export const StudentLifeFeatures = () => {
                             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05)'
                         }}
                     >
-
-                        {/* Wrapper for Text and content */}
-                        <div className="relative z-10 w-full flex flex-col lg:flex-row gap-8 lg:gap-12 items-center mb-12">
-                            <div className="flex-1 w-full">
-                                <h3 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight tracking-tight">
-                                    Seamless Privacy <br />
-                                    Integration
-                                </h3>
-                                <p className="text-slate-500 text-base md:text-lg leading-relaxed mb-8 max-w-lg font-medium">
-                                    Our kernel-level engine operates silently, keeping your workflow uninterrupted across any environment. Slide to see how it blends perfectly with your favorite platforms.
-                                </p>
-                                <div className="flex flex-wrap gap-4 md:gap-6 text-sm text-slate-600 font-medium">
-                                    <span className="flex items-center gap-2">
-                                        <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Silent Operation
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="flex-1 w-full lg:w-3/5 aspect-auto">
-                                <InteractiveComparisonSlider />
-                            </div>
-                        </div>
-
-
                     </motion.div>
 
                     {/* CARD 1: The Privacy Overlay */}
