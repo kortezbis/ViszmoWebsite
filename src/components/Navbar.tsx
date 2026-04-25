@@ -3,7 +3,7 @@ import { Menu, X as XIcon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from './Logo';
 import { useAuth, UserButton } from '../lib/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 interface NavbarProps {
     onOpenModal?: () => void;
@@ -23,15 +23,14 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
     return (
         <nav className="fixed top-0 left-0 right-0 z-[100] flex justify-center pt-4 md:pt-6 px-4" style={{ position: 'fixed', top: 0, left: 0, right: 0 }}>
             <div className="glass-navbar w-[95%] md:w-full max-w-7xl mx-auto flex md:grid md:grid-cols-3 gap-8 items-center justify-between px-6 md:px-10 py-3 md:py-4 rounded-full">
-                <a href="/" className="flex items-center justify-center transition-all hover:opacity-80 relative z-10 justify-self-start py-1">
+                <Link to="/" className="flex items-center justify-center transition-all hover:opacity-80 relative z-10 justify-self-start py-1">
                     <div className="[filter:brightness(0)_saturate(100%)_invert(58%)_sepia(89%)_saturate(1583%)_hue-rotate(169deg)_brightness(98%)_contrast(93%)]">
                         <Logo size={28} variant="full" />
                     </div>
-                </a>
+                </Link>
                 <div className="hidden md:flex items-center gap-7 text-sm font-medium text-[#0ea5e9] relative z-10 justify-self-center">
                     <button
-                        onClick={onOpenModal}
-                        className="hover:opacity-80 transition-opacity cursor-pointer flex items-center gap-1.5"
+                        className="hover:opacity-80 transition-opacity cursor-default flex items-center gap-1.5"
                     >
                         <span>Coming Soon</span>
                     </button>
@@ -58,19 +57,22 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                                     className="absolute top-full left-1/2 mt-1 w-44 glass-element rounded-[1.5rem] overflow-hidden p-2 shadow-xl"
                                 >
                                     <div className="flex flex-col gap-1">
-                                        <a href="/features" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
+                                        <Link to="/features" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
                                             Features
-                                        </a>
-                                        <a href="/how-it-works" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
+                                        </Link>
+                                        <Link to="/how-it-works" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
                                             How It Works
-                                        </a>
+                                        </Link>
+                                        <div className="px-3 py-2 text-slate-400 text-xs font-bold uppercase tracking-wider cursor-not-allowed">
+                                            Dashboard (Soon)
+                                        </div>
                                     </div>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
 
-                    <a href="/pricing" className="hover:opacity-80 transition-opacity">Pricing</a>
+                    <Link to="/pricing" className="hover:opacity-80 transition-opacity">Pricing</Link>
 
                     {onTestSurvey && (
                         <button onClick={onTestSurvey} className="hover:opacity-80 transition-opacity text-amber-500 font-bold">
@@ -83,13 +85,12 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
 
                     {isSignedIn ? (
                         <div className="flex items-center gap-3">
-                            <a 
-                                href="/dashboard" 
-                                className="text-sm font-bold text-slate-700 hover:text-[#0ea5e9] transition-colors"
+                            <span
+                                className="text-sm font-bold text-slate-400 cursor-not-allowed"
                             >
-                                Dashboard
-                            </a>
-                            <UserButton 
+                                Dashboard (Soon)
+                            </span>
+                            <UserButton
                                 afterSignOutUrl="/"
                                 appearance={{
                                     elements: {
@@ -111,8 +112,8 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                         </button>
                     )}
 
-                    <div className="btn-wrapper" onClick={onOpenModal}>
-                        <button className="btn btn-sm">
+                    <div className="btn-wrapper opacity-80 cursor-default">
+                        <button className="btn btn-sm cursor-default" disabled>
                             <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                                 <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
                             </svg>
@@ -167,27 +168,30 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                                 <div className="mt-2 mb-1 px-2">
                                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Explore</span>
                                 </div>
-                                <a href="/features" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">Features</a>
-                                <a href="/how-it-works" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">How It Works</a>
-                                <a href="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">Pricing</a>
+                                <Link to="/features" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">Features</Link>
+                                <Link to="/how-it-works" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">How It Works</Link>
+                                <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">Pricing</Link>
 
 
                                 <div className="flex flex-col gap-3 mt-4">
+                                    {isSignedIn ? (
+                                        <div className="w-full py-4 text-center text-sm font-bold text-slate-400 bg-slate-50 rounded-2xl border border-slate-100 cursor-not-allowed">
+                                            Dashboard (Soon)
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => {
+                                                handleSignIn();
+                                                setIsMobileMenuOpen(false);
+                                            }}
+                                            className="w-full py-4 text-sm font-bold text-[#0ea5e9] bg-blue-50/50 rounded-2xl border border-blue-100/50"
+                                        >
+                                            Sign in
+                                        </button>
+                                    )}
                                     <button
-                                        onClick={() => {
-                                            handleSignIn();
-                                            setIsMobileMenuOpen(false);
-                                        }}
-                                        className="w-full py-4 text-sm font-bold text-[#0ea5e9] bg-blue-50/50 rounded-2xl border border-blue-100/50"
-                                    >
-                                        Sign in
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setIsMobileMenuOpen(false);
-                                            onOpenModal();
-                                        }}
-                                        className="btn w-full py-4"
+                                        className="btn w-full py-4 opacity-80 cursor-default"
+                                        disabled
                                     >
                                         <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                                             <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>

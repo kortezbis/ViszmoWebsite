@@ -26,7 +26,7 @@ export const TermsOfServicePage = () => {
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">3. Acceptable Use & Stealth Technology</h2>
+                <h2 className="text-xl font-bold text-slate-900">3. Acceptable Use & Proprietary Technology</h2>
                 <p>
                     Viszmo's proprietary technology and transparent overlay technology are provided to enhance your study experience.
                 </p>

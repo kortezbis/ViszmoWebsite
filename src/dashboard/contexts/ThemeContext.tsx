@@ -33,9 +33,11 @@ function getStoredTheme(): Theme {
 interface ThemeProviderProps {
     children: ReactNode;
     defaultTheme?: Theme;
+    /** DOM id of the dashboard wrapper (theme classes apply here only, not on document). */
+    dashboardRootId?: string;
 }
 
-export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProviderProps) {
+export function ThemeProvider({ children, defaultTheme = 'system', dashboardRootId = 'viszmo-dashboard-root' }: ThemeProviderProps) {
     const [theme, setThemeState] = useState<Theme>(() => getStoredTheme() || defaultTheme);
     const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
         const stored = getStoredTheme();
@@ -49,14 +51,14 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
 
         // Target ONLY the dashboard root — never document.documentElement
         // This prevents dark mode from leaking to the landing page
-        const dashboardRoot = document.getElementById('viszmo-dashboard-root');
+        const dashboardRoot = document.getElementById(dashboardRootId);
         if (dashboardRoot) {
             dashboardRoot.classList.remove('light', 'dark');
             dashboardRoot.classList.add(resolved);
         }
 
         localStorage.setItem(THEME_STORAGE_KEY, theme);
-    }, [theme]);
+    }, [theme, dashboardRootId]);
 
     // Listen for system theme changes
     useEffect(() => {
@@ -67,7 +69,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
                 const newResolved = getSystemTheme();
                 setResolvedTheme(newResolved);
 
-                const dashboardRoot = document.getElementById('viszmo-dashboard-root');
+                const dashboardRoot = document.getElementById(dashboardRootId);
                 if (dashboardRoot) {
                     dashboardRoot.classList.remove('light', 'dark');
                     dashboardRoot.classList.add(newResolved);
@@ -77,7 +79,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
 
         mediaQuery.addEventListener('change', handleChange);
         return () => mediaQuery.removeEventListener('change', handleChange);
-    }, [theme]);
+    }, [theme, dashboardRootId]);
 
     const setTheme = (newTheme: Theme) => {
         setThemeState(newTheme);

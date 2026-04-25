@@ -569,7 +569,7 @@ export function FlashcardGame({
                                                         <Star className={`w-[18px] h-[18px] ${card.starred ? 'fill-warning text-warning' : ''}`} />
                                                     </button>
                                                     <button
-                                                        onClick={() => deleteCard(card.id)}
+                                                        onClick={() => void deleteCard(card.id)}
                                                         className="p-2 text-foreground-muted hover:text-error hover:bg-error/10 rounded-lg transition-colors" title="Delete"
                                                     >
                                                         <Trash2 className="w-[18px] h-[18px]" />

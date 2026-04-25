@@ -18,7 +18,7 @@ const FEATURE_CATEGORIES = [
     {
         title: "Core Assistant",
         features: [
-            { name: "Invisible Overlay", icon: EyeOff, desc: "Floating assistance that's 100% invisible to screen share and recording." },
+            { name: "Smart Overlay", icon: EyeOff, desc: "Instant screen analysis that works over any application or document." },
             { name: "Click-Through", icon: MousePointer2, desc: "Interact with apps behind the overlay without moving it." },
             { name: "Context Aware", icon: Cpu, desc: "Our OCR reads your screen 60x per second to keep help relevant." },
             { name: "Global Shortcuts", icon: Zap, desc: "Instant hide (Ctrl+Shift+H) and scan (Ctrl+Shift+Q) commands." },
@@ -29,7 +29,7 @@ const FEATURE_CATEGORIES = [
         features: [
             { name: "Smart Flashcards", icon: Layers, desc: "Auto-generate flashcards from any document or video." },
             { name: "Live Chat", icon: MessageSquare, desc: "Ask the AI follow-up questions about your study material." },
-            { name: "Exam Mode", icon: Shield, desc: "Locked-down safe assistance for high-stakes environments." },
+            { name: "Deep Study Mode", icon: Shield, desc: "Focused learning environment with automated note-taking and summaries." },
             { name: "Fast Search", icon: Search, desc: "Instantly find definitions and references across your library." },
         ]
     },

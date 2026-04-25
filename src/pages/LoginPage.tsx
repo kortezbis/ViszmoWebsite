@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Logo } from '../components/Logo';
 
 export const LoginPage = () => {
     const navigate = useNavigate();
@@ -57,7 +58,7 @@ export const LoginPage = () => {
         try {
             const { error: authError } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
-                options: { 
+                options: {
                     redirectTo: `${window.location.origin}${redirectTo}`,
                     queryParams: {
                         access_type: 'offline',
@@ -78,7 +79,7 @@ export const LoginPage = () => {
         try {
             const { error: authError } = await supabase.auth.signInWithOAuth({
                 provider: 'apple',
-                options: { 
+                options: {
                     redirectTo: `${window.location.origin}${redirectTo}`,
                     // Apple requires some specific scopes for better profile data
                     scopes: 'email name'
@@ -116,15 +117,12 @@ export const LoginPage = () => {
                 >
                     {/* Header */}
                     <div className="flex flex-col items-center mb-8 text-center">
-                        <Link to="/" className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 [filter:brightness(0)_saturate(100%)_invert(58%)_sepia(89%)_saturate(1583%)_hue-rotate(169deg)_brightness(98%)_contrast(93%)]">
-                                <img src="/favicon-32x32.png.png" alt="Logo" className="w-full h-full object-contain" />
-                            </div>
-                            <span className="text-xl font-black text-slate-900">Viszmo</span>
+                        <Link to="/" className="mb-6 block">
+                            <Logo size={40} variant="full" className="brightness-0 opacity-90" />
                         </Link>
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Welcome back</h1>
                         <p className="text-slate-500 font-medium max-w-[300px]">
-                            Sign in to access your study materials and AI help.
+                            Log in to access your account.
                         </p>
                     </div>
 
@@ -137,7 +135,7 @@ export const LoginPage = () => {
                                 className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 transition-all font-semibold text-slate-700 text-sm"
                             >
                                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-                                Continue with Google
+                                Sign in with Google
                             </button>
 
                             <button
@@ -147,7 +145,7 @@ export const LoginPage = () => {
                                 <svg viewBox="0 0 384 512" className="w-4 h-4 fill-current">
                                     <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
                                 </svg>
-                                Continue with Apple
+                                Sign in with Apple
                             </button>
                         </div>
 
@@ -219,7 +217,7 @@ export const LoginPage = () => {
                         <p className="text-sm text-slate-500 font-medium">
                             Don't have an account?{' '}
                             <Link to="/signup" className="text-[#0ea5e9] font-bold hover:underline">
-                                Create one
+                                Sign up for free
                             </Link>
                         </p>
                     </div>

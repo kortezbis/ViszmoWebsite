@@ -1,19 +1,19 @@
 import { motion } from 'framer-motion';
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
-import { useNavigate } from 'react-router-dom';
+
+
+import { useNavigate, Link } from 'react-router-dom';
 import {
     Download, PlayCircle, Scan, Sparkles, Radar, Mic
 } from 'lucide-react';
 
-export const HowItWorksPage = () => {
+export const HowItWorksPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
     const navigate = useNavigate();
 
     const steps = [
         {
             icon: <Download className="w-10 h-10 text-blue-500" />,
             title: "Download & Install",
-            text: "Viszmo for Windows is coming soon. Once released, installation will take less than a minute. Create an account to receive free access on the house—or double it if you sign up with a referral link!",
+            text: "Viszmo for Windows is available for download. Installation will take less than a minute. Create an account to receive free access on the house—or double it if you sign up with a referral link!",
             highlightColor: "bg-blue-500 shadow-blue-500/20"
         },
         {
@@ -24,8 +24,8 @@ export const HowItWorksPage = () => {
         },
         {
             icon: <Scan className="w-10 h-10 text-emerald-500" />,
-            title: "Scan & Ask",
-            text: "Click \"Scan\" on the overlay—it reads whatever is behind it on your screen. The AI analyzes it and provides instant answers, explanations, or solutions. No snipping or selecting required.",
+            title: "Analyze & Explain",
+            text: "Click \"Scan\" on the overlay—it instantly reads the complex diagrams, text, or equations on your screen. The AI breaks them down, providing detailed explanations and connecting them to your previous notes.",
             highlightColor: "bg-emerald-500 shadow-emerald-500/20"
         },
         {
@@ -60,23 +60,7 @@ export const HowItWorksPage = () => {
 
     return (
         <div className="min-h-screen bg-[#ffffff] font-sans text-slate-900 selection:bg-[#0ea5e9]/10 flex flex-col">
-            <Navbar onOpenModal={() => navigate('/pricing')} />
-
             <main className="flex-1 relative pt-32">
-                {/* Background (Shared) */}
-                <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20">
-                    <div className="absolute inset-0 bg-[#ffffff]" />
-                    <div
-                        className="absolute inset-0 opacity-[0.4]"
-                        style={{
-                            backgroundImage: `linear-gradient(#f1f5f9 1px, transparent 1px), linear-gradient(90deg, #f1f5f9 1px, transparent 1px)`,
-                            backgroundSize: '40px 40px'
-                        }}
-                    />
-                    <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#0ea5e9]/5 blur-[120px]" />
-                    <div className="absolute top-[10%] right-[-10%] w-[35%] h-[35%] rounded-full bg-indigo-500/5 blur-[100px]" />
-                </div>
-
                 {/* Hero Header */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-20">
                     <motion.div
@@ -148,13 +132,13 @@ export const HowItWorksPage = () => {
                                         <div className="group inline-block bg-white -skew-x-12 px-8 py-2.5 shadow-lg shadow-black/10 transform transition-all duration-300 hover:skew-x-0 hover:scale-105">
                                             <h2 className="text-2xl md:text-3xl font-black text-[#0ea5e9] uppercase tracking-wide transform skew-x-12 transition-all duration-300 group-hover:skew-x-0 flex items-center gap-3">
                                                 <Radar className="w-6 h-6 text-[#0ea5e9]" />
-                                                Bonus: Auto-Scan for Tests
+                                                Bonus: Passive Study Mode
                                             </h2>
                                         </div>
                                     </div>
 
                                     <p className="text-blue-50 text-lg md:text-xl leading-relaxed max-w-3xl mx-auto font-medium opacity-90">
-                                        Taking an exam? Enable Auto-Scan to automatically detect and capture questions at intervals. The AI reads your screen in real-time and provides answers without any manual clicks—meaning you never have to interact with the overlay, staying focused on your session.
+                                        Following a fast-paced lecture? Enable Passive Study Mode to automatically capture and analyze your screen at intervals. Viszmo builds a real-time knowledge base of everything being presented, so you can stay fully engaged with the material while your notes write themselves.
                                     </p>
                                 </div>
                             </div>
@@ -164,7 +148,7 @@ export const HowItWorksPage = () => {
                     {/* Quick Tips Grid */}
                     <section>
                         <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">Quick Tips</h2>
+                            <h2 className="text-3xl md:text-5 font-black text-slate-900 tracking-tight mb-4">Quick Tips</h2>
                             <p className="text-slate-500 text-lg">Master Viszmo in seconds.</p>
                         </div>
 
@@ -195,18 +179,15 @@ export const HowItWorksPage = () => {
                             Ready to get started?
                         </h2>
                         <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
-                            Join thousands of students using Viszmo to crush their coursework. Download now and get free access on the house.
+                            Join thousands of students using Viszmo to crush their coursework. Sign up now and be the first to know when we release.
                         </p>
                         <div className="flex flex-col items-center gap-6 pt-4">
                             <div className="flex flex-col sm:flex-row items-center gap-4">
-                                <div className="btn-wrapper">
+                                <div className="btn-wrapper opacity-80 cursor-default">
                                     <button
-                                        className="btn"
-                                        onClick={() => navigate('/pricing')}
+                                        className="btn cursor-default"
+                                        disabled
                                     >
-                                        <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
-                                            <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
-                                        </svg>
                                         <span className="btn-text">Coming Soon</span>
                                     </button>
                                 </div>
@@ -231,7 +212,7 @@ export const HowItWorksPage = () => {
                 </div>
             </main >
 
-            <Footer onOpenModal={() => navigate('/pricing')} />
+            
         </div >
     );
 };

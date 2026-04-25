@@ -17,16 +17,8 @@ export const HeroMockup = () => {
           <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/50" />
         </div>
 
-        {/* Hero Video */}
-        <div className="relative w-full h-full overflow-hidden">
-          <video
-            className="w-full h-full object-cover"
-            src="/demoVids/Hero Section Demo.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
+        {/* Hero Area - Blank */}
+        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a]">
           {/* Subtle overlay for better visual integration */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
         </div>

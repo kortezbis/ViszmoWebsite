@@ -61,7 +61,7 @@ export const ContactUsPage = () => {
                     <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                         <h4 className="font-bold text-slate-900 mb-2">Does this work on Mac?</h4>
                         <p className="text-slate-500 text-sm leading-relaxed">
-                            Currently we only support Windows 10 & 11. Mac version is in development.
+                            Currently we only support Windows 10 & 11. Mac version coming soon.
                         </p>
                     </div>
 

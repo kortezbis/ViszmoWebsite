@@ -139,43 +139,9 @@ export const InteractiveComparisonSlider = () => {
     );
 };
 
-// Video Modal Component
-const VideoModal = ({ src, onClose }: { src: string; onClose: () => void }) => {
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-10"
-        >
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-            <motion.div
-                layoutId={`video-${src}`}
-                className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 z-10"
-            >
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-md transition-colors"
-                >
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <video
-                    className="w-full h-full object-contain"
-                    src={src}
-                    autoPlay
-                    loop
-                    controls
-                    playsInline
-                />
-            </motion.div>
-        </motion.div>
-    );
-};
+// Video Modal Component removed
 
 export const StudentLifeFeatures = () => {
-    const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
     return (
         <section className="py-24 md:py-32 bg-white relative overflow-hidden">
@@ -195,7 +161,7 @@ export const StudentLifeFeatures = () => {
                         className="text-left"
                     >
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-6 leading-[1.1] tracking-tight">
-                            Three ways we make your <br />
+                            How we make your <br />
                             <span className="text-[#0ea5e9]">Student Life better</span>
                         </h2>
                         <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">
@@ -207,201 +173,57 @@ export const StudentLifeFeatures = () => {
                 {/* Bento Grid Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-auto">
 
-                    {/* FULL WIDTH: Seamless Privacy Integration */}
+                    {/* FULL WIDTH: Visual Study Sidekick (Overlay) */}
                     <motion.div
                         initial={{ opacity: 0, y: 40 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
-                        className="md:col-span-3 group relative rounded-[2rem] md:rounded-[3rem] overflow-hidden p-6 md:p-14 flex flex-col hover:shadow-xl transition-all duration-500"
+                        className="md:col-span-3 group relative rounded-[2rem] md:rounded-[3rem] overflow-hidden p-8 md:p-14 flex flex-col items-center justify-center text-center hover:shadow-xl transition-all duration-500 min-h-[600px]"
                         style={{
-                            // Matching the soft cool grey-blue aesthetic from typical SaaS "Cluely" style images
                             background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF4F9 100%)',
                             border: '1px solid #E2E8F0',
                             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05)'
                         }}
                     >
+                        <div className="max-w-2xl">
+                            <h3 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 uppercase tracking-tight">
+                                Visual Study <span className="text-[#0ea5e9]">Sidekick</span>
+                            </h3>
+                            <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed">
+                                Analyze complex diagrams, text, or equations instantly without ever leaving your browser or textbook. Simply point and learn with real-time AI insights.
+                            </p>
+                        </div>
                     </motion.div>
 
-                    {/* CARD 1: The Privacy Overlay */}
+                    {/* FULL WIDTH: Study Dashboard */}
                     <motion.div
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 40 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.1 }}
-                        className="group relative rounded-[2rem] bg-[#fdfbf7] border border-slate-200 overflow-hidden flex flex-col transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 hover:border-slate-300 hover:-translate-y-1"
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="md:col-span-3 group relative rounded-[2rem] md:rounded-[3rem] overflow-hidden p-8 md:p-14 flex flex-col items-center justify-center text-center hover:shadow-xl transition-all duration-500 min-h-[600px]"
+                        style={{
+                            background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF4F9 100%)',
+                            border: '1px solid #E2E8F0',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05)'
+                        }}
                     >
-                        {/* Video Container */}
-                        <div
-                            className="relative pt-6 px-3 pb-0 z-10 cursor-pointer"
-                            onClick={() => setSelectedVideo('/demoVids/AI Overlay Demo.mp4')}
-                        >
-                            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm border border-slate-100 transition-all duration-500 ease-out group-hover:scale-[1.05] group-hover:shadow-xl group-hover:rounded-xl">
-                                <div className="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors z-10 pointer-events-none" />
-                                <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
-                                        <svg className="w-5 h-5 text-white fill-white" viewBox="0 0 24 24">
-                                            <path d="M8 5v14l11-7z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <video
-                                    className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
-                                    src="/demoVids/AI Overlay Demo.mp4"
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                />
-                            </div>
-                        </div>
-
-                        <div className="p-8 relative z-0">
-                            {/* Paper Lines Background for Text Area */}
-                            <div className="absolute inset-0 opacity-[0.4] pointer-events-none"
-                                style={{
-                                    backgroundImage: 'repeating-linear-gradient(transparent, transparent 27px, #e2e8f0 27px, #e2e8f0 28px)',
-                                    backgroundSize: '100% 100%'
-                                }}
-                            />
-
-                            <div className="relative z-10">
-                                <div className="trusted-pill-wrap mb-4 scale-90 origin-left">
-                                    <div className="trusted-pill-shadow"></div>
-                                    <div className="trusted-pill">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-[#0ea5e9] animate-pulse" />
-                                        <span className="text-[#0ea5e9] text-[10px] font-bold uppercase tracking-widest leading-none">Privacy Mode</span>
-                                    </div>
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-3 tracking-tight">Private Assistance</h3>
-                                <p className="text-slate-500 text-sm leading-relaxed font-medium">
-                                    A floating overlay that instantly reads what's behind it. No copying, no switching tabs, 100% private.
-                                </p>
-                            </div>
+                        <div className="max-w-2xl">
+                            <h3 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 uppercase tracking-tight">
+                                Centralized <span className="text-[#0ea5e9]">Knowledge Hub</span>
+                            </h3>
+                            <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed">
+                                Your flashcards, quizzes, and comprehensive study guides—automatically organized from your lectures and readings in one powerful dashboard.
+                            </p>
                         </div>
                     </motion.div>
 
-                    {/* CARD 2: The Study Hub */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="group relative rounded-[2rem] bg-[#fdfbf7] border border-slate-200 overflow-hidden flex flex-col transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 hover:border-slate-300 hover:-translate-y-1"
-                    >
-                        {/* Video Container */}
-                        <div
-                            className="relative pt-6 px-3 pb-0 z-10 cursor-pointer"
-                            onClick={() => setSelectedVideo('/demoVids/Study Mode Demo.mp4')}
-                        >
-                            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm border border-slate-100 transition-all duration-500 ease-out group-hover:scale-[1.05] group-hover:shadow-xl group-hover:rounded-xl">
-                                <div className="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors z-10 pointer-events-none" />
-                                <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
-                                        <svg className="w-5 h-5 text-white fill-white" viewBox="0 0 24 24">
-                                            <path d="M8 5v14l11-7z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <video
-                                    className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
-                                    src="/demoVids/Study Mode Demo.mp4"
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                />
-                            </div>
-                        </div>
-
-                        <div className="p-8 relative z-0">
-                            {/* Paper Lines Background for Text Area */}
-                            <div className="absolute inset-0 opacity-[0.4] pointer-events-none"
-                                style={{
-                                    backgroundImage: 'repeating-linear-gradient(transparent, transparent 27px, #e2e8f0 27px, #e2e8f0 28px)',
-                                    backgroundSize: '100% 100%'
-                                }}
-                            />
-
-                            <div className="relative z-10">
-                                <div className="trusted-pill-wrap mb-4 scale-90 origin-left">
-                                    <div className="trusted-pill-shadow"></div>
-                                    <div className="trusted-pill">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse shadow-[0_0_8px_rgba(139,92,246,0.6)]" />
-                                        <span className="text-violet-600 text-[10px] font-bold uppercase tracking-widest leading-none">Study Hub</span>
-                                    </div>
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-3 tracking-tight">Auto-Pilot Guides</h3>
-                                <p className="text-slate-500 text-sm leading-relaxed font-medium">
-                                    Upload any PDF, link, or text. Viszmo instantly creates summaries, flashcards, quizzes, and test prep materials.
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* CARD 3: Live Transcription */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        className="group relative rounded-[2rem] bg-[#fdfbf7] border border-slate-200 overflow-hidden flex flex-col transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 hover:border-slate-300 hover:-translate-y-1"
-                    >
-                        {/* Video Container */}
-                        <div
-                            className="relative pt-6 px-3 pb-0 z-10 cursor-pointer"
-                            onClick={() => setSelectedVideo('/demoVids/Transcription AI Demo.mp4')}
-                        >
-                            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm border border-slate-100 transition-all duration-500 ease-out group-hover:scale-[1.05] group-hover:shadow-xl group-hover:rounded-xl">
-                                <div className="absolute inset-0 bg-slate-900/5 group-hover:bg-transparent transition-colors z-10 pointer-events-none" />
-                                <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
-                                        <svg className="w-5 h-5 text-white fill-white" viewBox="0 0 24 24">
-                                            <path d="M8 5v14l11-7z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <video
-                                    className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
-                                    src="/demoVids/Transcription AI Demo.mp4"
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                />
-                            </div>
-                        </div>
-
-                        <div className="p-8 relative z-0">
-                            {/* Paper Lines Background for Text Area */}
-                            <div className="absolute inset-0 opacity-[0.4] pointer-events-none"
-                                style={{
-                                    backgroundImage: 'repeating-linear-gradient(transparent, transparent 27px, #e2e8f0 27px, #e2e8f0 28px)',
-                                    backgroundSize: '100% 100%'
-                                }}
-                            />
-
-                            <div className="relative z-10">
-                                <div className="trusted-pill-wrap mb-4 scale-90 origin-left">
-                                    <div className="trusted-pill-shadow"></div>
-                                    <div className="trusted-pill">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                                        <span className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest leading-none">Transcription</span>
-                                    </div>
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-3 tracking-tight">Record & Chat</h3>
-                                <p className="text-slate-500 text-sm leading-relaxed font-medium">
-                                    Transcribe lectures and videos in real-time. Ask the AI questions about the transcript instantly.
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
 
                 </div>
             </div>
 
-            {/* Video Modal */}
-            {selectedVideo && <VideoModal src={selectedVideo} onClose={() => setSelectedVideo(null)} />}
+            {/* Video Modal Removed */}
         </section>
     );
 };

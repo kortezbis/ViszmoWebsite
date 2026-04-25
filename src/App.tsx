@@ -14,10 +14,13 @@ import { Navbar } from './components/Navbar';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { OnboardingModal } from './components/OnboardingModal';
+import { DownloadAppModal } from './components/DownloadAppModal';
 import { useProfile } from './contexts/ProfileContext';
 import DashboardApp from './dashboard/DashboardApp';
+
 import { SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Outlet } from 'react-router-dom';
+import { PublicLayout } from './components/PublicLayout';
 
 // HowItWorksPage import removed as file is missing
 import { HowItWorksPage } from './pages/HowItWorksPage';
@@ -99,7 +102,7 @@ const STICKER_POSITIONS_MOBILE = [
   { top: '85%', left: '5%', rotate: '-5deg', scale: 0.4 },
 ];
 
-function LandingPage() {
+function LandingPage({ onOpenDownload }: { onOpenDownload: () => void }) {
   const navigate = useNavigate();
 
 
@@ -210,7 +213,11 @@ function LandingPage() {
 
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
       className="relative min-h-screen font-sans overflow-x-hidden text-slate-900"
       style={{
         backgroundColor: '#ffffff',
@@ -218,25 +225,10 @@ function LandingPage() {
         width: '100%'
       }}
     >
-      {/* Light Mesh Gradient Background */}
-      <div className="fixed inset-0 -z-20 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[#ffffff]" />
-        <div
-          className="absolute inset-0 opacity-[0.4]"
-          style={{
-            backgroundImage: `linear-gradient(#f1f5f9 1px, transparent 1px), linear-gradient(90deg, #f1f5f9 1px, transparent 1px)`,
-            backgroundSize: '40px 40px'
-          }}
-        />
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#0ea5e9]/5 blur-[120px]" />
-        <div className="absolute top-[10%] right-[-10%] w-[35%] h-[35%] rounded-full bg-indigo-500/5 blur-[100px]" />
-        <div className="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] rounded-full bg-slate-500/5 blur-[120px]" />
-      </div>
+      {/* LandingPage Content */}
 
 
 
-      {/* Navbar - Fixed */}
-      <Navbar onOpenModal={() => navigate('/pricing')} />
 
       {/* Cluely-Inspired Hero Section */}
       <section ref={heroSectionRef} className="pt-32 md:pt-48 pb-12 md:pb-24 px-4 text-center relative z-10 overflow-hidden min-h-[auto] lg:min-h-screen flex flex-col items-center">
@@ -310,13 +302,13 @@ function LandingPage() {
           {/* Divider Line */}
           <div className="w-full max-w-2xl h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-6 md:mb-8"></div>
 
-          <p className="text-base md:text-lg text-white/90 mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed font-normal px-4">
-            Viszmo lives on your screen to take perfect notes and provide instant answers during your studies, working seamlessly while you learn.
+          <p className="text-base md:text-lg text-white/90 mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed font-normal px-4">
+            Viszmo lives on your screen to provide instant AI assistance and perfect notes while you study—all seamlessly synced to an advanced <span className="font-bold text-white">Study Dashboard</span> for your flashcards, quizzes, and personalized guides.
           </p>
 
           {/* Get for Windows Button - Centered */}
-          <div className="btn-wrapper mb-16">
-            <button className="btn" tabIndex={0} onClick={() => navigate('/pricing')}>
+          <div className="btn-wrapper mb-16 opacity-80 cursor-default">
+            <button className="btn cursor-default" tabIndex={0} disabled>
               <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                 <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
               </svg>
@@ -373,10 +365,187 @@ function LandingPage() {
 
 
 
-      {/* How It Works - "3 Steps" */}
-      <HowItWorks />
+      {/* Feature Cards Section */}
+      <section className="py-24 md:py-32 px-4 bg-transparent relative z-10">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header - Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-16 md:mb-20 items-start">
+            {/* Left: Main Title */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight">
+                One platform to learn faster{' '}
+                <span
+                  className="relative inline-block text-white px-4 py-1 transform -skew-x-6 mx-2 shadow-lg overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(90deg, #0ea5e9, #0aa883, #8b5cf6, #0ea5e9, #0aa883)',
+                    backgroundSize: '200% 100%',
+                    animation: 'gradient-flow 8s ease-in-out infinite'
+                  }}
+                >
+                  <span className="block transform skew-x-6 relative z-10">and retain longer</span>
+                </span>
+              </h2>
+              <style>{`
+                  @keyframes gradient-flow {
+                    0%, 100% {
+                      background-position: 0% 50%;
+                    }
+                    50% {
+                      background-position: 100% 50%;
+                    }
+                  }
+                `}</style>
+            </motion.div>
 
-      {/* Feature Cards Section with Grid Background */}
+            {/* Right: Description */}
+            <motion.div
+              className="lg:pt-2"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+            >
+              <p className="text-base md:text-lg text-slate-600 leading-relaxed">
+                Transform any content into interactive study materials, master subjects with AI-powered spaced repetition, and track your progress—all from one powerful dashboard designed for serious students.
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Two Column Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 transition-all duration-500">
+            {/* Card 1 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0 }}
+              className="group bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-200/60 hover:border-slate-300/80 hover:shadow-xl transition-all duration-300"
+            >
+              {/* Study Mode Pills */}
+              <div className="w-full min-h-[224px] mb-6 flex flex-wrap gap-2 p-4 sm:p-6 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-[1.02]">
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
+                  <img src="/dashimages/flashcard.png.png" alt="Flashcards" className="w-5 h-5 object-contain" />
+                  <span className="text-sm font-bold text-slate-700">Flashcards</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
+                  <img src="/dashimages/puzzle.png.png" alt="Matching" className="w-5 h-5 object-contain" />
+                  <span className="text-sm font-bold text-slate-700">Matching</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
+                  <img src="/dashimages/hotdeal.png.png" alt="Rapid-Fire" className="w-5 h-5 object-contain" />
+                  <span className="text-sm font-bold text-slate-700">Rapid-Fire</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
+                  <img src="/dashimages/speech.png.png" alt="Speaking" className="w-5 h-5 object-contain" />
+                  <span className="text-sm font-bold text-slate-700">Speaking</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
+                  <img src="/dashimages/writing.png.png" alt="Written" className="w-5 h-5 object-contain" />
+                  <span className="text-sm font-bold text-slate-700">Written</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
+                  <img src="/dashimages/test.png.png" alt="Practice Tests" className="w-5 h-5 object-contain" />
+                  <span className="text-sm font-bold text-slate-700">Practice Tests</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-cyan-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
+                  <img src="/dashimages/guide.png.png" alt="Learn" className="w-5 h-5 object-contain" />
+                  <span className="text-sm font-bold text-slate-700">Learn Mastery</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-pink-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
+                  <img src="/dashimages/card-games.png.png" alt="Spaced Repetition" className="w-5 h-5 object-contain" />
+                  <span className="text-sm font-bold text-slate-700">Spaced Repetition</span>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100/50 rounded-full liquid-glass-pill border border-dashed border-slate-300 transition-all duration-300 group-hover:scale-105">
+                  <div className="w-5 h-5 flex items-center justify-center bg-slate-200/50 rounded-full overflow-hidden">
+                    <img src="/dashimages/plus.png.png" alt="More" className="w-2 h-2 object-contain" />
+                  </div>
+                  <span className="text-sm font-bold text-slate-500">and much more...</span>
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                Smart Study Modes
+              </h3>
+
+              {/* Description */}
+              <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                8 interactive modes: Flashcards, Match Game, Rapid-Fire, Speaking, Written, Tests, and more. Adaptive AI prioritizes cards you need to review.
+              </p>
+
+              {/* CTA Link */}
+              <a
+                href="#"
+                className="inline-flex items-center gap-2 text-[#0ea5e9] font-semibold text-sm group-hover:gap-3 transition-all duration-300"
+              >
+                Learn more
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </motion.div>
+
+            {/* Card 2 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="group bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-200/60 hover:border-slate-300/80 hover:shadow-xl transition-all duration-300"
+            >
+              {/* Upload Visualization */}
+              <div className="w-full min-h-[224px] bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl mb-6 flex flex-col items-center justify-center p-8 border-2 border-dashed border-blue-200 hover:border-blue-400 transition-all duration-300 group-hover:scale-[1.02]">
+                {/* Upload Icon */}
+                <div className="mb-4 w-20 h-20 shrink-0 aspect-square flex items-center justify-center rounded-full liquid-glass-pill">
+                  <svg className="w-10 h-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+
+                {/* Upload Text */}
+                <p className="text-base font-semibold text-slate-700 mb-3">Drop files or click to upload</p>
+
+                {/* File Type Icons */}
+                <div className="flex items-center gap-4 mt-2">
+                  <img src="/dashimages/pdf-document.png.png" alt="PDF" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                  <img src="/dashimages/doc.png.png" alt="DOCX" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                  <img src="/dashimages/txt.png.png" alt="TXT" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                  <img src="/dashimages/mp3.png.png" alt="Audio" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                  <img src="/dashimages/youtube.png.png" alt="Video" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                AI-Powered Content Generation
+              </h3>
+
+              {/* Description */}
+              <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                Upload PDFs, paste notes, or use transcripts to instantly generate flashcards and quizzes. Your study materials create themselves.
+              </p>
+
+              {/* CTA Link */}
+              <a
+                href="#"
+                className="inline-flex items-center gap-2 text-[#0ea5e9] font-semibold text-sm group-hover:gap-3 transition-all duration-300"
+              >
+                Learn more
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - "3 Steps" with Grid Background */}
       <div className="relative isolate">
         {/* Grid Background Pattern */}
         <div
@@ -388,185 +557,7 @@ function LandingPage() {
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 10%, black 95%, transparent 100%)'
           }}
         />
-
-        <section className="py-24 md:py-32 px-4 bg-transparent relative z-10">
-          <div className="max-w-7xl mx-auto">
-            {/* Section Header - Two Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-16 md:mb-20 items-start">
-              {/* Left: Main Title */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              >
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight">
-                  One platform to learn faster{' '}
-                  <span
-                    className="relative inline-block text-white px-4 py-1 transform -skew-x-6 mx-2 shadow-lg overflow-hidden"
-                    style={{
-                      background: 'linear-gradient(90deg, #0ea5e9, #0aa883, #8b5cf6, #0ea5e9, #0aa883)',
-                      backgroundSize: '200% 100%',
-                      animation: 'gradient-flow 8s ease-in-out infinite'
-                    }}
-                  >
-                    <span className="block transform skew-x-6 relative z-10">and retain longer</span>
-                  </span>
-                </h2>
-                <style>{`
-                  @keyframes gradient-flow {
-                    0%, 100% {
-                      background-position: 0% 50%;
-                    }
-                    50% {
-                      background-position: 100% 50%;
-                    }
-                  }
-                `}</style>
-              </motion.div>
-
-              {/* Right: Description */}
-              <motion.div
-                className="lg:pt-2"
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-              >
-                <p className="text-base md:text-lg text-slate-600 leading-relaxed">
-                  Transform any content into interactive study materials, master subjects with AI-powered spaced repetition, and track your progress—all from one powerful dashboard designed for serious students.
-                </p>
-              </motion.div>
-            </div>
-
-            {/* Two Column Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 transition-all duration-500">
-              {/* Card 1 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0 }}
-                className="group bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-200/60 hover:border-slate-300/80 hover:shadow-xl transition-all duration-300"
-              >
-                {/* Study Mode Pills */}
-                <div className="w-full min-h-[224px] mb-6 flex flex-wrap gap-2 p-4 sm:p-6 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-[1.02]">
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                    <img src="/dashimages/flashcard.png.png" alt="Flashcards" className="w-5 h-5 object-contain" />
-                    <span className="text-sm font-bold text-slate-700">Flashcards</span>
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                    <img src="/dashimages/puzzle.png.png" alt="Matching" className="w-5 h-5 object-contain" />
-                    <span className="text-sm font-bold text-slate-700">Matching</span>
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                    <img src="/dashimages/hotdeal.png.png" alt="Rapid-Fire" className="w-5 h-5 object-contain" />
-                    <span className="text-sm font-bold text-slate-700">Rapid-Fire</span>
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                    <img src="/dashimages/speech.png.png" alt="Speaking" className="w-5 h-5 object-contain" />
-                    <span className="text-sm font-bold text-slate-700">Speaking</span>
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                    <img src="/dashimages/writing.png.png" alt="Written" className="w-5 h-5 object-contain" />
-                    <span className="text-sm font-bold text-slate-700">Written</span>
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                    <img src="/dashimages/test.png.png" alt="Practice Tests" className="w-5 h-5 object-contain" />
-                    <span className="text-sm font-bold text-slate-700">Practice Tests</span>
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-cyan-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                    <img src="/dashimages/guide.png.png" alt="Mini Course" className="w-5 h-5 object-contain" />
-                    <span className="text-sm font-bold text-slate-700">Mini Course</span>
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-pink-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                    <img src="/dashimages/card-games.png.png" alt="Spaced Repetition" className="w-5 h-5 object-contain" />
-                    <span className="text-sm font-bold text-slate-700">Spaced Repetition</span>
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100/50 rounded-full liquid-glass-pill border border-dashed border-slate-300 transition-all duration-300 group-hover:scale-105">
-                    <div className="w-5 h-5 flex items-center justify-center bg-slate-200/50 rounded-full overflow-hidden">
-                      <img src="/dashimages/plus.png.png" alt="More" className="w-2 h-2 object-contain" />
-                    </div>
-                    <span className="text-sm font-bold text-slate-500">and much more...</span>
-                  </div>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-xl font-bold text-slate-900 mb-3">
-                  Smart Study Modes
-                </h3>
-
-                {/* Description */}
-                <p className="text-slate-600 text-sm leading-relaxed mb-6">
-                  8 interactive modes: Flashcards, Match Game, Rapid-Fire, Speaking, Written, Tests, and more. Adaptive AI prioritizes cards you need to review.
-                </p>
-
-                {/* CTA Link */}
-                <a
-                  href="#"
-                  className="inline-flex items-center gap-2 text-[#0ea5e9] font-semibold text-sm group-hover:gap-3 transition-all duration-300"
-                >
-                  Learn more
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
-              </motion.div>
-
-              {/* Card 2 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="group bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-200/60 hover:border-slate-300/80 hover:shadow-xl transition-all duration-300"
-              >
-                {/* Upload Visualization */}
-                <div className="w-full min-h-[224px] bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl mb-6 flex flex-col items-center justify-center p-8 border-2 border-dashed border-blue-200 hover:border-blue-400 transition-all duration-300 group-hover:scale-[1.02]">
-                  {/* Upload Icon */}
-                  <div className="mb-4 w-20 h-20 shrink-0 aspect-square flex items-center justify-center rounded-full liquid-glass-pill">
-                    <svg className="w-10 h-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                  </div>
-
-                  {/* Upload Text */}
-                  <p className="text-base font-semibold text-slate-700 mb-3">Drop files or click to upload</p>
-
-                  {/* File Type Icons */}
-                  <div className="flex items-center gap-4 mt-2">
-                    <img src="/dashimages/pdf-document.png.png" alt="PDF" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
-                    <img src="/dashimages/doc.png.png" alt="DOCX" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
-                    <img src="/dashimages/txt.png.png" alt="TXT" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
-                    <img src="/dashimages/mp3.png.png" alt="Audio" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
-                    <img src="/dashimages/youtube.png.png" alt="Video" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
-                  </div>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-xl font-bold text-slate-900 mb-3">
-                  AI-Powered Content Generation
-                </h3>
-
-                {/* Description */}
-                <p className="text-slate-600 text-sm leading-relaxed mb-6">
-                  Upload PDFs, paste notes, or use transcripts to instantly generate flashcards and quizzes. Your study materials create themselves.
-                </p>
-
-                {/* CTA Link */}
-                <a
-                  href="#"
-                  className="inline-flex items-center gap-2 text-[#0ea5e9] font-semibold text-sm group-hover:gap-3 transition-all duration-300"
-                >
-                  Learn more
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
-              </motion.div>
-            </div>
-          </div>
-        </section>
+        <HowItWorks />
       </div>
 
 
@@ -608,7 +599,7 @@ function LandingPage() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-base md:text-lg text-slate-500 mb-10 md:mb-8 max-w-2xl mx-auto leading-relaxed px-4"
             >
-              Join thousands of students using Viszmo to crush their coursework. Download now and get free access on the house.
+              Join thousands of students using Viszmo to crush their coursework. Sign up now and be the first to know when we release.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -618,20 +609,16 @@ function LandingPage() {
               className="flex flex-col items-center gap-6"
             >
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="btn-wrapper">
-                    <button
-                    className="btn"
-                    tabIndex={0}
-                    onClick={() => navigate('/pricing')}
+                <div className="btn-wrapper opacity-80 cursor-default">
+                  <button
+                    className="btn cursor-default"
+                    disabled
                   >
-                    <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
-                      <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
-                    </svg>
                     <span className="btn-text">Coming Soon</span>
                   </button>
                 </div>
 
-                <div className="explore-btn-wrap" onClick={() => window.location.href = '/pricing'}>
+                <div className="explore-btn-wrap" onClick={() => navigate('/pricing')}>
                   <div className="explore-btn-shadow"></div>
                   <button className="explore-btn">
                     <span>Explore Pricing</span>
@@ -648,12 +635,10 @@ function LandingPage() {
 
       </div>
 
-      {/* Footer */}
-      <Footer onOpenModal={() => navigate('/pricing')} />
 
       {/* Subscription Modal */}
 
-    </div>
+    </motion.div>
   );
 }
 
@@ -667,37 +652,40 @@ const ScrollToTop = () => {
   return null;
 };
 
-export default function App() {
+function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
+  const location = useLocation();
   const { showSurvey, setShowSurvey } = useProfile();
 
-  return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/features" element={<FeaturesPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/how-it-works" element={<HowItWorksPage />} />
+  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/terms', '/privacy', '/contact', '/help', '/account'];
+  const isPublicPath = publicPaths.includes(location.pathname);
 
-        <Route path="/login/*" element={<LoginPage />} />
-        <Route path="/signup/*" element={<SignupPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-
+  const routes = (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<LandingPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/features" element={<FeaturesPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/pricing" element={<PricingPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/how-it-works" element={<HowItWorksPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/contact" element={<ContactUsPage />} />
+        <Route path="/help" element={<HelpCenterPage />} />
         <Route path="/account" element={
           <>
             <SignedIn>
-              <AccountPage />
+              <AccountPage onOpenDownload={onOpenDownload} />
             </SignedIn>
             <SignedOut>
               <RedirectToSignIn afterSignInUrl="/account" />
             </SignedOut>
           </>
         } />
-        <Route path="/terms" element={<TermsOfServicePage />} />
-        <Route path="/privacy" element={<PrivacyPolicyPage />} />
-        <Route path="/contact" element={<ContactUsPage />} />
-        <Route path="/help" element={<HelpCenterPage />} />
-        
+
+        {/* Independent Routes */}
+        <Route path="/login/*" element={<LoginPage />} />
+        <Route path="/signup/*" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
         <Route path="/dashboard/*" element={
           <>
             <SignedIn>
@@ -709,7 +697,31 @@ export default function App() {
           </>
         } />
       </Routes>
+    </AnimatePresence>
+  );
+
+  return (
+    <>
+      {isPublicPath ? (
+        <PublicLayout onOpenDownload={onOpenDownload}>
+          {routes}
+        </PublicLayout>
+      ) : (
+        routes
+      )}
       <OnboardingModal isOpen={showSurvey} onComplete={() => setShowSurvey(false)} />
+    </>
+  );
+}
+
+export default function App() {
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+
+  return (
+    <BrowserRouter>
+      <ScrollToTop />
+      <AnimatedRoutes onOpenDownload={() => setShowDownloadModal(true)} />
+      <DownloadAppModal isOpen={showDownloadModal} onClose={() => setShowDownloadModal(false)} />
     </BrowserRouter>
   );
 }

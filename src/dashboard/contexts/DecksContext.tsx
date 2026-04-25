@@ -1,14 +1,25 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+    type ReactNode,
+} from 'react';
+import { useAuth } from '../../lib/auth';
+import { db, type FlashcardRow } from '../../services/database';
 
 // ================================
 // Types
 // ================================
 
 export interface Card {
-    id: number;
+    id: string;
     front: string;
     back: string;
     image?: string;
+    backImage?: string;
     starred?: boolean;
     createdAt: string;
 }
@@ -17,7 +28,12 @@ export interface Deck {
     id: string;
     title: string;
     description?: string;
+    /** Server-backed card list; kept in sync with `cards` table. */
     cards: Card[];
+    /** From Supabase aggregate when cards are not yet hydrated (should match cards.length after load). */
+    cardCount?: number;
+    /** When set, deck belongs to a workspace (nested UI comes later). */
+    workspaceId?: string;
     folderId?: number | null;
     color: string;
     createdAt: string;
@@ -34,113 +50,77 @@ export interface Folder {
     createdAt: string;
 }
 
+function mapRowToCard(row: FlashcardRow): Card {
+    return {
+        id: row.id,
+        front: row.front,
+        back: row.back,
+        image: row.frontImage,
+        backImage: row.backImage,
+        starred: row.isStarred,
+        createdAt: new Date(row.createdAt).toISOString(),
+    };
+}
+
 interface DecksContextType {
-    // Data
     decks: Deck[];
     folders: Folder[];
     activeDeckId: string | null;
     activeDeck: Deck | null;
+    decksLoading: boolean;
+    decksError: string | null;
+    refreshDecks: () => Promise<void>;
 
-    // Deck CRUD
-    createDeck: (title: string, description?: string, cards?: Omit<Card, 'id' | 'createdAt'>[]) => string;
-    updateDeck: (id: string, updates: Partial<Omit<Deck, 'id' | 'createdAt'>>) => void;
-    deleteDeck: (id: string) => void;
+    createDeck: (
+        title: string,
+        description?: string,
+        cards?: Omit<Card, 'id' | 'createdAt'>[],
+        workspaceId?: string,
+    ) => Promise<string>;
+    updateDeck: (id: string, updates: Partial<Omit<Deck, 'id' | 'createdAt'>>) => Promise<void>;
+    deleteDeck: (id: string) => Promise<void>;
     restoreDeck: (id: string) => void;
-    permanentlyDeleteDeck: (id: string) => void;
-    duplicateDeck: (id: string) => string | null;
+    permanentlyDeleteDeck: (id: string) => Promise<void>;
+    duplicateDeck: (id: string) => Promise<string | null>;
     setActiveDeck: (id: string | null) => void;
 
-    // Card operations on active deck
-    addCard: (card: Omit<Card, 'id' | 'createdAt'>) => void;
-    updateCard: (cardId: number, updates: Partial<Card>) => void;
-    deleteCard: (cardId: number) => void;
+    addCard: (card: Omit<Card, 'id' | 'createdAt'>) => Promise<void>;
+    updateCard: (cardId: string, updates: Partial<Card>) => void;
+    deleteCard: (cardId: string) => Promise<void>;
     setCards: (cards: Card[]) => void;
-    updateDeckTitle: (title: string) => void;
+    updateDeckTitle: (title: string) => Promise<void>;
 
-    // Folder CRUD
     createFolder: (name: string, color: string) => number;
     updateFolder: (id: number, updates: Partial<Omit<Folder, 'id' | 'createdAt'>>) => void;
     deleteFolder: (id: number) => void;
     moveDeckToFolder: (deckId: string, folderId: number | null) => void;
 
-    // Utility
     getDecksInFolder: (folderId: number | null) => Deck[];
     getActiveDecks: () => Deck[];
     getDeletedDecks: () => Deck[];
     getDeckById: (id: string) => Deck | undefined;
 
-    // Import/Export
-    importDeck: (deckData: Partial<Deck>) => string;
+    importDeck: (deckData: Partial<Deck>) => Promise<string>;
     exportDeck: (id: string) => string | null;
 }
 
-// ================================
-// Storage Keys
-// ================================
-
-const DECKS_STORAGE_KEY = 'Viszmo_decks';
 const FOLDERS_STORAGE_KEY = 'Viszmo_folders';
 const ACTIVE_DECK_KEY = 'Viszmo_active_deck';
 
-// ================================
-// Default Data
-// ================================
-
-const defaultCards: Omit<Card, 'createdAt'>[] = [
-    { id: 1, front: "What is the powerhouse of the cell?", back: "Mitochondria" },
-    { id: 2, front: "What is the process by which plants make food?", back: "Photosynthesis" },
-    { id: 3, front: "Which organ is primarily responsible for filtering blood?", back: "Kidneys" },
-    { id: 4, front: "What molecule carries genetic information?", back: "DNA (Deoxyribonucleic Acid)" },
-    { id: 5, front: "What is the basic unit of life?", back: "The Cell" },
-    { id: 6, front: "What is the largest organ in the human body?", back: "Skin", starred: true },
-    { id: 7, front: "Explain the function of the ribosome.", back: "Ribosomes are responsible for protein synthesis by translating messenger RNA (mRNA) into amino acid chains." },
-    { id: 8, front: "What is the difference between mitosis and meiosis?", back: "Mitosis results in two genetically identical daughter cells, while meiosis results in four genetically diverse gametes.", starred: true },
-    { id: 9, front: "Define 'Homeostasis'.", back: "The tendency of the body to maintain a stable internal environment despite external changes." },
-    { id: 10, front: "What are the four main types of tissues in animals?", back: "Epithelial, Connective, Muscle, and Nervous tissue." }
-];
-
-const generateId = () => `deck_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-const createDefaultDeck = (): Deck => ({
-    id: generateId(),
-    title: "Biology 101 - Test Deck",
-    description: "Sample flashcard deck to get you started",
-    cards: defaultCards.map(c => ({ ...c, createdAt: new Date().toISOString() })),
-    color: 'bg-brand-primary',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    lastStudied: new Date().toISOString()
-});
-
-// ================================
-// Context
-// ================================
+const defaultDeckColor = 'bg-brand-primary';
 
 const DecksContext = createContext<DecksContextType | undefined>(undefined);
 
-export function DecksProvider({ children }: { children: ReactNode }) {
-    // Load initial state from localStorage
-    const [decks, setDecks] = useState<Deck[]>(() => {
-        try {
-            const saved = localStorage.getItem(DECKS_STORAGE_KEY);
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    return parsed;
-                }
-            }
-        } catch (e) {
-            console.warn('Failed to load decks from localStorage:', e);
-        }
-        return [createDefaultDeck()];
-    });
+const CARD_SAVE_DEBOUNCE_MS = 500;
 
+export function DecksProvider({ children }: { children: ReactNode }) {
+    const { isSignedIn, isLoading: authLoading } = useAuth();
+
+    const [decks, setDecks] = useState<Deck[]>([]);
     const [folders, setFolders] = useState<Folder[]>(() => {
         try {
             const saved = localStorage.getItem(FOLDERS_STORAGE_KEY);
-            if (saved) {
-                return JSON.parse(saved);
-            }
+            if (saved) return JSON.parse(saved);
         } catch (e) {
             console.warn('Failed to load folders from localStorage:', e);
         }
@@ -149,42 +129,71 @@ export function DecksProvider({ children }: { children: ReactNode }) {
 
     const [activeDeckId, setActiveDeckId] = useState<string | null>(() => {
         try {
-            const saved = localStorage.getItem(ACTIVE_DECK_KEY);
-            if (saved) {
-                return saved;
-            }
-        } catch (e) {
-            console.warn('Failed to load active deck from localStorage:', e);
+            return localStorage.getItem(ACTIVE_DECK_KEY);
+        } catch {
+            return null;
         }
-        return null;
     });
 
-    // Auto-delete trash items after 3 days
-    useEffect(() => {
-        const cleanupTrash = () => {
-            const threeDaysAgo = new Date();
-            threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const [decksLoading, setDecksLoading] = useState(false);
+    const [decksError, setDecksError] = useState<string | null>(null);
 
-            setDecks(prev => prev.filter(deck => {
-                if (!deck.isDeleted || !deck.deletedAt) return true;
-                return new Date(deck.deletedAt) > threeDaysAgo;
-            }));
-        };
+    const cardSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-        cleanupTrash();
-        // Check once a day
-        const interval = setInterval(cleanupTrash, 24 * 60 * 60 * 1000);
-        return () => clearInterval(interval);
+    const persistActiveDeck = useCallback((id: string | null) => {
+        try {
+            if (id) localStorage.setItem(ACTIVE_DECK_KEY, id);
+            else localStorage.removeItem(ACTIVE_DECK_KEY);
+        } catch (e) {
+            console.warn('Failed to persist active deck:', e);
+        }
     }, []);
 
-    // Persist to localStorage
-    useEffect(() => {
-        try {
-            localStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(decks));
-        } catch (e) {
-            console.warn('Failed to save decks to localStorage:', e);
+    const refreshDecks = useCallback(async () => {
+        if (!isSignedIn) {
+            setDecks([]);
+            return;
         }
-    }, [decks]);
+        setDecksLoading(true);
+        setDecksError(null);
+        try {
+            const rows = await db.getDecks();
+            const ids = rows.map((r) => r.id);
+            const byDeck = await db.getFlashcardsByDeckIds(ids);
+
+            const next: Deck[] = rows.map((r) => ({
+                id: r.id,
+                title: r.title,
+                description: r.description,
+                cards: (byDeck[r.id] || []).map(mapRowToCard),
+                cardCount: r.cardCount,
+                workspaceId: r.workspaceId,
+                folderId: null,
+                color: defaultDeckColor,
+                createdAt: new Date(r.createdAt).toISOString(),
+                updatedAt: new Date(r.updatedAt).toISOString(),
+                isDeleted: false,
+            }));
+
+            setDecks(next);
+        } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : 'Failed to load decks';
+            console.error('[Decks]', msg);
+            setDecksError(msg);
+        } finally {
+            setDecksLoading(false);
+        }
+    }, [isSignedIn]);
+
+    useEffect(() => {
+        if (authLoading) return;
+        if (isSignedIn) void refreshDecks();
+        else {
+            setDecks([]);
+            setActiveDeckId(null);
+            persistActiveDeck(null);
+        }
+    }, [authLoading, isSignedIn, refreshDecks, persistActiveDeck]);
 
     useEffect(() => {
         try {
@@ -195,173 +204,203 @@ export function DecksProvider({ children }: { children: ReactNode }) {
     }, [folders]);
 
     useEffect(() => {
-        try {
-            if (activeDeckId) {
-                localStorage.setItem(ACTIVE_DECK_KEY, activeDeckId);
-            } else {
-                localStorage.removeItem(ACTIVE_DECK_KEY);
-            }
-        } catch (e) {
-            console.warn('Failed to save active deck to localStorage:', e);
-        }
-    }, [activeDeckId]);
+        persistActiveDeck(activeDeckId);
+    }, [activeDeckId, persistActiveDeck]);
 
-    // Computed: active deck object
     const activeDeck = activeDeckId
-        ? decks.find(d => d.id === activeDeckId && !d.isDeleted) || null
-        : decks.find(d => !d.isDeleted) || null;
+        ? decks.find((d) => d.id === activeDeckId && !d.isDeleted) || null
+        : decks.find((d) => !d.isDeleted) || null;
 
-    // ================================
-    // Deck Operations
-    // ================================
+    const patchDeck = useCallback((deckId: string, fn: (d: Deck) => Deck) => {
+        setDecks((prev) => prev.map((d) => (d.id === deckId ? fn(d) : d)));
+    }, []);
 
-    const createDeck = (title: string, description?: string, cards?: Omit<Card, 'id' | 'createdAt'>[]): string => {
-        const newId = generateId();
-        const now = new Date().toISOString();
-
-        const newDeck: Deck = {
-            id: newId,
-            title: title || 'Untitled Deck',
-            description,
-            cards: cards?.map((c, i) => ({
-                ...c,
-                id: i + 1,
-                createdAt: now
-            })) || [],
-            color: 'bg-brand-primary',
-            createdAt: now,
-            updatedAt: now,
-        };
-
-        setDecks(prev => [...prev, newDeck]);
-        setActiveDeckId(newId);
-        return newId;
-    };
-
-    const updateDeck = (id: string, updates: Partial<Omit<Deck, 'id' | 'createdAt'>>) => {
-        setDecks(prev => prev.map(deck =>
-            deck.id === id
-                ? { ...deck, ...updates, updatedAt: new Date().toISOString() }
-                : deck
-        ));
-    };
-
-    const deleteDeck = (id: string) => {
-        setDecks(prev => prev.map(deck =>
-            deck.id === id
-                ? { ...deck, isDeleted: true, deletedAt: new Date().toISOString() }
-                : deck
-        ));
-        if (activeDeckId === id) {
-            const remaining = decks.filter(d => d.id !== id && !d.isDeleted);
-            setActiveDeckId(remaining.length > 0 ? remaining[0].id : null);
+    const createDeck = async (
+        title: string,
+        description?: string,
+        initialCards?: Omit<Card, 'id' | 'createdAt'>[],
+        workspaceId?: string,
+    ): Promise<string> => {
+        const created = await db.createDeck(title || 'Untitled Deck', workspaceId);
+        if (description) {
+            await db.updateDeck(created.id, { description });
         }
+        if (initialCards && initialCards.length > 0) {
+            await db.addFlashcards(
+                created.id,
+                initialCards.map((c) => ({
+                    front: c.front,
+                    back: c.back,
+                    frontImage: c.image,
+                    backImage: c.backImage,
+                })),
+            );
+        }
+        await refreshDecks();
+        setActiveDeckId(created.id);
+        return created.id;
     };
 
-    const restoreDeck = (id: string) => {
-        setDecks(prev => prev.map(deck =>
-            deck.id === id
-                ? { ...deck, isDeleted: false, deletedAt: undefined }
-                : deck
-        ));
+    const updateDeck = async (id: string, updates: Partial<Omit<Deck, 'id' | 'createdAt'>>) => {
+        const serverPayload: {
+            title?: string;
+            description?: string;
+            workspaceId?: string | null;
+        } = {};
+        if (updates.title !== undefined) serverPayload.title = updates.title;
+        if (updates.description !== undefined) serverPayload.description = updates.description;
+        if (updates.workspaceId !== undefined) serverPayload.workspaceId = updates.workspaceId ?? null;
+
+        if (Object.keys(serverPayload).length > 0) {
+            await db.updateDeck(id, serverPayload);
+        }
+
+        setDecks((prev) =>
+            prev.map((deck) =>
+                deck.id === id
+                    ? {
+                          ...deck,
+                          ...updates,
+                          updatedAt: new Date().toISOString(),
+                      }
+                    : deck,
+            ),
+        );
     };
 
-    const permanentlyDeleteDeck = (id: string) => {
-        setDecks(prev => prev.filter(deck => deck.id !== id));
+    const deleteDeck = async (id: string) => {
+        await db.deleteDeck(id);
+        setDecks((prev) => {
+            const next = prev.filter((deck) => deck.id !== id);
+            queueMicrotask(() => {
+                setActiveDeckId((aid) => {
+                    if (aid !== id) return aid;
+                    const pick = next.find((d) => !d.isDeleted) ?? next[0];
+                    return pick ? pick.id : null;
+                });
+            });
+            return next;
+        });
     };
 
-    const duplicateDeck = (id: string): string | null => {
-        const original = decks.find(d => d.id === id);
+    const restoreDeck = (_id: string) => {
+        // Soft-delete is not stored server-side; trash is local-only legacy. No-op.
+    };
+
+    const permanentlyDeleteDeck = (id: string) => deleteDeck(id);
+
+    const duplicateDeck = async (id: string): Promise<string | null> => {
+        const original = decks.find((d) => d.id === id);
         if (!original) return null;
 
-        const newId = generateId();
-        const now = new Date().toISOString();
+        let cards = original.cards;
+        if (cards.length === 0) {
+            const rows = await db.getFlashcardsByDeckId(id);
+            cards = rows.map(mapRowToCard);
+        }
 
-        const duplicate: Deck = {
-            ...original,
-            id: newId,
-            title: `${original.title} (Copy)`,
-            createdAt: now,
-            updatedAt: now,
-            lastStudied: undefined,
-            isDeleted: false,
-            deletedAt: undefined,
-        };
-
-        setDecks(prev => [...prev, duplicate]);
-        return newId;
+        const created = await db.createDeck(`${original.title} (Copy)`, original.workspaceId);
+        if (cards.length > 0) {
+            await db.addFlashcards(
+                created.id,
+                cards.map((c) => ({
+                    front: c.front,
+                    back: c.back,
+                    frontImage: c.image,
+                    backImage: c.backImage,
+                })),
+            );
+        }
+        await refreshDecks();
+        return created.id;
     };
 
     const setActiveDeck = (id: string | null) => {
         setActiveDeckId(id);
     };
 
-    // ================================
-    // Card Operations (on active deck)
-    // ================================
+    const flushCardSave = (cardId: string) => {
+        const t = cardSaveTimers.current[cardId];
+        if (t) clearTimeout(t);
+        delete cardSaveTimers.current[cardId];
+    };
 
-    const addCard = (card: Omit<Card, 'id' | 'createdAt'>) => {
+    const scheduleCardSave = (cardId: string, merged: Card) => {
+        flushCardSave(cardId);
+        cardSaveTimers.current[cardId] = setTimeout(() => {
+            void db
+                .updateFlashcard(cardId, {
+                    front: merged.front,
+                    back: merged.back,
+                    frontImage: merged.image,
+                    backImage: merged.backImage,
+                    isStarred: merged.starred,
+                })
+                .catch((e) => console.error('[Decks] Failed to save card:', e));
+            delete cardSaveTimers.current[cardId];
+        }, CARD_SAVE_DEBOUNCE_MS);
+    };
+
+    const addCard = async (card: Omit<Card, 'id' | 'createdAt'>) => {
         if (!activeDeck) return;
-
-        setDecks(prev => prev.map(deck => {
-            if (deck.id !== activeDeck.id) return deck;
-
-            const newId = Math.max(0, ...deck.cards.map(c => c.id)) + 1;
-            return {
-                ...deck,
-                cards: [...deck.cards, { ...card, id: newId, createdAt: new Date().toISOString() }],
-                updatedAt: new Date().toISOString()
-            };
+        const row = await db.createCard({
+            deckId: activeDeck.id,
+            front: card.front,
+            back: card.back,
+            frontImage: card.image,
+            backImage: card.backImage,
+        });
+        const newCard = mapRowToCard(row);
+        patchDeck(activeDeck.id, (d) => ({
+            ...d,
+            cards: [...d.cards, newCard],
+            cardCount: (d.cardCount ?? d.cards.length) + 1,
+            updatedAt: new Date().toISOString(),
         }));
     };
 
-    const updateCard = (cardId: number, updates: Partial<Card>) => {
+    const updateCard = (cardId: string, updates: Partial<Card>) => {
         if (!activeDeck) return;
 
-        setDecks(prev => prev.map(deck => {
-            if (deck.id !== activeDeck.id) return deck;
-            return {
-                ...deck,
-                cards: deck.cards.map(c => c.id === cardId ? { ...c, ...updates } : c),
-                updatedAt: new Date().toISOString()
-            };
+        const prevCard = activeDeck.cards.find((c) => c.id === cardId);
+        if (!prevCard) return;
+        const merged: Card = { ...prevCard, ...updates };
+
+        patchDeck(activeDeck.id, (d) => ({
+            ...d,
+            cards: d.cards.map((c) => (c.id === cardId ? merged : c)),
+            updatedAt: new Date().toISOString(),
         }));
+
+        scheduleCardSave(cardId, merged);
     };
 
-    const deleteCard = (cardId: number) => {
+    const deleteCard = async (cardId: string) => {
         if (!activeDeck) return;
-
-        setDecks(prev => prev.map(deck => {
-            if (deck.id !== activeDeck.id) return deck;
-            return {
-                ...deck,
-                cards: deck.cards.filter(c => c.id !== cardId),
-                updatedAt: new Date().toISOString()
-            };
+        flushCardSave(cardId);
+        await db.deleteFlashcard(cardId);
+        patchDeck(activeDeck.id, (d) => ({
+            ...d,
+            cards: d.cards.filter((c) => c.id !== cardId),
+            cardCount: Math.max(0, (d.cardCount ?? d.cards.length) - 1),
+            updatedAt: new Date().toISOString(),
         }));
     };
 
     const setCards = (cards: Card[]) => {
         if (!activeDeck) return;
-
-        setDecks(prev => prev.map(deck => {
-            if (deck.id !== activeDeck.id) return deck;
-            return {
-                ...deck,
-                cards,
-                updatedAt: new Date().toISOString()
-            };
+        // Local reorder only; persisted order follows `created_at` on reload (position column TBD).
+        patchDeck(activeDeck.id, (d) => ({
+            ...d,
+            cards,
+            updatedAt: new Date().toISOString(),
         }));
     };
 
-    const updateDeckTitle = (title: string) => {
+    const updateDeckTitle = async (title: string) => {
         if (!activeDeck) return;
-        updateDeck(activeDeck.id, { title });
+        await updateDeck(activeDeck.id, { title });
     };
-
-    // ================================
-    // Folder Operations
-    // ================================
 
     const createFolder = (name: string, color: string): number => {
         const newId = Date.now();
@@ -369,130 +408,115 @@ export function DecksProvider({ children }: { children: ReactNode }) {
             id: newId,
             name,
             color,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
         };
-        setFolders(prev => [...prev, newFolder]);
+        setFolders((prev) => [...prev, newFolder]);
         return newId;
     };
 
     const updateFolder = (id: number, updates: Partial<Omit<Folder, 'id' | 'createdAt'>>) => {
-        setFolders(prev => prev.map(f =>
-            f.id === id ? { ...f, ...updates } : f
-        ));
+        setFolders((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)));
     };
 
     const deleteFolder = (id: number) => {
-        setFolders(prev => prev.filter(f => f.id !== id));
-        // Remove folder reference from decks
-        setDecks(prev => prev.map(deck =>
-            deck.folderId === id ? { ...deck, folderId: null } : deck
-        ));
+        setFolders((prev) => prev.filter((f) => f.id !== id));
+        setDecks((prev) =>
+            prev.map((deck) => (deck.folderId === id ? { ...deck, folderId: null } : deck)),
+        );
     };
 
     const moveDeckToFolder = (deckId: string, folderId: number | null) => {
-        updateDeck(deckId, { folderId });
+        void updateDeck(deckId, { folderId });
     };
 
-    // ================================
-    // Utility Functions
-    // ================================
-
     const getDecksInFolder = (folderId: number | null): Deck[] => {
-        return decks.filter(d => d.folderId === folderId && !d.isDeleted);
+        return decks.filter((d) => d.folderId === folderId && !d.isDeleted);
     };
 
     const getActiveDecks = (): Deck[] => {
-        return decks.filter(d => !d.isDeleted);
+        return decks.filter((d) => !d.isDeleted);
     };
 
     const getDeletedDecks = (): Deck[] => {
-        return decks.filter(d => d.isDeleted);
+        return [];
     };
 
     const getDeckById = (id: string): Deck | undefined => {
-        return decks.find(d => d.id === id);
+        return decks.find((d) => d.id === id);
     };
 
-    // ================================
-    // Import/Export
-    // ================================
-
-    const importDeck = (deckData: Partial<Deck>): string => {
-        const newId = generateId();
-        const now = new Date().toISOString();
-
-        const importedDeck: Deck = {
-            id: newId,
-            title: deckData.title || 'Imported Deck',
-            description: deckData.description,
-            cards: (deckData.cards || []).map((c, i) => ({
-                ...c,
-                id: i + 1,
-                createdAt: now
-            })),
-            color: deckData.color || 'bg-brand-primary',
-            createdAt: now,
-            updatedAt: now,
-        };
-
-        setDecks(prev => [...prev, importedDeck]);
-        return newId;
+    const importDeck = async (deckData: Partial<Deck>): Promise<string> => {
+        const created = await db.createDeck(deckData.title || 'Imported Deck');
+        const cards = deckData.cards || [];
+        if (cards.length > 0) {
+            await db.addFlashcards(
+                created.id,
+                cards.map((c) => ({
+                    front: c.front,
+                    back: c.back,
+                    frontImage: c.image,
+                    backImage: c.backImage,
+                })),
+            );
+        }
+        await refreshDecks();
+        return created.id;
     };
 
     const exportDeck = (id: string): string | null => {
-        const deck = decks.find(d => d.id === id);
+        const deck = decks.find((d) => d.id === id);
         if (!deck) return null;
 
-        // Create a shareable version (without internal IDs)
         const exportData = {
             title: deck.title,
             description: deck.description,
-            cards: deck.cards.map(c => ({
+            cards: deck.cards.map((c) => ({
                 front: c.front,
                 back: c.back,
                 image: c.image,
-                starred: c.starred
+                starred: c.starred,
             })),
             color: deck.color,
-            exportedAt: new Date().toISOString()
+            exportedAt: new Date().toISOString(),
         };
 
         return JSON.stringify(exportData);
     };
 
-    // ================================
-    // Provider
-    // ================================
-
     return (
-        <DecksContext.Provider value={{
-            decks,
-            folders,
-            activeDeckId,
-            activeDeck,
-            createDeck,
-            updateDeck,
-            deleteDeck,
-            restoreDeck,
-            permanentlyDeleteDeck,
-            duplicateDeck,
-            setActiveDeck,
-            addCard,
-            updateCard,
-            deleteCard,
-            setCards,
-            updateDeckTitle,
-            createFolder,
-            updateFolder,
-            deleteFolder,
-            moveDeckToFolder,
-            getDecksInFolder,
-            getActiveDecks,
-            getDeletedDecks,
-            getDeckById,
-            importDeck,
-            exportDeck
-        }}>
+        <DecksContext.Provider
+            value={{
+                decks,
+                folders,
+                activeDeckId,
+                activeDeck,
+                decksLoading,
+                decksError,
+                refreshDecks,
+                createDeck,
+                updateDeck,
+                deleteDeck,
+                restoreDeck,
+                permanentlyDeleteDeck,
+                duplicateDeck,
+                setActiveDeck,
+                addCard,
+                updateCard,
+                deleteCard,
+                setCards,
+                updateDeckTitle,
+                createFolder,
+                updateFolder,
+                deleteFolder,
+                moveDeckToFolder,
+                getDecksInFolder,
+                getActiveDecks,
+                getDeletedDecks,
+                getDeckById,
+                importDeck,
+                exportDeck,
+            }}
+        >
             {children}
         </DecksContext.Provider>
     );
@@ -504,4 +528,10 @@ export function useDecks() {
         throw new Error('useDecks must be used within a DecksProvider');
     }
     return context;
+}
+
+/** UI helper: prefer hydrated `cards.length`, fall back to server aggregate. */
+export function getDeckCardCount(deck: Pick<Deck, 'cards' | 'cardCount'>): number {
+    if (deck.cards.length > 0) return deck.cards.length;
+    return deck.cardCount ?? 0;
 }

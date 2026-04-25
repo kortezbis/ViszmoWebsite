@@ -70,7 +70,7 @@ export const HelpCenterPage = () => {
                         <div className="space-y-4">
                             <AccordionArticle
                                 title="How do I download and install Viszmo?"
-                                text='Visit our homepage and click "Download Free". Run the installer—Windows may show a warning since we don&apos;t have a code signing certificate yet. Click "More info" then "Run anyway" to proceed. Viszmo installs as "vsdrv" for stealth.'
+                                text='Visit our homepage and click "Download Free". Run the installer—Windows may show a warning since we don&apos;t have a code signing certificate yet. Click "More info" then "Run anyway" to proceed.'
                             />
                             <AccordionArticle
                                 title="How do I use the AI Overlay?"
@@ -78,7 +78,7 @@ export const HelpCenterPage = () => {
                             />
                             <AccordionArticle
                                 title="What can I use Viszmo for?"
-                                text="Viszmo is perfect for homework, exams, studying, coding help, and any situation where you need quick AI assistance. It works with lockdown browsers and proctoring tools."
+                                text="Viszmo is perfect for homework, research, studying, coding help, and any situation where you need quick AI assistance. It works alongside your existing study tools to enhance your productivity."
                             />
                             <AccordionArticle
                                 title="Is there a free trial?"
@@ -119,8 +119,8 @@ export const HelpCenterPage = () => {
                                 text='Make sure Viszmo is running—check your system tray for the icon. Try clicking "Start Session" from the dashboard. If using multiple monitors, check which display the overlay is on.'
                             />
                             <AccordionArticle
-                                title="What is Auto-Scan mode?"
-                                text="Auto-Scan captures your screen automatically at set intervals (20-60 seconds) without any clicking. Perfect for hands-free use during lockdown exams. Enable it from the overlay settings."
+                                title="What is Passive Study mode?"
+                                text="Passive Study captures your screen automatically at set intervals (20-60 seconds) without any clicking. Perfect for hands-free note-taking during long lectures. Enable it from the overlay settings."
                             />
                         </div>
                     </div>
@@ -188,7 +188,7 @@ export const HelpCenterPage = () => {
                             />
                             <AccordionArticle
                                 title="How do I reopen Viszmo after closing it?"
-                                text='Search for "vsdrv" in your Windows search bar and launch it. Viszmo installs with this name for stealth purposes.'
+                                text='Search for "vsdrv" in your Windows search bar and launch it.'
                             />
                         </div>
                     </div>

@@ -12,12 +12,11 @@ import {
     Layers,
     BrainCircuit
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSidebar } from '../contexts/SidebarContext';
 import { useDecks } from '../contexts/DecksContext';
 import { useStudyProgress } from '../contexts/StudyProgressContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { useDebug } from '../contexts/DebugContext';
 import { SettingsModal } from '../components/SettingsModal';
 import { CreateModal } from '../components/CreateModal';
 import { FlashcardGame } from '../components/FlashcardGame';
@@ -128,9 +127,10 @@ interface GamePageProps {
 
 export default function GamePage({ initialModeName }: GamePageProps) {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const deckIdFromUrl = searchParams.get('deckId');
     const { setHideSidebar } = useSidebar();
     const { decks, setActiveDeck, activeDeck } = useDecks();
-    const { debugEmpty } = useDebug();
     const { getDueCards, getNewCards, getDeckStats } = useStudyProgress();
     const { resolvedTheme } = useTheme();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -144,9 +144,14 @@ export default function GamePage({ initialModeName }: GamePageProps) {
     const [isDeckDropdownOpen, setIsDeckDropdownOpen] = useState(false);
     const [jumpToCardIndex, setJumpToCardIndex] = useState<number | null>(null);
 
+    useEffect(() => {
+        if (deckIdFromUrl) {
+            setActiveDeck(deckIdFromUrl);
+        }
+    }, [deckIdFromUrl, setActiveDeck]);
+
     // Use activeDeck or empty fallback
-    const rawDeck = activeDeck || { id: 'none', title: 'No Deck Selected', cards: [], color: 'bg-gray-500' };
-    const deck = debugEmpty ? { ...rawDeck, cards: [] } : rawDeck;
+    const deck = activeDeck || { id: 'none', title: 'No Deck Selected', cards: [], color: 'bg-gray-500' };
 
     useEffect(() => {
         setHideSidebar(isGameStarted);
@@ -424,7 +429,9 @@ export default function GamePage({ initialModeName }: GamePageProps) {
                                             >
                                                 <div className="flex-1 min-w-0">
                                                     <p className={`text-sm font-bold truncate ${d.id === deck.id ? 'text-brand-primary' : 'text-foreground'}`}>{d.title}</p>
-                                                    <p className="text-[10px] text-foreground-secondary">{d.cards.length} cards</p>
+                                                    <p className="text-[10px] text-foreground-secondary">
+                                                        {(d.cardCount ?? d.cards.length)} cards
+                                                    </p>
                                                 </div>
                                                 {d.id === deck.id && (
                                                     <div className="w-1.5 h-1.5 rounded-full bg-brand-primary"></div>
@@ -452,7 +459,11 @@ export default function GamePage({ initialModeName }: GamePageProps) {
                         >
                             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${reviewDueOnly ? 'bg-brand-primary text-white' : 'bg-surface-active text-foreground-muted'
                                 }`}>
-                                {getDeckStats(activeDeck.id, deck.cards.length).dueToday + getDeckStats(activeDeck.id, deck.cards.length).newCards}
+                                {(() => {
+                                    const ids = deck.cards.map((c) => c.id);
+                                    const s = getDeckStats(activeDeck.id, ids);
+                                    return s.dueToday + s.newCards;
+                                })()}
                             </span>
                             <span className="hidden sm:inline">Review Due</span>
                         </button>

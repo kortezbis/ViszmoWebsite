@@ -8,11 +8,12 @@ import { SidebarProvider } from './contexts/SidebarContext';
 import { DecksProvider } from './contexts/DecksContext';
 import { StudyProgressProvider } from './contexts/StudyProgressContext';
 import { SettingsProvider } from './contexts/SettingsContext';
-import { DebugProvider } from './contexts/DebugContext';
-
 import EditDeckPage from './pages/EditDeckPage';
 import MyDecksPage from './pages/MyDecksPage';
+import DeckDetailPage from './pages/DeckDetailPage';
+import WorkspaceDetailPage from './pages/WorkspaceDetailPage';
 import TranscriptPage from './pages/TranscriptPage';
+import TranscriptDetailPage from './pages/TranscriptDetailPage';
 import DashboardPage from './pages/DashboardPage';
 import ChatPage from './pages/ChatPage';
 import SummarizersPage from './pages/SummarizersPage';
@@ -38,7 +39,6 @@ export default function DashboardApp() {
                 <ThemeProvider defaultTheme="system">
                     <SettingsProvider>
                         <StudyProgressProvider>
-                            <DebugProvider>
                                 <DecksProvider>
                                     <SidebarProvider>
                                         <Layout>
@@ -57,7 +57,10 @@ export default function DashboardApp() {
 
                                                 {/* Content */}
                                                 <Route path="canvas" element={<CanvasPage />} />
+                                                <Route path="transcripts/:transcriptId" element={<TranscriptDetailPage />} />
                                                 <Route path="transcripts" element={<TranscriptPage />} />
+                                                <Route path="decks/:deckId" element={<DeckDetailPage />} />
+                                                <Route path="workspaces/:workspaceId" element={<WorkspaceDetailPage />} />
                                                 <Route path="decks" element={<MyDecksPage />} />
                                                 <Route path="edit-deck" element={<EditDeckPage />} />
                                                 <Route path="edit-deck/:deckId" element={<EditDeckPage />} />
@@ -71,7 +74,6 @@ export default function DashboardApp() {
                                         </Layout>
                                     </SidebarProvider>
                                 </DecksProvider>
-                            </DebugProvider>
                         </StudyProgressProvider>
                     </SettingsProvider>
                 </ThemeProvider>

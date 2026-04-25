@@ -6,7 +6,6 @@ import {
     AlertCircle, ChevronRight, FileText, Target
 } from 'lucide-react';
 import { useClasses, type SyllabusItem, type StudyClass } from '../contexts/ClassesContext';
-import { useDebug } from '../contexts/DebugContext';
 import { FadeInUp } from '../components/ui/MotionWrapper';
 
 // ============================================
@@ -609,14 +608,13 @@ function ClassDetailView({ classData, onBack }: { classData: StudyClass; onBack:
 
 export default function ClassesPage() {
     const { classes: rawClasses, canAddClass, getUpcomingItems, getOverdueItems } = useClasses();
-    const { debugEmpty } = useDebug();
     const [addClassOpen, setAddClassOpen] = useState(false);
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 
-    const classes = debugEmpty ? [] : rawClasses;
+    const classes = rawClasses;
     const selectedClass = selectedClassId ? classes.find(c => c.id === selectedClassId) : null;
-    const upcomingItems = debugEmpty ? [] : getUpcomingItems(7);
-    const overdueItems = debugEmpty ? [] : getOverdueItems();
+    const upcomingItems = getUpcomingItems(7);
+    const overdueItems = getOverdueItems();
 
     if (selectedClass) {
         return (

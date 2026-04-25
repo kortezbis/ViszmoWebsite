@@ -1,5 +1,3 @@
-import { useDebug } from '../contexts/DebugContext';
-
 import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '../contexts/SidebarContext';
@@ -23,6 +21,7 @@ import {
     ClipboardCheck,
     ChevronUp,
     Scroll,
+    MessageSquare,
 
     Crown,
     Bell,
@@ -64,7 +63,6 @@ function Sidebar({
         await signOut();
         navigate('/');
     };
-    const { debugEmpty, toggleDebugEmpty } = useDebug();
     const { resolvedTheme, toggleTheme } = useTheme();
     const [showAllModes, setShowAllModes] = useState(false);
 
@@ -78,12 +76,20 @@ function Sidebar({
             className={`sidebar z-[60] ${isCollapsed ? 'sidebar-collapsed' : ''} ${hideSidebar ? '-translate-x-full' : 'translate-x-0'}`}
         >
             {/* Logo & Toggle */}
-            <div className={`h-16 flex items-center border-border ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
-                <div className={`flex items-center gap-3 overflow-hidden transition-all duration-200 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-                    <img src="/viszmo.png" alt="Viszmo" className="h-8 w-8 object-contain" />
-                    <img src="/viszmofull.png" alt="Viszmo" className="h-6 object-contain invert dark:invert-0" />
-                </div>
-                {isCollapsed && <img src="/viszmo.png" alt="V" className="h-10 w-10 object-contain" />}
+            <div className={`h-20 flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
+                <Link to="/dashboard" className="flex items-center gap-3">
+                    <img src="/viszmo.png" alt="Viszmo" className="h-10 w-10 object-contain shrink-0" />
+                    {!isCollapsed && (
+                        <motion.img 
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            src="/viszmofull.png" 
+                            alt="Viszmo" 
+                            className="h-7 object-contain invert dark:invert-0" 
+                        />
+                    )}
+                </Link>
             </div>
 
             {/* Floating Toggle Button */}
@@ -116,25 +122,25 @@ function Sidebar({
                     </Link>
                     <Link
                         to="/dashboard/decks"
-                        className={`${isActive('/dashboard/decks') ? 'sidebar-item-active' : 'sidebar-item'} group relative`}
-                        title={isCollapsed ? "My Decks" : ""}
+                        className={`${location.pathname.startsWith('/dashboard/decks') ? 'sidebar-item-active' : 'sidebar-item'} group relative`}
+                        title={isCollapsed ? "Library" : ""}
                     >
                         <BookOpen className="w-5 h-5 shrink-0" />
                         {!isCollapsed && (
                             <span className="whitespace-nowrap">
-                                My Decks
+                                Library
                             </span>
                         )}
                     </Link>
                     <Link
-                        to="/dashboard/transcripts"
-                        className={`${isActive('/dashboard/transcripts') ? 'sidebar-item-active' : 'sidebar-item'} group relative`}
-                        title={isCollapsed ? "Transcripts" : ""}
+                        to="/dashboard/chat"
+                        className={`${isActive('/dashboard/chat') ? 'sidebar-item-active' : 'sidebar-item'} group relative`}
+                        title={isCollapsed ? "Study Chat" : ""}
                     >
-                        <Scroll className="w-5 h-5 shrink-0" />
+                        <MessageSquare className="w-5 h-5 shrink-0" />
                         {!isCollapsed && (
                             <span className="whitespace-nowrap">
-                                Transcripts
+                                Study Chat
                             </span>
                         )}
                     </Link>
@@ -270,14 +276,7 @@ function Sidebar({
             <div className={`p-4 border-t border-border flex flex-col gap-1 ${isCollapsed ? 'items-center' : ''}`}>
 
 
-                <Link to="/dashboard/notifications" className={`${isActive('/dashboard/notifications') ? 'sidebar-item-active' : 'sidebar-item'} mb-2 group relative`} title={isCollapsed ? "Notifications" : ""}>
-                    <Bell className="w-5 h-5 shrink-0" />
-                    {!isCollapsed && (
-                        <span>
-                            Notifications
-                        </span>
-                    )}
-                </Link>
+
 
                 <div className="relative w-full">
                     <AnimatePresence>
@@ -316,18 +315,7 @@ function Sidebar({
                                     Return to Viszmo
                                 </button>
 
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleDebugEmpty();
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl mb-1.5"
-                                >
-                                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${debugEmpty ? 'bg-brand-primary border-brand-primary' : 'border-zinc-400'}`}>
-                                        {debugEmpty && <div className="w-2 h-2 bg-white rounded-sm" />}
-                                    </div>
-                                    Debug Empty
-                                </button>
+
                                 <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl">
                                     <User className="w-4 h-4 text-zinc-500" />
                                     Profile

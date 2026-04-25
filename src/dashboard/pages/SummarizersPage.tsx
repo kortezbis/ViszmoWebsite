@@ -22,9 +22,15 @@ export default function SummarizersPage() {
 
                     {/* Placeholder for content */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="h-48 rounded-3xl border-2 border-dashed border-border flex items-center justify-center bg-surface/50 backdrop-blur-sm">
-                                <span className="text-foreground-muted font-medium">Feature coming soon</span>
+                        {[
+                            { name: "Lecture Summarizer", desc: "Convert long recordings into key insights" },
+                            { name: "PDF Key Points", desc: "Extract crucial information from any document" },
+                            { name: "Video Insights", desc: "Summarize YouTube or local video content" },
+                            { name: "Study Guide Generator", desc: "Turn transcripts into structured guides" }
+                        ].map((feature, i) => (
+                            <div key={i} className="h-48 rounded-3xl border border-border p-8 flex flex-col items-center justify-center text-center bg-surface/50 backdrop-blur-sm group hover:border-brand-primary/40 transition-colors">
+                                <h3 className="text-foreground font-bold text-lg mb-2">{feature.name}</h3>
+                                <p className="text-foreground-secondary text-sm">{feature.desc}</p>
                             </div>
                         ))}
                     </div>

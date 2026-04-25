@@ -30,7 +30,7 @@ export const Pricing = () => {
             monthly: { price: 5.99, period: '/wk' },
             annual: { price: 5.99, period: '/wk', total: 5.99, label: '7-day access' },
             features: [
-                'Best for exams',
+                'Best for intensive sessions',
                 'Unlimited AI messages',
                 'Unlimited meeting notes',
                 'Priority support',
@@ -60,7 +60,7 @@ export const Pricing = () => {
             monthly: { price: 16.99, period: '/mo' },
             annual: { price: 12.74, period: '/mo', total: 152.88, label: 'Billed $152.88/year' },
             features: [
-                'Best for semester',
+                'Best for long-term learning',
                 'Unlimited AI messages',
                 'Unlimited meeting notes',
                 'Recurring subscription',
@@ -90,7 +90,7 @@ export const Pricing = () => {
         { name: 'Meeting notetaking', weekly: 'Unlimited', plus: '30/mo', pro: 'Unlimited' },
         { name: 'Subscription', weekly: '7-day Access', plus: 'Standard Access', pro: 'Unlimited Access' },
         { name: 'Custom Keybinds', weekly: true, plus: true, pro: true },
-        { name: 'Advanced Screen Privacy', weekly: true, plus: true, pro: true }
+        { name: 'Deep Study Focus', weekly: true, plus: true, pro: true }
     ];
 
     return (
@@ -179,7 +179,7 @@ export const Pricing = () => {
                                     <div className="mb-6 btn-wrapper w-full">
                                         <button
                                             onClick={() => setIsSubscriptionModalOpen(true)}
-                                            className="btn btn-black w-full btn-all-nighter"
+                                            className="btn btn-black w-full"
                                         >
                                             <span className="btn-text">{plan.cta}</span>
                                         </button>
@@ -245,7 +245,7 @@ export const Pricing = () => {
                                                             <div className="btn-wrapper w-full max-w-[180px]">
                                                                 <button
                                                                     onClick={() => setIsSubscriptionModalOpen(true)}
-                                                                    className="btn btn-black w-full flex items-center justify-center gap-2 h-11 transition-all duration-300 btn-all-nighter shadow-violet-500/10 hover:shadow-violet-500/20"
+                                                                    className="btn btn-black w-full flex items-center justify-center gap-2 h-11 transition-all duration-300"
                                                                 >
                                                                     <span className="btn-text text-[13px] font-bold tracking-wide">{plan.cta}</span>
                                                                     {plan.hasDropdown && <ChevronDown className="w-4 h-4 opacity-70" />}

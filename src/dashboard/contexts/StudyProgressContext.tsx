@@ -8,7 +8,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 export type CardRating = 'still-learning' | 'somewhat' | 'know';
 
 export interface CardProgress {
-    cardId: number;
+    cardId: string;
     deckId: string;
     // Spaced repetition values
     easeFactor: number;      // Multiplier for intervals (starts at 2.5)
@@ -61,20 +61,20 @@ export interface DailyStats {
 // ============================================
 
 interface StudyProgressContextType {
-    // Card progress
+    // Card progress (keys use server card UUIDs; scoped per deckId)
     cardProgress: Record<string, CardProgress>;
-    updateCardProgress: (deckId: string, cardId: number, rating: CardRating) => void;
-    getCardProgress: (deckId: string, cardId: number) => CardProgress | null;
-    resetCardProgress: (deckId: string, cardId: number) => void;
+    updateCardProgress: (deckId: string, cardId: string, rating: CardRating) => void;
+    getCardProgress: (deckId: string, cardId: string) => CardProgress | null;
+    resetCardProgress: (deckId: string, cardId: string) => void;
     resetDeckProgress: (deckId: string) => void;
 
     // Due cards
-    getDueCards: (deckId: string, cardIds: number[]) => number[];
-    getNewCards: (deckId: string, cardIds: number[]) => number[];
-    getLearningCards: (deckId: string, cardIds: number[]) => number[];
+    getDueCards: (deckId: string, cardIds: string[]) => string[];
+    getNewCards: (deckId: string, cardIds: string[]) => string[];
+    getLearningCards: (deckId: string, cardIds: string[]) => string[];
 
-    // Deck stats
-    getDeckStats: (deckId: string, totalCards: number) => DeckStats;
+    // Deck stats (iterate known card IDs — aligns with Supabase `cards.id` UUIDs)
+    getDeckStats: (deckId: string, cardIds: string[]) => DeckStats;
 
     // Sessions
     sessions: StudySession[];
@@ -210,12 +210,12 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('studylayer_daily_stats', JSON.stringify(dailyStats));
     }, [dailyStats]);
 
-    // Helper to get progress key
-    const getProgressKey = (deckId: string, cardId: number) => `${deckId}_${cardId}`;
+    // Delimiter avoids ambiguity between UUID segments (legacy keys used a single `_`).
+    const getProgressKey = (deckId: string, cardId: string) => `${deckId}|${cardId}`;
 
     // ========== CARD PROGRESS ==========
 
-    const updateCardProgress = (deckId: string, cardId: number, rating: CardRating) => {
+    const updateCardProgress = (deckId: string, cardId: string, rating: CardRating) => {
         const key = getProgressKey(deckId, cardId);
         const current = cardProgress[key] || null;
         const { interval, easeFactor, repetitions, status } = calculateNextReview(current, rating);
@@ -245,12 +245,12 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
         updateDailyStats(rating);
     };
 
-    const getCardProgress = (deckId: string, cardId: number): CardProgress | null => {
+    const getCardProgress = (deckId: string, cardId: string): CardProgress | null => {
         const key = getProgressKey(deckId, cardId);
         return cardProgress[key] || null;
     };
 
-    const resetCardProgress = (deckId: string, cardId: number) => {
+    const resetCardProgress = (deckId: string, cardId: string) => {
         const key = getProgressKey(deckId, cardId);
         setCardProgress(prev => {
             const updated = { ...prev };
@@ -260,10 +260,12 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
     };
 
     const resetDeckProgress = (deckId: string) => {
+        const prefix = `${deckId}|`;
+        const legacyPrefix = `${deckId}_`;
         setCardProgress(prev => {
             const updated = { ...prev };
             Object.keys(updated).forEach(key => {
-                if (key.startsWith(`${deckId}_`)) {
+                if (key.startsWith(prefix) || key.startsWith(legacyPrefix)) {
                     delete updated[key];
                 }
             });
@@ -273,7 +275,7 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
 
     // ========== DUE CARDS ==========
 
-    const getDueCards = (deckId: string, cardIds: number[]): number[] => {
+    const getDueCards = (deckId: string, cardIds: string[]): string[] => {
         const now = new Date();
         return cardIds.filter(cardId => {
             const progress = getCardProgress(deckId, cardId);
@@ -282,14 +284,14 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
         });
     };
 
-    const getNewCards = (deckId: string, cardIds: number[]): number[] => {
+    const getNewCards = (deckId: string, cardIds: string[]): string[] => {
         return cardIds.filter(cardId => {
             const progress = getCardProgress(deckId, cardId);
             return !progress || progress.status === 'new';
         });
     };
 
-    const getLearningCards = (deckId: string, cardIds: number[]): number[] => {
+    const getLearningCards = (deckId: string, cardIds: string[]): string[] => {
         return cardIds.filter(cardId => {
             const progress = getCardProgress(deckId, cardId);
             return progress?.status === 'learning';
@@ -298,7 +300,7 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
 
     // ========== DECK STATS ==========
 
-    const getDeckStats = (deckId: string, totalCards: number): DeckStats => {
+    const getDeckStats = (deckId: string, cardIds: string[]): DeckStats => {
         const now = new Date();
         let newCards = 0;
         let learningCards = 0;
@@ -307,8 +309,9 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
         let dueToday = 0;
         let totalMastery = 0;
 
-        // Check all possible card IDs (1 to totalCards)
-        for (let cardId = 1; cardId <= totalCards; cardId++) {
+        const totalCards = cardIds.length;
+
+        for (const cardId of cardIds) {
             const progress = getCardProgress(deckId, cardId);
 
             if (!progress) {
@@ -334,7 +337,6 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
                     break;
             }
 
-            // Check if due
             if (new Date(progress.nextReview) <= now) {
                 dueToday++;
             }

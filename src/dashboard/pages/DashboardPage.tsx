@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookOpen, FolderPlus, Sparkles, Flame, Sun, Moon, Bell, Mic, Layers, FileText } from 'lucide-react';
+import { Plus, BookOpen, FolderPlus, Sparkles, Flame, Sun, Moon, Bell, Mic, Layers, FileText, FileUp, ClipboardPaste } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FadeInUp } from '../components/ui/MotionWrapper';
 import { CreateModal } from '../components/CreateModal';
@@ -44,7 +44,7 @@ export default function DashboardPage() {
 
     const handleDeckClick = (deckId: string) => {
         setActiveDeck(deckId);
-        navigate('/dashboard/flashcards');
+        navigate(`/dashboard/decks/${deckId}`);
     };
 
     const formatLastStudied = (lastStudied?: string) => {
@@ -92,84 +92,7 @@ export default function DashboardPage() {
 
                     <div className="w-px h-6 bg-border" />
 
-                    {/* Notifications */}
-                    <div className="relative">
-                        <motion.button
-                            whileHover={{ backgroundColor: 'rgba(var(--brand-primary), 0.1)' }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsNotificationOpen(!isNotificationOpen);
-                                setIsAddMenuOpen(false); // Close other menu
-                                setIsStreakMenuOpen(false);
-                            }}
-                            className={`w-10 h-10 flex items-center justify-center rounded-xl text-foreground-muted hover:text-foreground transition-colors relative ${isNotificationOpen ? 'bg-brand-primary/10 text-brand-primary' : ''}`}
-                            title="Notifications"
-                        >
-                            <Bell className="w-5 h-5" />
-                            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />
-                        </motion.button>
 
-                        <AnimatePresence>
-                            {isNotificationOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
-                                    animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-                                    exit={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
-                                    className="absolute top-full right-0 mt-3 w-96 bg-background-elevated/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl shadow-black/50 overflow-hidden z-50 ring-1 ring-white/5"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/5">
-                                        <h3 className="font-bold text-foreground text-sm tracking-wide">Notifications</h3>
-                                        <button className="text-[10px] text-brand-primary font-bold uppercase tracking-wider hover:text-brand-primary/80 transition-colors">Mark all read</button>
-                                    </div>
-                                    <div className="max-h-[350px] overflow-y-auto custom-scrollbar">
-                                        <div className="p-4 hover:bg-white/5 transition-colors cursor-pointer border-b border-white/5 group relative">
-                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            <div className="flex gap-4">
-                                                <div className="w-10 h-10 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary flex-shrink-0 shadow-inner">
-                                                    <Flame className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm text-foreground font-bold leading-snug mb-1">3 Day Streak!</p>
-                                                    <p className="text-xs text-foreground-secondary leading-relaxed">You're on fire! Keep studying to maintain your streak.</p>
-                                                    <p className="text-[10px] text-foreground-muted mt-2 font-medium">2 hours ago</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="p-4 hover:bg-white/5 transition-colors cursor-pointer group relative">
-                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            <div className="flex gap-4">
-                                                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 flex-shrink-0 shadow-inner">
-                                                    <BookOpen className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm text-foreground font-bold leading-snug mb-1">New Deck Created</p>
-                                                    <p className="text-xs text-foreground-secondary leading-relaxed">"Biology 101" was successfully created.</p>
-                                                    <p className="text-[10px] text-foreground-muted mt-2 font-medium">Yesterday</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="p-3 border-t border-white/5 bg-black/20 backdrop-blur-md">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setIsNotificationOpen(false);
-                                                navigate('/dashboard/notifications');
-                                            }}
-                                            className="w-full py-2.5 rounded-xl text-xs font-bold text-foreground-secondary hover:text-foreground hover:bg-white/5 transition-all flex items-center justify-center gap-2 group"
-                                        >
-                                            View all notifications
-                                            <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-
-                    <div className="w-px h-6 bg-border" />
 
                     {/* Streak Counter */}
                     <div className="relative">
@@ -268,39 +191,56 @@ export default function DashboardPage() {
                                 >
                                     <button
                                         onClick={() => {
+                                            navigate('/dashboard/decks?tab=lectures');
+                                            setIsAddMenuOpen(false);
+                                        }}
+                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500">
+                                            <Mic className="w-4 h-4" />
+                                        </div>
+                                        <span>Record Lecture</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
                                             setIsCreateModalOpen(true);
                                             setIsAddMenuOpen(false);
                                         }}
                                         className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors"
                                     >
                                         <div className="w-8 h-8 rounded-lg bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-                                            <BookOpen className="w-4 h-4" />
+                                            <FileUp className="w-4 h-4" />
                                         </div>
-                                        <span>Create Deck</span>
+                                        <span>Upload Content</span>
                                     </button>
+
                                     <button
                                         onClick={() => {
-                                            setIsCreateFolderModalOpen(true);
+                                            setIsCreateModalOpen(true);
                                             setIsAddMenuOpen(false);
                                         }}
-                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors"
-                                    >
-                                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                                            <FolderPlus className="w-4 h-4" />
-                                        </div>
-                                        <span>Create Folder</span>
-                                    </button>
-                                    <div className="h-px bg-border my-1 mx-2" />
-                                    <button
                                         className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors"
                                     >
                                         <div className="w-8 h-8 rounded-lg bg-brand-secondary/10 flex items-center justify-center text-brand-secondary">
                                             <Sparkles className="w-4 h-4" />
                                         </div>
-                                        <div className="flex flex-col items-start leading-none">
-                                            <span>AI Scan</span>
-                                            <span className="text-[10px] text-brand-secondary uppercase font-bold mt-1">Pro</span>
+                                        <span>Paste Notes</span>
+                                    </button>
+
+                                    <div className="h-px bg-border my-1 mx-2" />
+
+                                    <button
+                                        onClick={() => {
+                                            setIsCreateModalOpen(true);
+                                            setIsAddMenuOpen(false);
+                                        }}
+                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                            <BookOpen className="w-4 h-4" />
                                         </div>
+                                        <span>Write Manually</span>
                                     </button>
                                 </motion.div>
                             )}
@@ -324,7 +264,10 @@ export default function DashboardPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {recentDecks.map((d, index) => {
-                            const stats = getDeckStats(d.id, d.cards.length);
+                            const stats = getDeckStats(
+                                d.id,
+                                d.cards.map((c) => c.id),
+                            );
                             return (
                                 <RecentDeckCard
                                     key={d.id}

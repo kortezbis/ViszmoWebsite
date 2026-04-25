@@ -1,6 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useDecks } from '../contexts/DecksContext';
-import { ArrowLeft, Plus, Image as ImageIcon, Trash2, GripVertical, X } from 'lucide-react';
+import { ArrowLeft, Plus, Image as ImageIcon, Trash2, GripVertical, X, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { generateCardsFromPrompt } from '../../services/flashcardGenerator';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FadeInUp } from '../components/ui/MotionWrapper';
 import {
@@ -25,9 +26,9 @@ import type { Card } from '../contexts/DecksContext';
 interface SortableCardProps {
     card: Card;
     index: number;
-    updateCard: (id: number, updates: Partial<Card>) => void;
-    deleteCard: (id: number) => void;
-    handleImageUpload: (id: number) => void;
+    updateCard: (id: string, updates: Partial<Card>) => void;
+    deleteCard: (id: string) => void;
+    handleImageUpload: (id: string) => void;
 }
 
 function SortableCard({ card, index, updateCard, deleteCard, handleImageUpload }: SortableCardProps) {
@@ -63,7 +64,7 @@ function SortableCard({ card, index, updateCard, deleteCard, handleImageUpload }
                         <GripVertical className="w-5 h-5" />
                     </button>
                     <button
-                        onClick={() => deleteCard(card.id)}
+                        onClick={() => void deleteCard(card.id)}
                         className="hover:text-error transition-colors"
                         title="Delete card"
                     >
@@ -134,27 +135,34 @@ export default function EditDeckPage() {
         deleteCard,
         setCards,
         createDeck,
-        getDeckById
+        getDeckById,
+        decksLoading,
     } = useDecks();
     const navigate = useNavigate();
     const scrollRef = useRef<HTMLDivElement>(null);
+    const creatingDeckRef = useRef(false);
 
-    // If a deckId is provided in URL, set it as active
     useEffect(() => {
+        if (decksLoading) return;
+
         if (deckId) {
             const deck = getDeckById(deckId);
             if (deck) {
                 setActiveDeck(deckId);
             } else {
-                // Deck not found, redirect to decks page
                 navigate('/dashboard/decks');
             }
-        } else if (!activeDeck) {
-            // No deck ID and no active deck - create a new one
-            const newDeckId = createDeck('Untitled Deck');
-            setActiveDeck(newDeckId);
+            return;
         }
-    }, [deckId]);
+
+        if (creatingDeckRef.current) return;
+        creatingDeckRef.current = true;
+        void (async () => {
+            const newDeckId = await createDeck('Untitled Deck');
+            setActiveDeck(newDeckId);
+            navigate(`/dashboard/edit-deck/${newDeckId}`, { replace: true });
+        })();
+    }, [deckId, decksLoading, getDeckById, setActiveDeck, createDeck, navigate]);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -174,7 +182,7 @@ export default function EditDeckPage() {
     };
 
     const handleAddCard = () => {
-        addCard({
+        void addCard({
             front: '',
             back: '',
             starred: false
@@ -185,11 +193,41 @@ export default function EditDeckPage() {
         }, 100);
     };
 
-    const handleImageUpload = (id: number) => {
+    const handleImageUpload = (id: string) => {
         // In a real app, this would open a file picker
         const url = prompt("Enter image URL (mock):");
         if (url) {
             updateCard(id, { image: url });
+        }
+    };
+
+    // ── Magic Add (AI) ──────────────────────────────────────────────────────────
+    const [magicPrompt, setMagicPrompt] = useState('');
+    const [isMagicLoading, setIsMagicLoading] = useState(false);
+    const [magicError, setMagicError] = useState<string | null>(null);
+
+    const handleMagicAdd = async () => {
+        const prompt = magicPrompt.trim();
+        if (!prompt || isMagicLoading || !activeDeck) return;
+        setIsMagicLoading(true);
+        setMagicError(null);
+        try {
+            // Build context from existing cards so AI doesn't duplicate
+            const context = activeDeck.cards
+                .slice(0, 20)
+                .map((c) => `${c.front} — ${c.back}`)
+                .join('\n');
+            const newCards = await generateCardsFromPrompt(prompt, context || undefined);
+            if (!newCards.length) throw new Error('AI returned no cards. Try rephrasing your prompt.');
+            for (const card of newCards) {
+                await addCard({ front: card.front, back: card.back, starred: false });
+            }
+            setMagicPrompt('');
+            setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+        } catch (e: unknown) {
+            setMagicError(e instanceof Error ? e.message : 'Something went wrong.');
+        } finally {
+            setIsMagicLoading(false);
         }
     };
 
@@ -241,6 +279,39 @@ export default function EditDeckPage() {
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto p-8 relative">
                 <FadeInUp className="max-w-5xl mx-auto space-y-4 pb-32">
+                    {/* AI Prompt Bar */}
+                    <div className="rounded-2xl border border-brand-primary/20 bg-brand-primary/5 p-4 mb-2 shadow-sm space-y-2">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center shrink-0">
+                                {isMagicLoading
+                                    ? <Loader2 className="w-5 h-5 text-white animate-spin" />
+                                    : <Sparkles className="w-5 h-5 text-white" />}
+                            </div>
+                            <input
+                                type="text"
+                                value={magicPrompt}
+                                onChange={(e) => setMagicPrompt(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') void handleMagicAdd(); }}
+                                placeholder="What would you like to add? (e.g. 'Add 5 cards about cell biology')"
+                                disabled={isMagicLoading}
+                                className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium text-foreground placeholder:text-foreground-muted/60 disabled:opacity-50"
+                            />
+                            <button
+                                onClick={() => void handleMagicAdd()}
+                                disabled={!magicPrompt.trim() || isMagicLoading}
+                                className="px-5 py-2.5 bg-brand-primary text-white rounded-xl text-xs font-bold hover:bg-brand-primary/90 transition-all shadow-md shadow-brand-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isMagicLoading ? 'Adding...' : 'Magic Add'}
+                            </button>
+                        </div>
+                        {magicError && (
+                            <div className="flex items-center gap-2 text-xs text-red-500 pl-14">
+                                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                {magicError}
+                            </div>
+                        )}
+                    </div>
+
                     <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}

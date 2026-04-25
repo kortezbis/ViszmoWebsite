@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MoreVertical, Pencil, Link as LinkIcon, Copy, FolderPlus, Trash2 } from 'lucide-react';
+import { getDeckCardCount } from '../../contexts/DecksContext';
 
 interface LiquidDeckCardProps {
     deck: {
@@ -8,6 +9,7 @@ interface LiquidDeckCardProps {
         title: string;
         color: string;
         cards: any[];
+        cardCount?: number;
         lastStudied?: string;
     };
     stats: {
@@ -40,6 +42,7 @@ export const LiquidDeckCard: React.FC<LiquidDeckCardProps> = ({
     handleOpenMoveModal,
     handleDeleteDeck,
 }) => {
+    const nCards = getDeckCardCount({ cards: deck.cards, cardCount: deck.cardCount });
     const isDropdownOpen = openDropdownId === deck.id;
 
     const [isDeleteHolding, setIsDeleteHolding] = React.useState(false);
@@ -158,7 +161,7 @@ export const LiquidDeckCard: React.FC<LiquidDeckCardProps> = ({
                     <div className="flex items-center pt-4 border-t border-white/10 mt-auto">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-white/20 text-white border border-white/10">
                             <span className="text-xs font-medium">
-                                {deck.cards.length} {deck.cards.length === 1 ? 'Card' : 'Cards'}
+                                {nCards} {nCards === 1 ? 'Card' : 'Cards'}
                             </span>
                             <div className="w-1 h-1 rounded-full bg-current opacity-50" />
                             <span className="text-xs font-medium">

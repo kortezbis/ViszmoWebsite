@@ -8,13 +8,59 @@ import { Navbar } from '../components/Navbar';
 
 import { useAuth } from '../lib/auth';
 
-export const AccountPage = () => {
-    const { userEmail, userName } = useAuth();
+export const AccountPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
+    const { userEmail, userName, userIdentities } = useAuth();
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [isConnecting, setIsConnecting] = useState<string | null>(null);
+
+    const isGoogleConnected = userIdentities?.some(id => id.provider === 'google');
+    const isAppleConnected = userIdentities?.some(id => id.provider === 'apple');
+
+    const handleConnect = async (provider: 'google' | 'apple') => {
+        setIsConnecting(provider);
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider,
+                options: {
+                    redirectTo: window.location.href,
+                    // For Apple, always request scopes to ensure profile data is captured
+                    scopes: provider === 'apple' ? 'email name' : undefined
+                }
+            });
+            if (error) throw error;
+        } catch (err: any) {
+            console.error(`Error connecting ${provider}:`, err.message);
+            alert(`Failed to connect ${provider} account: ${err.message}`);
+        } finally {
+            setIsConnecting(null);
+        }
+    };
+
+    const handleUnlink = async (provider: 'google' | 'apple') => {
+        const identity = userIdentities?.find(id => id.provider === provider);
+        if (!identity) return;
+
+        // Don't allow unlinking the last identity if there's no password
+        if (userIdentities?.length === 1) {
+            alert("You cannot disconnect your only login method. Please set a password first.");
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to disconnect your ${provider} account?`)) return;
+
+        try {
+            const { error } = await supabase.auth.unlinkIdentity(identity);
+            if (error) throw error;
+            window.location.reload(); // Refresh to update identities
+        } catch (err: any) {
+            console.error(`Error unlinking ${provider}:`, err.message);
+            alert(`Failed to disconnect: ${err.message}`);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#ffffff] font-sans text-slate-900 selection:bg-[#0ea5e9]/10 flex flex-col">
-            <Navbar />
+            <Navbar onOpenModal={onOpenDownload} />
 
             <main className="flex-1 relative pt-32 pb-24">
                 {/* Background (Shared) */}
@@ -28,7 +74,7 @@ export const AccountPage = () => {
                         }}
                     />
                     <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#0ea5e9]/5 blur-[120px]" />
-                    <div className="absolute top-[10%] right-[-10%] w-[35%] h-[35%] rounded-full bg-indigo-500/5 blur-[100px]" />
+                    <div className="absolute top-[10%] right-[-10%] w-[35%] h-[35%] rounded-full bg-indigo-50/5 blur-[100px]" />
                     <div className="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] rounded-full bg-slate-500/5 blur-[120px]" />
                 </div>
 
@@ -94,12 +140,28 @@ export const AccountPage = () => {
                                         </div>
                                         <div>
                                             <div className="font-bold text-slate-900 text-sm">Google</div>
-                                            <div className="text-xs text-slate-500 font-medium">{userEmail}</div>
+                                            <div className="text-xs text-slate-500 font-medium">
+                                                {isGoogleConnected ? userEmail : 'Connect to sync across devices'}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg">
-                                        <span className="text-xs font-bold text-emerald-600 uppercase tracking-wide">Connected</span>
-                                    </div>
+                                    {isGoogleConnected ? (
+                                        <button 
+                                            onClick={() => handleUnlink('google')}
+                                            className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg group transition-all hover:bg-red-50 hover:border-red-200"
+                                        >
+                                            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wide group-hover:hidden">Connected</span>
+                                            <span className="text-xs font-bold text-red-600 uppercase tracking-wide hidden group-hover:block">Disconnect</span>
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            onClick={() => handleConnect('google')}
+                                            disabled={!!isConnecting}
+                                            className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all disabled:opacity-50"
+                                        >
+                                            {isConnecting === 'google' ? 'Connecting...' : 'Connect'}
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/* Apple Account */}
@@ -112,12 +174,28 @@ export const AccountPage = () => {
                                         </div>
                                         <div>
                                             <div className="font-bold text-slate-900 text-sm">Apple</div>
-                                            <div className="text-xs text-slate-500 font-medium">Connect to sync across devices</div>
+                                            <div className="text-xs text-slate-500 font-medium">
+                                                {isAppleConnected ? 'Account Connected' : 'Connect to sync across devices'}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Not Connected</span>
-                                    </div>
+                                    {isAppleConnected ? (
+                                        <button 
+                                            onClick={() => handleUnlink('apple')}
+                                            className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg group transition-all hover:bg-red-50 hover:border-red-200"
+                                        >
+                                            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wide group-hover:hidden">Connected</span>
+                                            <span className="text-xs font-bold text-red-600 uppercase tracking-wide hidden group-hover:block">Disconnect</span>
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            onClick={() => handleConnect('apple')}
+                                            disabled={!!isConnecting}
+                                            className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all disabled:opacity-50"
+                                        >
+                                            {isConnecting === 'apple' ? 'Connecting...' : 'Connect'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
