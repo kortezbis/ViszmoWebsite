@@ -45,11 +45,23 @@ export const TermsOfServicePage = () => {
                     <li><strong>Management:</strong> Subscriptions are managed and processed through the <strong>Apple App Store</strong>.</li>
                     <li><strong>Billing:</strong> You will be billed according to the terms of the Apple App Store. Any questions regarding billing or refunds must be directed to Apple Support.</li>
                     <li><strong>Cancellation:</strong> You can cancel your subscription at any time through your Apple ID settings.</li>
+                    <li><strong>All Purchases Final:</strong> Due to the nature of digital services and AI processing costs, all subscription purchases and upgrades are final and non-refundable, subject to Apple's standard terms.</li>
                 </ul>
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">5. AI-Generated Content Disclaimer</h2>
+                <h2 className="text-xl font-bold text-slate-900">5. Acceptable Use & Proprietary Technology</h2>
+                <p>
+                    Viszmo's proprietary technology and transparent overlay technology are provided to enhance your study experience.
+                </p>
+                <ul className="list-disc pl-5 space-y-2">
+                    <li><strong>Academic Integrity:</strong> You are solely responsible for ensuring that your use of Viszmo complies with your educational institution's academic integrity policies. Viszmo is intended as an educational aid and study tutor.</li>
+                    <li><strong>Prohibited Actions:</strong> You may not attempt to reverse engineer the desktop application, bypass usage limits, or use the service for any illegal activities.</li>
+                </ul>
+            </section>
+
+            <section className="space-y-4">
+                <h2 className="text-xl font-bold text-slate-900">6. AI-Generated Content Disclaimer</h2>
                 <p>
                     Viszmo uses artificial intelligence to generate study materials, including flashcards, lectures, and podcasts.
                 </p>
@@ -61,21 +73,21 @@ export const TermsOfServicePage = () => {
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">6. Limitation of Liability</h2>
+                <h2 className="text-xl font-bold text-slate-900">7. Limitation of Liability</h2>
                 <p>
                     In no event shall Viszmo, nor its directors, employees, or partners, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, or other intangible losses, resulting from your use of the Service.
                 </p>
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">7. Changes to Terms</h2>
+                <h2 className="text-xl font-bold text-slate-900">8. Changes to Terms</h2>
                 <p>
                     We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will provide notice of any significant changes by updating the "Last Updated" date at the top of these Terms.
                 </p>
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">8. Contact Us</h2>
+                <h2 className="text-xl font-bold text-slate-900">9. Contact Us</h2>
                 <p>
                     If you have any questions about these Terms, please contact us at <a href="mailto:support@viszmo.com" className="text-[#0ea5e9] hover:underline">support@viszmo.com</a>.
                 </p>

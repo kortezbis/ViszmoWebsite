@@ -25,11 +25,24 @@ export const PrivacyPolicyPage = () => {
                     <li><strong>Demographic Information:</strong> Age Range (to ensure compliance with age restrictions).</li>
                     <li><strong>Survey and Persona Data:</strong> To tailor your study experience, we collect information regarding your student level (e.g., high school, undergraduate), study goals, and specific study struggles.</li>
                     <li><strong>Subscription Data:</strong> We use <strong>RevenueCat</strong> to manage subscriptions. While we do not store your credit card information directly, RevenueCat and the Apple App Store process your purchase data.</li>
+                    <li><strong>Technical Identifiers:</strong> We may collect technical identifiers like IP addresses at signup to prevent duplicate account fraud and maintain platform security.</li>
                 </ul>
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">2. How We Use Your Information</h2>
+                <h2 className="text-xl font-bold text-slate-900">2. How We Handle Screen Data</h2>
+                <p>
+                    Your privacy is our priority. When using the "Analyze Screen" or "Scan" features:
+                </p>
+                <ul className="list-disc pl-5 space-y-2">
+                    <li><strong>Local Capture:</strong> The screenshot or image is captured locally on your Windows or iOS device.</li>
+                    <li><strong>Secure Transmission:</strong> The extracted text or image is sent securely to our encrypted AI processing servers.</li>
+                    <li><strong>Immediate Deletion:</strong> All raw screen data and temporary files are discarded immediately after processing. We do not store your screenshots or analyzed images unless you explicitly choose to save them to your library.</li>
+                </ul>
+            </section>
+
+            <section className="space-y-4">
+                <h2 className="text-xl font-bold text-slate-900">3. How We Use Your Information</h2>
                 <p>We use the information we collect or receive:</p>
                 <ul className="list-disc pl-5 space-y-2">
                     <li><strong>To Personalize Your Experience:</strong> We use your persona and survey data to tailor study metrics and provide AI-generated study content such as flashcards, lectures, and podcasts specifically relevant to your needs.</li>
@@ -39,7 +52,7 @@ export const PrivacyPolicyPage = () => {
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">3. Sharing Your Information</h2>
+                <h2 className="text-xl font-bold text-slate-900">4. Sharing Your Information</h2>
                 <p>
                     We only share information with your consent, to comply with laws, to provide you with services, to protect your rights, or to fulfill business obligations.
                 </p>
@@ -50,14 +63,14 @@ export const PrivacyPolicyPage = () => {
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">4. Children's Privacy (COPPA Compliance)</h2>
+                <h2 className="text-xl font-bold text-slate-900">5. Children's Privacy (COPPA Compliance)</h2>
                 <p>
                     Viszmo is strictly intended for users <strong>aged 13 and older</strong>. We do not knowingly collect, solicit, or maintain personal information from anyone under the age of 13. If we learn that we have collected personal information from a child under age 13 without verification of parental consent, we will delete that information as quickly as possible. If you believe we might have any information from or about a child under 13, please contact us at <a href="mailto:support@viszmo.com" className="text-[#0ea5e9] hover:underline">support@viszmo.com</a>.
                 </p>
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">5. Data Retention and Deletion</h2>
+                <h2 className="text-xl font-bold text-slate-900">6. Data Retention and Deletion</h2>
                 <p>
                     We keep your information for as long as necessary to fulfill the purposes outlined in this privacy policy unless otherwise required by law.
                 </p>
@@ -67,7 +80,7 @@ export const PrivacyPolicyPage = () => {
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-900">6. Contact Us</h2>
+                <h2 className="text-xl font-bold text-slate-900">7. Contact Us</h2>
                 <p>
                     If you have questions or comments about this policy, you may email us at <a href="mailto:support@viszmo.com" className="text-[#0ea5e9] hover:underline">support@viszmo.com</a>.
                 </p>
