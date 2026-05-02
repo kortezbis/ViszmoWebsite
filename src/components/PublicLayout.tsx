@@ -5,12 +5,13 @@ import { Footer } from './Footer';
 interface PublicLayoutProps {
     children: React.ReactNode;
     onOpenDownload: () => void;
+    onOpenAuth: (view: 'login' | 'signup') => void;
 }
 
-export const PublicLayout = ({ children, onOpenDownload }: PublicLayoutProps) => {
+export const PublicLayout = ({ children, onOpenDownload, onOpenAuth }: PublicLayoutProps) => {
     return (
         <div className="relative min-h-screen font-sans text-slate-900 bg-white flex flex-col">
-            <Navbar onOpenModal={onOpenDownload} />
+            <Navbar onOpenModal={onOpenDownload} onOpenAuth={onOpenAuth} />
 
             {/* Global Background Mesh (Persistent) */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20">

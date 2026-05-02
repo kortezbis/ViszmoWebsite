@@ -1,44 +1,25 @@
 import './dashboard-v2.css';
 
-import { Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from '../contexts/ThemeContext';
-import { DecksProvider } from '../contexts/DecksContext';
-import { StudyProgressProvider } from '../contexts/StudyProgressContext';
-import { SettingsProvider } from '../contexts/SettingsContext';
-import { DebugProvider } from '../contexts/DebugContext';
+import { useEffect } from 'react';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import DashvisApp from '../../dashvis/DashvisApp';
 
-import { DashboardHomeV2 } from './DashboardHomeV2';
-import { VisDashboard2PlaceholderPage } from './VisDashboard2PlaceholderPage';
+/**
+ * Dashboard v2: same app as the `dashvis` project (NewStudyDashboardSkeleton + pages).
+ * Code lives in `src/dashvis/*`. Open /dashboard-v2 when signed in.
+ */
 export default function VisDashboard2App() {
+    useEffect(() => {
+        return () => {
+            // Theme is scoped to #viszmo-dashboard-v2-root; clear any legacy html.dark from older builds.
+            document.documentElement.classList.remove('dark');
+        };
+    }, []);
+
     return (
         <ErrorBoundary>
-            <div id="viszmo-dashboard-v2-root">
-                <ThemeProvider defaultTheme="system" dashboardRootId="viszmo-dashboard-v2-root">
-                    <SettingsProvider>
-                        <StudyProgressProvider>
-                            <DebugProvider>
-                                <DecksProvider>
-                                    <Routes>
-                                        <Route index element={<DashboardHomeV2 />} />
-                                        <Route
-                                            path="decks"
-                                            element={<VisDashboard2PlaceholderPage title="My Decks" />}
-                                        />
-                                        <Route
-                                            path="transcripts"
-                                            element={<VisDashboard2PlaceholderPage title="Transcripts" />}
-                                        />
-                                        <Route
-                                            path="chat"
-                                            element={<VisDashboard2PlaceholderPage title="Study Chat" />}
-                                        />
-                                    </Routes>
-                                </DecksProvider>
-                            </DebugProvider>
-                        </StudyProgressProvider>
-                    </SettingsProvider>
-                </ThemeProvider>
+            <div id="viszmo-dashboard-v2-root" className="min-h-screen bg-background text-foreground">
+                <DashvisApp />
             </div>
         </ErrorBoundary>
     );

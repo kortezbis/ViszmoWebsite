@@ -14,11 +14,14 @@ import { Navbar } from './components/Navbar';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { OnboardingModal } from './components/OnboardingModal';
+import { AuthModal } from './components/AuthModal';
 import { DownloadAppModal } from './components/DownloadAppModal';
 import { useProfile } from './contexts/ProfileContext';
+import { AuthModalProvider, useAuthModal } from './contexts/AuthModalContext';
 import DashboardApp from './dashboard/DashboardApp';
+import VisDashboard2App from './dashboard/vis-dashboard-2/VisDashboard2App';
 
-import { SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
+import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
 import { BrowserRouter, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { PublicLayout } from './components/PublicLayout';
 
@@ -26,6 +29,8 @@ import { PublicLayout } from './components/PublicLayout';
 import { HowItWorksPage } from './pages/HowItWorksPage';
 import { PricingPage } from './pages/PricingPage';
 import { FeaturesPage } from './pages/FeaturesPage';
+import { StudyOverlayPage } from './pages/StudyOverlayPage';
+
 
 import { AccountPage } from './pages/AccountPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
@@ -102,8 +107,9 @@ const STICKER_POSITIONS_MOBILE = [
   { top: '85%', left: '5%', rotate: '-5deg', scale: 0.4 },
 ];
 
-function LandingPage({ onOpenDownload }: { onOpenDownload: () => void }) {
-  const navigate = useNavigate();
+function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => void, onOpenAuth: (view: 'login' | 'signup') => void }) {
+    const { isSignedIn } = useAuth();
+    const navigate = useNavigate();
 
 
   const [loadedSchoolLogos, setLoadedSchoolLogos] = useState<string[]>([]);
@@ -218,7 +224,7 @@ function LandingPage({ onOpenDownload }: { onOpenDownload: () => void }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="relative min-h-screen font-sans overflow-x-hidden text-slate-900"
+      className="relative min-h-screen font-sans overflow-x-hidden bg-white text-slate-900"
       style={{
         backgroundColor: '#ffffff',
         minHeight: '100vh',
@@ -307,12 +313,12 @@ function LandingPage({ onOpenDownload }: { onOpenDownload: () => void }) {
           </p>
 
           {/* Get for Windows Button - Centered */}
-          <div className="btn-wrapper mb-16 opacity-80 cursor-default">
-            <button className="btn cursor-default" tabIndex={0} disabled>
+          <div className="btn-wrapper">
+            <button className="btn" onClick={() => isSignedIn ? navigate('/dashboard') : onOpenAuth('signup')}>
               <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                 <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
               </svg>
-              <span className="btn-text">Coming Soon</span>
+              <span className="btn-text">{isSignedIn ? 'Go to Dashboard' : 'Get Started Free'}</span>
             </button>
           </div>
 
@@ -561,6 +567,8 @@ function LandingPage({ onOpenDownload }: { onOpenDownload: () => void }) {
       </div>
 
 
+
+
       {/* Shared Background Wrapper for Testimonials & CTA */}
       <div className="relative isolate">
         {/* Continuous Grid Background with Vertical Fade */}
@@ -574,7 +582,6 @@ function LandingPage({ onOpenDownload }: { onOpenDownload: () => void }) {
           }}
         />
 
-        {/* Bottom Fade into Footer Color (Slate-250 custom) */}
         <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-b from-transparent to-[#d6dee8] -z-10 pointer-events-none" />
 
         {/* Testimonials - Social Proof */}
@@ -609,12 +616,12 @@ function LandingPage({ onOpenDownload }: { onOpenDownload: () => void }) {
               className="flex flex-col items-center gap-6"
             >
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="btn-wrapper opacity-80 cursor-default">
+                <div className="btn-wrapper">
                   <button
-                    className="btn cursor-default"
-                    disabled
+                    className="btn"
+                    onClick={() => navigate('/dashboard')}
                   >
-                    <span className="btn-text">Coming Soon</span>
+                    <span className="btn-text">Get Started</span>
                   </button>
                 </div>
 
@@ -652,20 +659,33 @@ const ScrollToTop = () => {
   return null;
 };
 
+const AuthRedirect = ({ view }: { view: 'login' | 'signup' }) => {
+  const { openAuthModal } = useAuthModal();
+  const navigate = useNavigate();
+  useEffect(() => {
+    openAuthModal(view);
+    navigate('/', { replace: true });
+  }, [view, openAuthModal, navigate]);
+  return null;
+};
+
 function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
   const location = useLocation();
   const { showSurvey, setShowSurvey } = useProfile();
+  const { openAuthModal } = useAuthModal();
 
-  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/terms', '/privacy', '/contact', '/help', '/account'];
-  const isPublicPath = publicPaths.includes(location.pathname);
+  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup'];
+  const isPublicPath = publicPaths.includes(location.pathname) || location.pathname.startsWith('/login') || location.pathname.startsWith('/signup');
 
   const routes = (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<LandingPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/" element={<LandingPage onOpenDownload={onOpenDownload} onOpenAuth={openAuthModal} />} />
         <Route path="/features" element={<FeaturesPage onOpenDownload={onOpenDownload} />} />
         <Route path="/pricing" element={<PricingPage onOpenDownload={onOpenDownload} />} />
         <Route path="/how-it-works" element={<HowItWorksPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/study-overlay" element={<StudyOverlayPage />} />
+
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/contact" element={<ContactUsPage />} />
@@ -681,9 +701,9 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
           </>
         } />
 
-        {/* Independent Routes */}
-        <Route path="/login/*" element={<LoginPage />} />
-        <Route path="/signup/*" element={<SignupPage />} />
+        {/* Independent Routes redirected to modal */}
+        <Route path="/login/*" element={<AuthRedirect view="login" />} />
+        <Route path="/signup/*" element={<AuthRedirect view="signup" />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         <Route path="/dashboard/*" element={
@@ -696,6 +716,18 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
             </SignedOut>
           </>
         } />
+
+        {/* New dashboard workspace (separate layout + routes) */}
+        <Route path="/dashboard-v2/*" element={
+          <>
+            <SignedIn>
+              <VisDashboard2App />
+            </SignedIn>
+            <SignedOut>
+              <RedirectToSignIn afterSignInUrl="/dashboard-v2" />
+            </SignedOut>
+          </>
+        } />
       </Routes>
     </AnimatePresence>
   );
@@ -703,12 +735,14 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
   return (
     <>
       {isPublicPath ? (
-        <PublicLayout onOpenDownload={onOpenDownload}>
+        <PublicLayout onOpenDownload={onOpenDownload} onOpenAuth={openAuthModal}>
           {routes}
         </PublicLayout>
       ) : (
         routes
       )}
+      
+
       <OnboardingModal isOpen={showSurvey} onComplete={() => setShowSurvey(false)} />
     </>
   );
@@ -716,12 +750,20 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
 
 export default function App() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const { isOpen, view, closeAuthModal } = useAuthModal();
 
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <AnimatedRoutes onOpenDownload={() => setShowDownloadModal(true)} />
+      <AnimatedRoutes 
+        onOpenDownload={() => setShowDownloadModal(true)} 
+      />
       <DownloadAppModal isOpen={showDownloadModal} onClose={() => setShowDownloadModal(false)} />
+      <AuthModal 
+        isOpen={isOpen} 
+        initialView={view} 
+        onClose={closeAuthModal} 
+      />
     </BrowserRouter>
   );
 }

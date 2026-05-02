@@ -129,7 +129,7 @@ export const LiquidDeckCard: React.FC<LiquidDeckCardProps> = ({
                                             <Copy className="w-4 h-4 text-zinc-500" /> Duplicate
                                         </button>
                                         <button onClick={() => handleOpenMoveModal(deck.id)} className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl">
-                                            <FolderPlus className="w-4 h-4 text-zinc-500" /> Move to Folder
+                                            <FolderPlus className="w-4 h-4 text-zinc-500" /> Move to Workspace
                                         </button>
                                         <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1.5 mx-1"></div>
                                         <motion.button

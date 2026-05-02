@@ -29,7 +29,8 @@ import {
     Settings,
     MoreHorizontal,
     Sun,
-    Moon
+    Moon,
+    Menu
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 // import { PixelTransition } from './PixelTransition';
@@ -73,32 +74,56 @@ function Sidebar({
 
     return (
         <aside
-            className={`sidebar z-[60] ${isCollapsed ? 'sidebar-collapsed' : ''} ${hideSidebar ? '-translate-x-full' : 'translate-x-0'}`}
+            className={`sidebar z-[60] border-r border-border flex flex-col transition-all duration-300 ${isCollapsed ? 'sidebar-collapsed' : ''} ${hideSidebar ? '-translate-x-full' : 'translate-x-0'}`}
+            style={{ 
+                background: resolvedTheme === 'dark' ? '#111112' : '#ffffff',
+                boxShadow: isCollapsed ? 'none' : '10px 0 40px rgba(0, 0, 0, 0.05)'
+            }}
         >
-            {/* Logo & Toggle */}
-            <div className={`h-20 flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
-                <Link to="/dashboard" className="flex items-center gap-3">
-                    <img src="/viszmo.png" alt="Viszmo" className="h-10 w-10 object-contain shrink-0" />
-                    {!isCollapsed && (
-                        <motion.img 
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
+            {/* Logo & Toggle Section (from dashvis) */}
+            <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center px-0' : 'justify-between px-4'} shrink-0 mb-2`}>
+                <Link 
+                    to="/dashboard" 
+                    className={`flex items-center ${isCollapsed ? 'w-full justify-center' : 'pl-2'}`}
+                >
+                    {!isCollapsed ? (
+                        <img 
                             src="/viszmofull.png" 
                             alt="Viszmo" 
-                            className="h-7 object-contain invert dark:invert-0" 
+                            className="h-8 object-contain" 
+                            style={resolvedTheme !== 'dark' ? { filter: 'brightness(0)' } : {}}
+                        />
+                    ) : (
+                        <img 
+                            src="/viszmo.png" 
+                            alt="Viszmo" 
+                            className="h-16 w-16 object-contain mx-auto scale-150" 
+                            style={resolvedTheme !== 'dark' ? { filter: 'brightness(0)' } : {}}
                         />
                     )}
                 </Link>
+                {!isCollapsed && (
+                    <button 
+                        onClick={() => setIsCollapsed(true)}
+                        className="p-1.5 rounded-lg hover:bg-surface-hover text-foreground-secondary transition-colors"
+                        aria-label="Collapse Sidebar"
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
+                )}
             </div>
 
-            {/* Floating Toggle Button */}
-            <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute -right-3 top-6 w-6 h-6 bg-surface border border-border rounded-full flex items-center justify-center text-foreground-secondary hover:text-foreground hover:border-brand-primary transition-all shadow-sm z-50"
-            >
-                {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
-            </button>
+            {isCollapsed && (
+                <div className="flex justify-center mt-4 mb-2">
+                    <button 
+                        onClick={() => setIsCollapsed(false)}
+                        className="p-2 rounded-lg hover:bg-surface-hover text-foreground-secondary transition-colors"
+                        aria-label="Expand Sidebar"
+                    >
+                        <Menu size={20} />
+                    </button>
+                </div>
+            )}
 
             {/* Navigation */}
             <nav className="flex-1 px-4 py-6 overflow-hidden">
@@ -135,12 +160,12 @@ function Sidebar({
                     <Link
                         to="/dashboard/chat"
                         className={`${isActive('/dashboard/chat') ? 'sidebar-item-active' : 'sidebar-item'} group relative`}
-                        title={isCollapsed ? "Study Chat" : ""}
+                        title={isCollapsed ? "Chat" : ""}
                     >
                         <MessageSquare className="w-5 h-5 shrink-0" />
                         {!isCollapsed && (
                             <span className="whitespace-nowrap">
-                                Study Chat
+                                Chat
                             </span>
                         )}
                     </Link>
@@ -184,7 +209,7 @@ function Sidebar({
                 <div className="mt-6 space-y-1">
                     {!isCollapsed && (
                         <div className="px-4 mb-2 text-xs font-bold text-foreground-muted uppercase tracking-wider">
-                            Study Modes
+                            Practice
                         </div>
                     )}
 

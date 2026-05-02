@@ -18,6 +18,16 @@ export interface LectureNote {
     updatedAt: number;
 }
 
+export interface StudyGuide {
+    id: string;
+    userId: string;
+    workspaceId?: string;
+    title: string;
+    topic: string | null;
+    content: string;
+    createdAt: number;
+}
+
 export interface DeckRow {
     id: string;
     userId: string;
@@ -49,6 +59,8 @@ export interface WorkspaceRow {
     iconName: string | null;
     parentId: string | null;
     createdAt: number;
+    /** Populated by getWorkspaces() — mirrors iOS getWorkspaceStats */
+    stats?: { cardCount: number; mastery: number; subdeckCount: number };
 }
 
 function formatLectureDateLong(ts: number): string {
@@ -85,6 +97,7 @@ class DatabaseService {
             .from('decks')
             .select('*, cards(count)')
             .eq('profile_id', user.id)
+            .eq('is_deleted', false)
             .order('updated_at', { ascending: false });
 
         if (error) {
@@ -106,7 +119,12 @@ class DatabaseService {
 
     async getDeckById(id: string): Promise<DeckRow | undefined> {
         await this.ensureSessionReady();
-        const { data, error } = await supabase.from('decks').select('*').eq('id', id).single();
+        const { data, error } = await supabase
+            .from('decks')
+            .select('*')
+            .eq('id', id)
+            .eq('is_deleted', false)
+            .single();
 
         if (error || !data) return undefined;
 
@@ -424,6 +442,7 @@ class DatabaseService {
             .from('decks')
             .select('*, cards(count)')
             .eq('workspace_id', wsId)
+            .eq('is_deleted', false)
             .order('updated_at', { ascending: false });
 
         if (error) {
@@ -443,16 +462,60 @@ class DatabaseService {
         }));
     }
 
+    async getFlashcardsByWorkspace(wsId: string): Promise<FlashcardRow[]> {
+        await this.ensureSessionReady();
+        // 1. Get all decks in this workspace
+        const { data: decks } = await supabase
+            .from('decks')
+            .select('id')
+            .eq('workspace_id', wsId)
+            .eq('is_deleted', false);
+        
+        if (!decks || decks.length === 0) return [];
+        const deckIds = decks.map(d => d.id);
+
+        // 2. Get all cards for those decks
+        const { data, error } = await supabase
+            .from('cards')
+            .select('*')
+            .in('deck_id', deckIds)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('[DB] getFlashcardsByWorkspace:', error.message);
+            return [];
+        }
+
+        return (data || []).map((row) => ({
+            id: row.id,
+            deckId: row.deck_id,
+            front: row.front,
+            back: row.back,
+            frontImage: row.image ?? undefined,
+            backImage: row.back_image ?? undefined,
+            isStarred: row.is_starred ?? false,
+            createdAt: new Date(row.created_at).getTime(),
+        }));
+    }
+
     /** Approximate card count for a workspace (direct decks + optional nested sub-workspace decks). Mirrors iOS `getWorkspaceStats` intent. */
     async getWorkspaceCardCount(wsId: string): Promise<number> {
         await this.ensureSessionReady();
-        const { data: directDecks } = await supabase.from('decks').select('id').eq('workspace_id', wsId);
+        const { data: directDecks } = await supabase
+            .from('decks')
+            .select('id')
+            .eq('workspace_id', wsId)
+            .eq('is_deleted', false);
         let deckIds = (directDecks || []).map((d: { id: string }) => d.id);
 
         const { data: subWs } = await supabase.from('workspaces').select('id').eq('parent_id', wsId);
         if (subWs && subWs.length > 0) {
             const subIds = subWs.map((w: { id: string }) => w.id);
-            const { data: subDecks } = await supabase.from('decks').select('id').in('workspace_id', subIds);
+            const { data: subDecks } = await supabase
+                .from('decks')
+                .select('id')
+                .in('workspace_id', subIds)
+                .eq('is_deleted', false);
             deckIds = [...deckIds, ...(subDecks || []).map((d: { id: string }) => d.id)];
         }
 
@@ -491,6 +554,264 @@ class DatabaseService {
             createdAt: created,
             updatedAt: created,
         };
+    }
+
+    async getWorkspaces(): Promise<WorkspaceRow[]> {
+        await this.ensureSessionReady();
+        const user = await getAuthenticatedUser();
+        const { data, error } = await supabase
+            .from('workspaces')
+            .select('*')
+            .eq('profile_id', user.id)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('[DB] getWorkspaces:', error.message);
+            return [];
+        }
+
+        const workspaces: WorkspaceRow[] = (data || []).map((row: Record<string, unknown>) => ({
+            id: row.id as string,
+            profileId: row.profile_id as string,
+            name: row.name as string,
+            color: (row.color as string) || '#3B82F6',
+            iconName: (row.icon_name as string | null) ?? null,
+            parentId: (row.parent_id as string | null) ?? null,
+            createdAt: new Date(row.created_at as string).getTime(),
+        }));
+
+        // Optimize stats fetching: instead of N queries, fetch all required data in bulk
+        const [allDecksRes, allCardsRes] = await Promise.all([
+            supabase.from('decks').select('id, workspace_id').eq('is_deleted', false),
+            // Fetching just deck_id for cards is sufficient to count them locally
+            supabase.from('cards').select('deck_id')
+        ]);
+
+        const allDecks = allDecksRes.data || [];
+        const allCards = allCardsRes.data || [];
+
+        // Build dictionaries for O(1) lookups
+        const deckCardCounts: Record<string, number> = {};
+        allCards.forEach((c: { deck_id: string }) => {
+            deckCardCounts[c.deck_id] = (deckCardCounts[c.deck_id] || 0) + 1;
+        });
+
+        // Group decks by workspace
+        const wsDeckIds: Record<string, string[]> = {};
+        allDecks.forEach((d: { id: string, workspace_id: string }) => {
+            if (!wsDeckIds[d.workspace_id]) wsDeckIds[d.workspace_id] = [];
+            wsDeckIds[d.workspace_id].push(d.id);
+        });
+
+        // Compute subdeck maps
+        const wsSubdeckCounts: Record<string, number> = {};
+        const wsSubWsIds: Record<string, string[]> = {};
+        workspaces.forEach(ws => {
+            if (ws.parentId) {
+                wsSubdeckCounts[ws.parentId] = (wsSubdeckCounts[ws.parentId] || 0) + 1;
+                if (!wsSubWsIds[ws.parentId]) wsSubWsIds[ws.parentId] = [];
+                wsSubWsIds[ws.parentId].push(ws.id);
+            }
+        });
+
+        // Attach stats
+        workspaces.forEach(ws => {
+            const directDecks = wsDeckIds[ws.id] || [];
+            let allDeckIds = [...directDecks];
+            
+            // Include decks from sub-workspaces
+            const subWsIds = wsSubWsIds[ws.id] || [];
+            subWsIds.forEach(subId => {
+                if (wsDeckIds[subId]) {
+                    allDeckIds = allDeckIds.concat(wsDeckIds[subId]);
+                }
+            });
+
+            const cardCount = allDeckIds.reduce((sum, deckId) => sum + (deckCardCounts[deckId] || 0), 0);
+
+            ws.stats = {
+                cardCount,
+                mastery: 0,
+                subdeckCount: wsSubdeckCounts[ws.id] || 0
+            };
+        });
+
+        return workspaces;
+    }
+
+    /** Mirrors iOS getWorkspaceStats — card count across direct + sub-workspace decks. */
+    async getWorkspaceStats(wsId: string): Promise<{ cardCount: number; mastery: number; subdeckCount: number }> {
+        const [decksResult, subdecksResult] = await Promise.all([
+            supabase.from('decks').select('id').eq('workspace_id', wsId).eq('is_deleted', false),
+            supabase.from('workspaces').select('id').eq('parent_id', wsId),
+        ]);
+
+        const directDecks = decksResult.data || [];
+        const subWorkspaces = subdecksResult.data || [];
+        const subdeckCount = subWorkspaces.length;
+
+        let allDeckIds = directDecks.map((d: { id: string }) => d.id);
+
+        if (subWorkspaces.length > 0) {
+            const subWsIds = subWorkspaces.map((sw: { id: string }) => sw.id);
+            const { data: subDecks } = await supabase
+                .from('decks')
+                .select('id')
+                .in('workspace_id', subWsIds)
+                .eq('is_deleted', false);
+            if (subDecks) allDeckIds = [...allDeckIds, ...subDecks.map((d: { id: string }) => d.id)];
+        }
+
+        if (allDeckIds.length === 0) return { cardCount: 0, mastery: 0, subdeckCount };
+
+        const { count } = await supabase
+            .from('cards')
+            .select('*', { count: 'exact', head: true })
+            .in('deck_id', allDeckIds);
+
+        return { cardCount: count ?? 0, mastery: 0, subdeckCount };
+    }
+
+    /** Mirrors iOS getNotesByWorkspace — queries metadata JSON field directly, not "fetch all → filter". */
+    async getNotesByWorkspace(wsId: string): Promise<LectureNote[]> {
+        await this.ensureSessionReady();
+        const { data, error } = await supabase
+            .from('transcripts')
+            .select('*')
+            .filter('metadata->>workspaceId', 'eq', wsId);
+
+        if (error) {
+            console.error('[DB] getNotesByWorkspace:', error.message);
+            return [];
+        }
+
+        return (data || []).map((row: Record<string, unknown>) => {
+            const meta = row.metadata as { workspaceId?: string; flashcardDeckId?: string } | null;
+            const created = new Date(row.created_at as string).getTime();
+            return {
+                id: row.id as string,
+                userId: row.profile_id as string,
+                workspaceId: wsId,
+                flashcardDeckId: meta?.flashcardDeckId,
+                title: (row.title as string) || 'Untitled Lecture',
+                content: (row.content as string) || '',
+                summary: row.summary as string | undefined,
+                keyTakeaways: (row.key_takeaways as string[]) || [],
+                glossary: (row.glossary as { term: string; definition: string }[]) || [],
+                date: formatLectureDateLong(created),
+                duration: (row.duration as string) || '0:00',
+                createdAt: created,
+                updatedAt: created,
+            };
+        });
+    }
+
+    /** Mirrors iOS getStudyGuidesByWorkspace — queries workspace_id column directly. */
+    async getStudyGuidesByWorkspace(wsId: string): Promise<StudyGuide[]> {
+        await this.ensureSessionReady();
+        const { data, error } = await supabase
+            .from('study_guides')
+            .select('*')
+            .eq('workspace_id', wsId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('[DB] getStudyGuidesByWorkspace:', error.message);
+            return [];
+        }
+
+        return (data || []).map((row: Record<string, unknown>) => ({
+            id: row.id as string,
+            userId: row.profile_id as string,
+            workspaceId: wsId,
+            title: row.title as string,
+            topic: row.topic as string | null,
+            content: row.content as string,
+            createdAt: new Date(row.created_at as string).getTime(),
+        }));
+    }
+
+    async getStudyGuides(): Promise<StudyGuide[]> {
+        await this.ensureSessionReady();
+        const user = await getAuthenticatedUser();
+        const { data, error } = await supabase
+            .from('study_guides')
+            .select('*')
+            .eq('profile_id', user.id)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('[DB] getStudyGuides:', error.message);
+            return [];
+        }
+
+        return (data || []).map((row: Record<string, unknown>) => ({
+            id: row.id as string,
+            userId: row.profile_id as string,
+            workspaceId: (row.workspace_id as string | null) ?? undefined,
+            title: row.title as string,
+            topic: row.topic as string | null,
+            content: row.content as string,
+            createdAt: new Date(row.created_at as string).getTime(),
+        }));
+    }
+
+    async createWorkspace(name: string, color: string, iconName?: string, parentId?: string): Promise<WorkspaceRow> {
+        await this.ensureSessionReady();
+        const user = await getAuthenticatedUser();
+
+        const { data, error } = await supabase
+            .from('workspaces')
+            .insert({
+                profile_id: user.id,
+                name: name.trim(),
+                color: color || '#3B82F6',
+                icon_name: iconName || 'folder',
+                parent_id: parentId || null,
+            })
+            .select()
+            .single();
+
+        if (error || !data) {
+            console.error('[DB] createWorkspace:', error?.message);
+            throw error || new Error('Create failed');
+        }
+
+        return {
+            id: data.id,
+            profileId: data.profile_id,
+            name: data.name,
+            color: data.color || '#3B82F6',
+            iconName: data.icon_name ?? null,
+            parentId: data.parent_id ?? null,
+            createdAt: new Date(data.created_at).getTime(),
+        };
+    }
+
+    async updateWorkspace(wsId: string, updates: { name?: string; color?: string }): Promise<void> {
+        await this.ensureSessionReady();
+        const payload: Record<string, unknown> = {};
+        if (updates.name !== undefined) payload.name = updates.name.trim();
+        if (updates.color !== undefined) payload.color = updates.color;
+
+        const { error } = await supabase.from('workspaces').update(payload).eq('id', wsId);
+
+        if (error) {
+            console.error('[DB] updateWorkspace:', error.message);
+            throw error;
+        }
+    }
+
+    async deleteWorkspace(wsId: string): Promise<void> {
+        await this.ensureSessionReady();
+        // Cascading delete is usually handled by Supabase DB constraints (ON DELETE CASCADE),
+        // but we'll call the delete on the workspace itself.
+        const { error } = await supabase.from('workspaces').delete().eq('id', wsId);
+
+        if (error) {
+            console.error('[DB] deleteWorkspace:', error.message);
+            throw error;
+        }
     }
 }
 

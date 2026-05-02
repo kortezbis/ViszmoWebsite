@@ -6,29 +6,29 @@ interface MoveDeckModalProps {
     isOpen: boolean;
     onClose: () => void;
     deckName: string;
-    folders: Array<{
-        id: number;
+    workspaces: Array<{
+        id: string;
         name: string;
         color: string;
     }>;
-    currentFolderId: number | null;
-    onMove: (folderId: number | null) => void;
-    onCreateFolder: () => void;
+    currentWorkspaceId: string | null;
+    onMove: (workspaceId: string | null) => void;
+    onCreateWorkspace: () => void;
 }
 
 export function MoveDeckModal({
     isOpen,
     onClose,
     deckName,
-    folders,
-    currentFolderId,
+    workspaces,
+    currentWorkspaceId,
     onMove,
-    onCreateFolder
+    onCreateWorkspace
 }: MoveDeckModalProps) {
-    const [selectedFolderId, setSelectedFolderId] = useState<number | null>(currentFolderId);
+    const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(currentWorkspaceId);
 
     const handleConfirmMove = () => {
-        onMove(selectedFolderId);
+        onMove(selectedWorkspaceId);
         onClose();
     };
 
@@ -77,9 +77,9 @@ export function MoveDeckModal({
                             <div className="space-y-2">
                                 {/* Root Option */}
                                 <button
-                                    onClick={() => setSelectedFolderId(null)}
+                                    onClick={() => setSelectedWorkspaceId(null)}
                                     className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${
-                                        selectedFolderId === null
+                                        selectedWorkspaceId === null
                                             ? 'bg-brand-primary/5 border-brand-primary'
                                             : 'bg-background border-border hover:border-brand-primary/50'
                                     }`}
@@ -90,19 +90,19 @@ export function MoveDeckModal({
                                         </div>
                                         <span className="font-bold text-foreground">Library (Root)</span>
                                     </div>
-                                    {selectedFolderId === null && (
+                                    {selectedWorkspaceId === null && (
                                         <div className="w-6 h-6 rounded-full bg-brand-primary flex items-center justify-center">
                                             <Check className="w-4 h-4 text-white" />
                                         </div>
                                     )}
                                 </button>
 
-                                {folders.map((folder) => (
+                                {workspaces.map((workspace) => (
                                     <button
-                                        key={folder.id}
-                                        onClick={() => setSelectedFolderId(folder.id)}
+                                        key={workspace.id}
+                                        onClick={() => setSelectedWorkspaceId(workspace.id)}
                                         className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${
-                                            selectedFolderId === folder.id
+                                            selectedWorkspaceId === workspace.id
                                                 ? 'bg-brand-primary/5 border-brand-primary'
                                                 : 'bg-background border-border hover:border-brand-primary/50'
                                         }`}
@@ -110,15 +110,15 @@ export function MoveDeckModal({
                                         <div className="flex items-center gap-3">
                                             <div
                                                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                                                style={{ backgroundColor: `${folder.color}20` }}
+                                                style={{ backgroundColor: `${workspace.color}20` }}
                                             >
-                                                <Folder className="w-5 h-5" style={{ color: folder.color }} />
+                                                <Folder className="w-5 h-5" style={{ color: workspace.color }} />
                                             </div>
                                             <span className="font-bold text-foreground truncate max-w-[180px]">
-                                                {folder.name}
+                                                {workspace.name}
                                             </span>
                                         </div>
-                                        {selectedFolderId === folder.id && (
+                                        {selectedWorkspaceId === workspace.id && (
                                             <div className="w-6 h-6 rounded-full bg-brand-primary flex items-center justify-center">
                                                 <Check className="w-4 h-4 text-white" />
                                             </div>
@@ -126,11 +126,11 @@ export function MoveDeckModal({
                                     </button>
                                 ))}
 
-                                {/* Create Folder Button in list */}
+                                {/* Create Workspace Button in list */}
                                 <button
                                     onClick={() => {
                                         onClose();
-                                        onCreateFolder();
+                                        onCreateWorkspace();
                                     }}
                                     className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed border-border hover:border-brand-primary hover:bg-surface-hover/50 group transition-all"
                                 >
@@ -138,7 +138,7 @@ export function MoveDeckModal({
                                         <Plus className="w-5 h-5" />
                                     </div>
                                     <span className="font-bold text-foreground-secondary group-hover:text-brand-primary">
-                                        Create New Folder
+                                        Create New Workspace
                                     </span>
                                 </button>
                             </div>
@@ -154,7 +154,7 @@ export function MoveDeckModal({
                             </button>
                             <button
                                 onClick={handleConfirmMove}
-                                disabled={selectedFolderId === currentFolderId}
+                                disabled={selectedWorkspaceId === currentWorkspaceId}
                                 className="flex-1 px-6 py-3 bg-brand-primary text-white font-bold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-lg shadow-brand-primary/25"
                             >
                                 Move Here

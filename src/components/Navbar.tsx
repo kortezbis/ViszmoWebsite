@@ -7,10 +7,10 @@ import { useNavigate, Link } from 'react-router-dom';
 
 interface NavbarProps {
     onOpenModal?: () => void;
-    onTestSurvey?: () => void;
+    onOpenAuth?: (view: 'login' | 'signup') => void;
 }
 
-export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) => {
+export const Navbar = ({ onOpenModal = () => { }, onOpenAuth = () => { } }: NavbarProps) => {
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { isSignedIn } = useAuth();
@@ -30,9 +30,10 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                 </Link>
                 <div className="hidden md:flex items-center gap-7 text-sm font-medium text-[#0ea5e9] relative z-10 justify-self-center">
                     <button
-                        className="hover:opacity-80 transition-opacity cursor-default flex items-center gap-1.5"
+                        className="hover:opacity-80 transition-opacity flex items-center gap-1.5"
+                        onClick={() => navigate('/dashboard')}
                     >
-                        <span>Coming Soon</span>
+                        <span>Dashboard</span>
                     </button>
 
                     {/* Explore Dropdown */}
@@ -57,15 +58,18 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                                     className="absolute top-full left-1/2 mt-1 w-44 glass-element rounded-[1.5rem] overflow-hidden p-2 shadow-xl"
                                 >
                                     <div className="flex flex-col gap-1">
+                                        <button onClick={() => { onOpenModal(); setShowExploreMenu(false); }} className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700 text-left w-full">
+                                            Mobile App
+                                        </button>
                                         <Link to="/features" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
                                             Features
                                         </Link>
                                         <Link to="/how-it-works" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
                                             How It Works
                                         </Link>
-                                        <div className="px-3 py-2 text-slate-400 text-xs font-bold uppercase tracking-wider cursor-not-allowed">
-                                            Dashboard (Soon)
-                                        </div>
+                                        <Link to="/dashboard" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
+                                            Dashboard
+                                        </Link>
                                     </div>
                                 </motion.div>
                             )}
@@ -74,22 +78,18 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
 
                     <Link to="/pricing" className="hover:opacity-80 transition-opacity">Pricing</Link>
 
-                    {onTestSurvey && (
-                        <button onClick={onTestSurvey} className="hover:opacity-80 transition-opacity text-amber-500 font-bold">
-                            Test Survey
-                        </button>
-                    )}
                 </div>
 
                 <div className="hidden md:flex items-center gap-6 relative z-10 justify-self-end">
 
                     {isSignedIn ? (
                         <div className="flex items-center gap-3">
-                            <span
-                                className="text-sm font-bold text-slate-400 cursor-not-allowed"
+                            <Link
+                                to="/dashboard"
+                                className="text-sm font-bold text-[#0ea5e9] hover:opacity-80"
                             >
-                                Dashboard (Soon)
-                            </span>
+                                Dashboard
+                            </Link>
                             <UserButton
                                 afterSignOutUrl="/"
                                 appearance={{
@@ -105,19 +105,19 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                         </div>
                     ) : (
                         <button
-                            onClick={handleSignIn}
+                            onClick={() => onOpenAuth('login')}
                             className="text-sm font-bold text-[#0ea5e9] hover:opacity-80 transition-opacity"
                         >
                             Sign in
                         </button>
                     )}
 
-                    <div className="btn-wrapper opacity-80 cursor-default">
-                        <button className="btn btn-sm cursor-default" disabled>
+                    <div className="btn-wrapper">
+                        <button className="btn btn-sm" onClick={() => navigate('/dashboard')}>
                             <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                                 <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
                             </svg>
-                            <span className="btn-text">Coming Soon</span>
+                            <span className="btn-text">Dashboard</span>
                         </button>
                     </div>
                 </div>
@@ -156,21 +156,23 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                             <div className="flex flex-col gap-4">
                                 <button
                                     onClick={() => {
-                                        onOpenModal();
+                                        navigate('/dashboard');
                                         setIsMobileMenuOpen(false);
                                     }}
                                     className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100 flex items-center justify-between text-left w-full cursor-pointer"
                                 >
-                                    <span>Coming Soon</span>
+                                    <span>Dashboard</span>
                                     <div className="w-1.5 h-1.5 rounded-full bg-[#0ea5e9]/20" />
                                 </button>
 
                                 <div className="mt-2 mb-1 px-2">
                                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Explore</span>
                                 </div>
+                                <button onClick={() => { onOpenModal(); setIsMobileMenuOpen(false); }} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100 text-left w-full">Mobile App</button>
                                 <Link to="/features" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">Features</Link>
                                 <Link to="/how-it-works" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">How It Works</Link>
                                 <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">Pricing</Link>
+                                
 
 
                                 <div className="flex flex-col gap-3 mt-4">
@@ -181,7 +183,7 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                                     ) : (
                                         <button
                                             onClick={() => {
-                                                handleSignIn();
+                                                onOpenAuth('login');
                                                 setIsMobileMenuOpen(false);
                                             }}
                                             className="w-full py-4 text-sm font-bold text-[#0ea5e9] bg-blue-50/50 rounded-2xl border border-blue-100/50"
@@ -190,13 +192,16 @@ export const Navbar = ({ onOpenModal = () => { }, onTestSurvey }: NavbarProps) =
                                         </button>
                                     )}
                                     <button
-                                        className="btn w-full py-4 opacity-80 cursor-default"
-                                        disabled
+                                        className="btn w-full py-4"
+                                        onClick={() => {
+                                            navigate('/dashboard');
+                                            setIsMobileMenuOpen(false);
+                                        }}
                                     >
                                         <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                                             <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
                                         </svg>
-                                        <span className="btn-text">Coming Soon</span>
+                                        <span className="btn-text">Dashboard</span>
                                     </button>
                                 </div>
                             </div>

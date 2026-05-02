@@ -43,10 +43,11 @@ export interface Deck {
     deletedAt?: string;
 }
 
-export interface Folder {
-    id: number;
+export interface Workspace {
+    id: string;
     name: string;
     color: string;
+    parentId: string | null;
     createdAt: string;
 }
 
@@ -64,7 +65,7 @@ function mapRowToCard(row: FlashcardRow): Card {
 
 interface DecksContextType {
     decks: Deck[];
-    folders: Folder[];
+    workspaces: Workspace[];
     activeDeckId: string | null;
     activeDeck: Deck | null;
     decksLoading: boolean;
@@ -90,12 +91,12 @@ interface DecksContextType {
     setCards: (cards: Card[]) => void;
     updateDeckTitle: (title: string) => Promise<void>;
 
-    createFolder: (name: string, color: string) => number;
-    updateFolder: (id: number, updates: Partial<Omit<Folder, 'id' | 'createdAt'>>) => void;
-    deleteFolder: (id: number) => void;
-    moveDeckToFolder: (deckId: string, folderId: number | null) => void;
+    createWorkspace: (name: string, color: string, parentId?: string | null) => Promise<string>;
+    updateWorkspace: (id: string, updates: Partial<Omit<Workspace, 'id' | 'createdAt'>>) => Promise<void>;
+    deleteWorkspace: (id: string) => Promise<void>;
+    moveDeckToWorkspace: (deckId: string, workspaceId: string | null) => Promise<void>;
 
-    getDecksInFolder: (folderId: number | null) => Deck[];
+    getDecksInWorkspace: (workspaceId: string | null) => Deck[];
     getActiveDecks: () => Deck[];
     getDeletedDecks: () => Deck[];
     getDeckById: (id: string) => Deck | undefined;
@@ -117,24 +118,8 @@ export function DecksProvider({ children }: { children: ReactNode }) {
     const { isSignedIn, isLoading: authLoading } = useAuth();
 
     const [decks, setDecks] = useState<Deck[]>([]);
-    const [folders, setFolders] = useState<Folder[]>(() => {
-        try {
-            const saved = localStorage.getItem(FOLDERS_STORAGE_KEY);
-            if (saved) return JSON.parse(saved);
-        } catch (e) {
-            console.warn('Failed to load folders from localStorage:', e);
-        }
-        return [];
-    });
-
-    const [activeDeckId, setActiveDeckId] = useState<string | null>(() => {
-        try {
-            return localStorage.getItem(ACTIVE_DECK_KEY);
-        } catch {
-            return null;
-        }
-    });
-
+    const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+    const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
     const [decksLoading, setDecksLoading] = useState(false);
     const [decksError, setDecksError] = useState<string | null>(null);
 
@@ -152,20 +137,22 @@ export function DecksProvider({ children }: { children: ReactNode }) {
     const refreshDecks = useCallback(async () => {
         if (!isSignedIn) {
             setDecks([]);
+            setWorkspaces([]);
             return;
         }
         setDecksLoading(true);
         setDecksError(null);
         try {
-            const rows = await db.getDecks();
-            const ids = rows.map((r) => r.id);
-            const byDeck = await db.getFlashcardsByDeckIds(ids);
+            const [deckRows, workspaceRows] = await Promise.all([
+                db.getDecks(),
+                db.getWorkspaces()
+            ]);
 
-            const next: Deck[] = rows.map((r) => ({
+            const nextDecks: Deck[] = deckRows.map((r) => ({
                 id: r.id,
                 title: r.title,
                 description: r.description,
-                cards: (byDeck[r.id] || []).map(mapRowToCard),
+                cards: [], // Hydrated on-demand or by specific page loaders
                 cardCount: r.cardCount,
                 workspaceId: r.workspaceId,
                 folderId: null,
@@ -175,7 +162,16 @@ export function DecksProvider({ children }: { children: ReactNode }) {
                 isDeleted: false,
             }));
 
-            setDecks(next);
+            const nextWorkspaces: Workspace[] = workspaceRows.map(r => ({
+                id: r.id,
+                name: r.name,
+                color: r.color,
+                parentId: r.parentId,
+                createdAt: new Date(r.createdAt).toISOString()
+            }));
+
+            setDecks(nextDecks);
+            setWorkspaces(nextWorkspaces);
         } catch (e: unknown) {
             const msg = e instanceof Error ? e.message : 'Failed to load decks';
             console.error('[Decks]', msg);
@@ -190,22 +186,10 @@ export function DecksProvider({ children }: { children: ReactNode }) {
         if (isSignedIn) void refreshDecks();
         else {
             setDecks([]);
+            setWorkspaces([]);
             setActiveDeckId(null);
-            persistActiveDeck(null);
         }
-    }, [authLoading, isSignedIn, refreshDecks, persistActiveDeck]);
-
-    useEffect(() => {
-        try {
-            localStorage.setItem(FOLDERS_STORAGE_KEY, JSON.stringify(folders));
-        } catch (e) {
-            console.warn('Failed to save folders to localStorage:', e);
-        }
-    }, [folders]);
-
-    useEffect(() => {
-        persistActiveDeck(activeDeckId);
-    }, [activeDeckId, persistActiveDeck]);
+    }, [authLoading, isSignedIn, refreshDecks]);
 
     const activeDeck = activeDeckId
         ? decks.find((d) => d.id === activeDeckId && !d.isDeleted) || null
@@ -402,35 +386,29 @@ export function DecksProvider({ children }: { children: ReactNode }) {
         await updateDeck(activeDeck.id, { title });
     };
 
-    const createFolder = (name: string, color: string): number => {
-        const newId = Date.now();
-        const newFolder: Folder = {
-            id: newId,
-            name,
-            color,
-            createdAt: new Date().toISOString(),
-        };
-        setFolders((prev) => [...prev, newFolder]);
-        return newId;
+    const createWorkspace = async (name: string, color: string, parentId: string | null = null): Promise<string> => {
+        const created = await db.createWorkspace(name, color, parentId);
+        await refreshDecks();
+        return created.id;
     };
 
-    const updateFolder = (id: number, updates: Partial<Omit<Folder, 'id' | 'createdAt'>>) => {
-        setFolders((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)));
+    const updateWorkspace = async (id: string, updates: Partial<Omit<Workspace, 'id' | 'createdAt'>>) => {
+        await db.updateWorkspace(id, updates);
+        await refreshDecks();
     };
 
-    const deleteFolder = (id: number) => {
-        setFolders((prev) => prev.filter((f) => f.id !== id));
-        setDecks((prev) =>
-            prev.map((deck) => (deck.folderId === id ? { ...deck, folderId: null } : deck)),
-        );
+    const deleteWorkspace = async (id: string) => {
+        await db.deleteWorkspace(id);
+        await refreshDecks();
     };
 
-    const moveDeckToFolder = (deckId: string, folderId: number | null) => {
-        void updateDeck(deckId, { folderId });
+    const moveDeckToWorkspace = async (deckId: string, workspaceId: string | null) => {
+        await db.updateDeck(deckId, { workspaceId });
+        await refreshDecks();
     };
 
-    const getDecksInFolder = (folderId: number | null): Deck[] => {
-        return decks.filter((d) => d.folderId === folderId && !d.isDeleted);
+    const getDecksInWorkspace = (workspaceId: string | null): Deck[] => {
+        return decks.filter((d) => d.workspaceId === (workspaceId ?? undefined) && !d.isDeleted);
     };
 
     const getActiveDecks = (): Deck[] => {
@@ -487,7 +465,7 @@ export function DecksProvider({ children }: { children: ReactNode }) {
         <DecksContext.Provider
             value={{
                 decks,
-                folders,
+                workspaces,
                 activeDeckId,
                 activeDeck,
                 decksLoading,
@@ -505,11 +483,11 @@ export function DecksProvider({ children }: { children: ReactNode }) {
                 deleteCard,
                 setCards,
                 updateDeckTitle,
-                createFolder,
-                updateFolder,
-                deleteFolder,
-                moveDeckToFolder,
-                getDecksInFolder,
+                createWorkspace,
+                updateWorkspace,
+                deleteWorkspace,
+                moveDeckToWorkspace,
+                getDecksInWorkspace,
                 getActiveDecks,
                 getDeletedDecks,
                 getDeckById,

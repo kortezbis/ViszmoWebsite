@@ -38,49 +38,50 @@ interface LearnModeProps {
 
 function GoalSelection({ onSelect }: { onSelect: (goal: LearnGoal) => void }) {
     return (
-        <div className="flex flex-col items-center justify-center h-full p-8 bg-background">
+        <div className="flex flex-col items-center justify-center min-h-full p-4 sm:p-8 bg-background">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-background-card border border-border rounded-3xl p-8 max-w-lg w-full shadow-2xl"
+                className="bg-background-card border border-border rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-lg"
             >
-                <h2 className="text-2xl font-bold text-foreground mb-2">Choose a goal for this session</h2>
-                <p className="text-foreground-muted mb-6">How do you want to learn today?</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight mb-1.5">
+                    Choose a goal
+                </h2>
+                <p className="text-sm text-foreground-secondary leading-relaxed mb-6">
+                    Pick how you want to run this session.
+                </p>
 
-                <div className="space-y-4 mb-6">
+                <div className="space-y-3 mb-6">
                     <button
                         onClick={() => onSelect('study')}
-                        className="w-full p-5 rounded-2xl border-2 border-brand-primary bg-brand-primary/10 text-left transition-all"
+                        className="w-full p-4 sm:p-5 rounded-xl border border-brand-primary/40 bg-brand-primary/5 text-left transition-all hover:bg-brand-primary/10 hover:border-brand-primary/60"
                     >
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-lg font-bold text-foreground">Study</span>
-                            <Sparkles className="w-6 h-6 text-brand-primary" />
+                        <div className="flex items-center justify-between gap-3 mb-1.5">
+                            <span className="text-base font-semibold text-foreground">Deep study</span>
+                            <Sparkles className="w-5 h-5 text-brand-primary shrink-0" />
                         </div>
-                        <p className="text-sm text-foreground-muted">
-                            AI-powered deep learning. Teaching, typing, fill-in-blank, and mini quizzes.
+                        <p className="text-sm text-foreground-secondary leading-relaxed">
+                            AI explanations, typing, fill-in-the-blank, and short quizzes.
                         </p>
                     </button>
 
                     <button
                         onClick={() => onSelect('learn')}
-                        className="w-full p-5 rounded-2xl border-2 border-border hover:border-brand-primary bg-surface text-left transition-all"
+                        className="w-full p-4 sm:p-5 rounded-xl border border-border bg-surface text-left transition-all hover:border-brand-primary/35 hover:bg-surface-hover"
                     >
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-lg font-bold text-foreground">Learn All Cards</span>
-                            <BookOpen className="w-6 h-6 text-foreground-muted" />
+                        <div className="flex items-center justify-between gap-3 mb-1.5">
+                            <span className="text-base font-semibold text-foreground">Quick practice</span>
+                            <BookOpen className="w-5 h-5 text-foreground-muted shrink-0" />
                         </div>
-                        <p className="text-sm text-foreground-muted">
-                            Quick practice. MCQ, True/False, and more until you master all cards.
+                        <p className="text-sm text-foreground-secondary leading-relaxed">
+                            MCQ, true/false, and drills until you clear the deck.
                         </p>
                     </button>
                 </div>
 
-                <button
-                    onClick={() => onSelect('study')}
-                    className="w-full py-4 rounded-xl bg-brand-primary text-white font-bold hover:bg-brand-primary/90 transition-colors"
-                >
-                    Start Learning →
-                </button>
+                <p className="text-xs text-foreground-muted text-center">
+                    Tap a card above to start — no extra step required.
+                </p>
             </motion.div>
         </div>
     );
@@ -104,48 +105,48 @@ function TeachingCard({ card, content, isLoading, onContinue }: TeachingCardProp
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="w-full max-w-3xl"
+            className="w-full max-w-xl sm:max-w-2xl mx-auto"
         >
-            <div className="bg-background-card border border-border rounded-2xl overflow-hidden shadow-xl">
+            <div className="bg-background-card border border-border rounded-2xl overflow-hidden shadow-lg">
                 {/* Header */}
-                <div className="bg-brand-primary/10 border-b border-brand-primary/20 px-6 py-4 flex items-center gap-3">
-                    <Lightbulb className="w-5 h-5 text-brand-primary" />
-                    <span className="text-xs font-black text-brand-primary uppercase tracking-wider">Teaching Mode</span>
+                <div className="bg-brand-primary/10 border-b border-brand-primary/20 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-2.5">
+                    <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5 text-brand-primary shrink-0" />
+                    <span className="text-xs font-semibold text-brand-primary uppercase tracking-wide">Teaching</span>
                 </div>
 
                 {/* Content */}
-                <div className="p-8">
+                <div className="p-5 sm:p-8">
                     {/* Term & Definition */}
-                    <div className="mb-8 text-center">
-                        <p className="text-xl font-black text-foreground mb-3">{card.term}</p>
-                        <p className="text-base text-foreground-secondary leading-relaxed">{card.definition}</p>
+                    <div className="mb-6 sm:mb-8 text-center space-y-3">
+                        <p className="text-xl sm:text-2xl font-bold text-foreground tracking-tight leading-snug">{card.term}</p>
+                        <p className="text-sm sm:text-base text-foreground-secondary leading-relaxed max-w-prose mx-auto">{card.definition}</p>
                     </div>
 
                     {/* AI Content */}
                     {isLoading ? (
-                        <div className="flex flex-col items-center justify-center py-10 gap-4">
-                            <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
-                            <span className="text-sm font-medium text-foreground-muted">AI is explaining...</span>
+                        <div className="flex flex-col items-center justify-center py-10 gap-3">
+                            <div className="w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
+                            <span className="text-sm text-foreground-secondary">Generating explanation…</span>
                         </div>
                     ) : content ? (
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                             {content.eli5 && (
-                                <div className="bg-surface/50 rounded-2xl p-5 border border-border/50 group hover:border-brand-primary/30 transition-colors">
-                                    <p className="text-[10px] font-black text-brand-primary uppercase mb-2 tracking-[0.2em]">💡 Simple Explanation</p>
+                                <div className="bg-surface/60 rounded-xl p-4 sm:p-5 border border-border/60 transition-colors hover:border-brand-primary/25">
+                                    <p className="text-xs font-semibold text-brand-primary mb-2">Simple explanation</p>
                                     <p className="text-sm text-foreground leading-relaxed">{content.eli5}</p>
                                 </div>
                             )}
 
                             {content.realWorldExamples && content.realWorldExamples.length > 0 && (
-                                <div className="bg-surface/50 rounded-2xl p-5 border border-border/50 group hover:border-brand-primary/30 transition-colors">
-                                    <p className="text-[10px] font-black text-warning uppercase mb-2 tracking-[0.2em]">📌 Real-World Example</p>
+                                <div className="bg-surface/60 rounded-xl p-4 sm:p-5 border border-border/60 transition-colors hover:border-brand-primary/25">
+                                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-2">Real-world example</p>
                                     <p className="text-sm text-foreground leading-relaxed">{content.realWorldExamples[0]}</p>
                                 </div>
                             )}
 
                             {content.importance && (
-                                <div className="bg-surface/50 rounded-2xl p-5 border border-border/50 group hover:border-brand-primary/30 transition-colors">
-                                    <p className="text-[10px] font-black text-success uppercase mb-2 tracking-[0.2em]">🎯 Importance</p>
+                                <div className="bg-surface/60 rounded-xl p-4 sm:p-5 border border-border/60 transition-colors hover:border-brand-primary/25">
+                                    <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-2">Why it matters</p>
                                     <p className="text-sm text-foreground leading-relaxed">{content.importance}</p>
                                 </div>
                             )}
@@ -154,13 +155,13 @@ function TeachingCard({ card, content, isLoading, onContinue }: TeachingCardProp
                 </div>
 
                 {/* Footer */}
-                <div className="px-8 py-6 border-t border-border bg-surface/30">
+                <div className="px-5 sm:px-8 py-4 sm:py-5 border-t border-border bg-surface/25">
                     <button
                         onClick={onContinue}
                         disabled={isLoading}
-                        className="w-full py-4 rounded-xl bg-brand-primary text-black font-black hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-brand-primary/20"
+                        className="w-full py-3.5 rounded-xl bg-brand-primary text-black font-semibold text-sm sm:text-base hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50"
                     >
-                        I've got it! → Practice
+                        Continue to practice
                     </button>
                 </div>
             </div>
@@ -215,15 +216,15 @@ function WrittenQuestion({ card, onAnswer, onSkip }: WrittenQuestionProps) {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="w-full max-w-3xl"
+            className="w-full max-w-xl sm:max-w-2xl mx-auto"
         >
-            <div className="bg-background-card border border-border rounded-2xl p-8">
-                <div className="flex items-center gap-2 mb-4">
-                    <span className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Type the Answer</span>
+            <div className="bg-background-card border border-border rounded-2xl p-5 sm:p-8">
+                <div className="mb-5">
+                    <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wide">Written answer</span>
                 </div>
 
-                <p className="text-base text-foreground-muted mb-2 text-center">What is the definition of:</p>
-                <p className="text-xl font-bold text-foreground mb-6 text-center">{card.term}</p>
+                <p className="text-sm text-foreground-secondary mb-1 text-center">Define or explain:</p>
+                <p className="text-lg sm:text-xl font-bold text-foreground mb-5 sm:mb-6 text-center tracking-tight leading-snug">{card.term}</p>
 
                 <textarea
                     value={userAnswer}
@@ -231,8 +232,8 @@ function WrittenQuestion({ card, onAnswer, onSkip }: WrittenQuestionProps) {
                     onKeyDown={handleKeyDown}
                     disabled={showResult}
                     placeholder="Type your answer..."
-                    className="w-full p-4 bg-surface border border-border rounded-xl text-foreground placeholder-foreground-muted resize-none focus:outline-none focus:border-brand-primary transition-colors text-sm"
-                    rows={3}
+                    className="w-full p-3.5 sm:p-4 bg-surface border border-border rounded-xl text-foreground placeholder:text-foreground-muted/70 resize-none focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-colors text-sm leading-relaxed min-h-[100px]"
+                    rows={4}
                     autoFocus
                 />
 
@@ -272,17 +273,17 @@ function WrittenQuestion({ card, onAnswer, onSkip }: WrittenQuestionProps) {
                         <button
                             onClick={handleSubmit}
                             disabled={!userAnswer.trim()}
-                            className="px-6 py-3 rounded-xl bg-brand-primary text-black font-black hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                            className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-brand-primary text-black font-semibold text-sm sm:text-base hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50"
                         >
-                            Check Answer
+                            Check answer
                         </button>
                     </div>
                 ) : !isCorrect && (
-                    <div className="flex flex-col items-center mt-8 pt-8 border-t border-border gap-4">
-                        <p className="text-sm font-medium text-foreground-muted animate-pulse">Click the correct answer or press any key to continue</p>
+                    <div className="flex flex-col items-center mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border gap-3 text-center px-2">
+                        <p className="text-sm text-foreground-secondary">Press any key or tap continue to move on.</p>
                         <button
                             onClick={() => onAnswer(false)}
-                            className="px-12 py-4 rounded-2xl bg-brand-primary text-black font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-brand-primary/20"
+                            className="w-full sm:w-auto px-8 sm:px-10 py-3 rounded-xl bg-brand-primary text-black font-semibold hover:opacity-95 active:scale-[0.99] transition-all"
                         >
                             Continue
                         </button>
@@ -365,18 +366,18 @@ function FillBlankQuestion({ card, onAnswer, onSkip }: FillBlankQuestionProps) {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="w-full max-w-3xl"
+            className="w-full max-w-xl sm:max-w-2xl mx-auto"
         >
-            <div className="bg-background-card border border-border rounded-2xl p-8">
-                <div className="flex items-center gap-2 mb-4">
-                    <span className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Fill in the Blank</span>
+            <div className="bg-background-card border border-border rounded-2xl p-5 sm:p-8">
+                <div className="mb-5">
+                    <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wide">Fill in the blank</span>
                 </div>
 
-                <p className="text-xs font-medium text-foreground-muted mb-2 uppercase tracking-wider text-center">Complete the sentence about:</p>
-                <p className="text-lg font-bold text-foreground mb-6 text-center">{card.term}</p>
+                <p className="text-sm text-foreground-secondary mb-1 text-center">Complete the sentence for:</p>
+                <p className="text-lg sm:text-xl font-bold text-foreground mb-5 sm:mb-6 text-center tracking-tight">{card.term}</p>
 
-                <div className="bg-surface/50 rounded-xl p-6 border border-border mb-6">
-                    <p className="text-lg text-foreground leading-relaxed italic text-center">{sentence}</p>
+                <div className="bg-surface/60 rounded-xl p-4 sm:p-6 border border-border mb-5">
+                    <p className="text-base sm:text-lg text-foreground leading-relaxed text-center">{sentence}</p>
                 </div>
 
                 <input
@@ -385,8 +386,8 @@ function FillBlankQuestion({ card, onAnswer, onSkip }: FillBlankQuestionProps) {
                     onChange={(e) => setUserAnswer(e.target.value)}
                     onKeyDown={handleKeyDown}
                     disabled={showResult}
-                    placeholder="Type the missing word..."
-                    className="w-full p-4 bg-surface border border-border rounded-xl text-foreground placeholder-foreground-muted focus:outline-none focus:border-brand-primary transition-colors"
+                    placeholder="Missing word…"
+                    className="w-full p-3.5 sm:p-4 bg-surface border border-border rounded-xl text-foreground placeholder:text-foreground-muted/70 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-colors text-sm sm:text-base"
                     autoFocus
                 />
 
@@ -421,17 +422,17 @@ function FillBlankQuestion({ card, onAnswer, onSkip }: FillBlankQuestionProps) {
                         <button
                             onClick={handleSubmit}
                             disabled={!userAnswer.trim()}
-                            className="px-10 py-3 rounded-xl bg-brand-primary text-black font-black hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                            className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl bg-brand-primary text-black font-semibold text-sm sm:text-base hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50"
                         >
                             Check
                         </button>
                     </div>
                 ) : !isCorrect && (
-                    <div className="flex flex-col items-center mt-8 pt-8 border-t border-border gap-4">
-                        <p className="text-sm font-medium text-foreground-muted animate-pulse">Click the correct answer or press any key to continue</p>
+                    <div className="flex flex-col items-center mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border gap-3 text-center px-2">
+                        <p className="text-sm text-foreground-secondary">Press any key or tap continue to move on.</p>
                         <button
                             onClick={() => onAnswer(false)}
-                            className="px-12 py-4 rounded-2xl bg-brand-primary text-black font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-brand-primary/20"
+                            className="w-full sm:w-auto px-8 sm:px-10 py-3 rounded-xl bg-brand-primary text-black font-semibold hover:opacity-95 active:scale-[0.99] transition-all"
                         >
                             Continue
                         </button>
@@ -561,16 +562,16 @@ function SpeakingQuestion({ card, onAnswer, onSkip }: SpeakingQuestionProps) {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="w-full max-w-3xl"
+            className="w-full max-w-xl sm:max-w-2xl mx-auto"
         >
-            <div className="bg-background-card border border-border rounded-2xl p-8">
-                <div className="flex items-center gap-2 mb-4">
-                    <Mic className="w-4 h-4 text-brand-primary" />
-                    <span className="text-xs font-medium text-brand-primary uppercase tracking-wider">Speaking</span>
+            <div className="bg-background-card border border-border rounded-2xl p-5 sm:p-8">
+                <div className="flex items-center gap-2 mb-5">
+                    <Mic className="w-4 h-4 text-brand-primary shrink-0" />
+                    <span className="text-xs font-semibold text-brand-primary uppercase tracking-wide">Speaking</span>
                 </div>
 
-                <p className="text-lg text-foreground-muted mb-2 text-center">Say the definition for:</p>
-                <p className="text-2xl font-bold text-foreground mb-8 text-center">{card.term}</p>
+                <p className="text-sm text-foreground-secondary mb-1 text-center">Say the definition for:</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground mb-6 sm:mb-8 text-center tracking-tight leading-snug">{card.term}</p>
 
                 <div className="flex flex-col items-center gap-4">
                     {!showResult ? (
@@ -682,36 +683,36 @@ function MCQQuestion({ card, allCards, onAnswer, onSkip }: MCQQuestionProps) {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="w-full max-w-3xl"
+            className="w-full max-w-xl sm:max-w-2xl mx-auto"
         >
-            <div className="bg-background-card border border-border rounded-2xl p-8">
-                <div className="flex items-center gap-2 mb-6">
-                    <span className="text-[10px] font-black text-warning uppercase tracking-[0.2em]">📝 Checkpoint Quiz</span>
+            <div className="bg-background-card border border-border rounded-2xl p-5 sm:p-8">
+                <div className="mb-5">
+                    <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Checkpoint quiz</span>
                 </div>
 
-                <p className="text-lg font-bold text-foreground mb-8 text-center">{card.term}</p>
+                <p className="text-lg sm:text-xl font-bold text-foreground mb-6 sm:mb-8 text-center tracking-tight leading-snug">{card.term}</p>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5 sm:space-y-3">
                     {options.map((option, index) => {
-                        let bgClass = 'bg-surface border-border hover:border-brand-primary';
+                        let bgClass = 'bg-surface border-border hover:border-brand-primary/45';
 
                         if (showResult) {
-                            if (index === correctIndex) bgClass = 'bg-success/20 border-success';
-                            else if (index === selectedOption) bgClass = 'bg-error/20 border-error';
+                            if (index === correctIndex) bgClass = 'bg-success/15 border-success/60';
+                            else if (index === selectedOption) bgClass = 'bg-error/15 border-error/60';
                         } else if (selectedOption === index) {
-                            bgClass = 'bg-brand-primary/20 border-brand-primary';
+                            bgClass = 'bg-brand-primary/15 border-brand-primary';
                         }
 
                         return (
                             <button
                                 key={index}
                                 onClick={() => handleSelect(index)}
-                                className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-start gap-3 ${bgClass}`}
+                                className={`w-full p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-start gap-3 ${bgClass}`}
                             >
-                                <span className="w-6 h-6 rounded bg-surface-active flex items-center justify-center text-xs font-bold text-foreground-muted shrink-0">
+                                <span className="w-7 h-7 rounded-lg bg-surface-active flex items-center justify-center text-xs font-semibold text-foreground-muted shrink-0">
                                     {index + 1}
                                 </span>
-                                <span className="text-sm text-foreground">{option}</span>
+                                <span className="text-sm text-foreground leading-relaxed pt-0.5">{option}</span>
                             </button>
                         );
                     })}
@@ -719,11 +720,11 @@ function MCQQuestion({ card, allCards, onAnswer, onSkip }: MCQQuestionProps) {
             </div>
 
             {showResult && options[selectedOption!] !== card.definition && (
-                <div className="flex flex-col items-center mt-8 gap-4">
-                    <p className="text-sm font-medium text-foreground-muted animate-pulse">Click the correct answer or press any key to continue</p>
+                <div className="flex flex-col items-center mt-6 sm:mt-8 gap-3 text-center px-2">
+                    <p className="text-sm text-foreground-secondary">Choose the correct option or press any key to continue.</p>
                     <button
                         onClick={() => onAnswer(false)}
-                        className="px-12 py-4 rounded-2xl bg-brand-primary text-black font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-brand-primary/20"
+                        className="w-full sm:w-auto px-8 py-3 rounded-xl bg-brand-primary text-black font-semibold hover:opacity-95 active:scale-[0.99] transition-all"
                     >
                         Continue
                     </button>
@@ -795,25 +796,25 @@ function LearnMCQQuestion({ card, allCards, onAnswer, onSkip }: MCQQuestionProps
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="w-full max-w-4xl"
+            className="w-full max-w-xl sm:max-w-3xl mx-auto"
         >
-            <div className="bg-background-card border border-border rounded-2xl p-8 mb-4">
-                <div className="flex items-center gap-2 mb-4">
-                    <span className="text-xs font-medium text-foreground-muted uppercase tracking-wider">Multiple Choice</span>
-                    <button className="p-1 hover:bg-surface-hover rounded-lg transition-colors">
+            <div className="bg-background-card border border-border rounded-2xl p-5 sm:p-8 mb-3 sm:mb-4">
+                <div className="flex items-center justify-between gap-2 mb-5">
+                    <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wide">Multiple choice</span>
+                    <button type="button" className="p-1.5 hover:bg-surface-hover rounded-lg transition-colors" aria-label="Audio (coming soon)">
                         <Volume2 className="w-4 h-4 text-foreground-muted" />
                     </button>
                 </div>
 
-                <p className="text-lg font-bold text-foreground leading-relaxed mb-8 text-center">{card.term}</p>
+                <p className="text-lg sm:text-xl font-bold text-foreground leading-snug mb-6 sm:mb-8 text-center tracking-tight max-w-prose mx-auto">{card.term}</p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {options.map((option, index) => {
-                        let bgClass = 'bg-surface border-border hover:border-brand-primary/50';
+                        let bgClass = 'bg-surface border-border hover:border-brand-primary/40';
 
                         if (showResult) {
-                            if (index === correctIndex) bgClass = 'bg-success/10 border-success/50';
-                            else if (index === selectedOption) bgClass = 'bg-error/10 border-error/50';
+                            if (index === correctIndex) bgClass = 'bg-success/10 border-success/55';
+                            else if (index === selectedOption) bgClass = 'bg-error/10 border-error/55';
                         } else if (selectedOption === index) {
                             bgClass = 'bg-brand-primary/10 border-brand-primary';
                         }
@@ -822,12 +823,12 @@ function LearnMCQQuestion({ card, allCards, onAnswer, onSkip }: MCQQuestionProps
                             <button
                                 key={index}
                                 onClick={() => handleSelect(index)}
-                                className={`p-4 rounded-2xl border-2 text-left transition-all flex items-start gap-4 ${bgClass} group`}
+                                className={`p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-start gap-3 sm:gap-4 ${bgClass} group`}
                             >
-                                <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shrink-0 mt-0.5 transition-colors ${showResult && index === correctIndex ? 'bg-success text-white' : 'bg-surface-active text-foreground-muted'}`}>
+                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold shrink-0 mt-0.5 transition-colors ${showResult && index === correctIndex ? 'bg-success text-white' : 'bg-surface-active text-foreground-muted'}`}>
                                     {String.fromCharCode(65 + index)}
                                 </span>
-                                <span className="text-sm text-foreground leading-snug pt-1">{option}</span>
+                                <span className="text-sm text-foreground leading-relaxed pt-1">{option}</span>
                             </button>
                         );
                     })}
@@ -835,11 +836,11 @@ function LearnMCQQuestion({ card, allCards, onAnswer, onSkip }: MCQQuestionProps
             </div>
 
             {showResult && options[selectedOption!] !== card.definition && (
-                <div className="flex flex-col items-center mt-8 gap-4">
-                    <p className="text-sm font-medium text-foreground-muted animate-pulse">Click the correct answer or press any key to continue</p>
+                <div className="flex flex-col items-center mt-6 sm:mt-8 gap-3 text-center px-2">
+                    <p className="text-sm text-foreground-secondary">Choose the correct option or press any key to continue.</p>
                     <button
                         onClick={() => onAnswer(false)}
-                        className="px-12 py-4 rounded-2xl bg-brand-primary text-black font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-brand-primary/20"
+                        className="w-full sm:w-auto px-8 py-3 rounded-xl bg-brand-primary text-black font-semibold hover:opacity-95 active:scale-[0.99] transition-all"
                     >
                         Continue
                     </button>
@@ -915,25 +916,27 @@ function TrueFalseQuestion({ card, allCards, onAnswer, onSkip }: { card: LearnCa
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="w-full max-w-4xl"
+            className="w-full max-w-xl sm:max-w-2xl mx-auto"
         >
-            <div className="bg-background-card border border-border rounded-2xl p-8 mb-4">
-                <span className="text-xs font-medium text-foreground-muted uppercase tracking-wider">True or False</span>
+            <div className="bg-background-card border border-border rounded-2xl p-5 sm:p-8 mb-3 sm:mb-4">
+                <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wide">True or false</span>
 
-                <p className="text-lg text-foreground-muted mt-4 mb-2">Is this correct for: <span className="font-bold text-foreground">{card.term}</span></p>
+                <p className="text-sm text-foreground-secondary mt-4 mb-3 leading-relaxed">
+                    For <span className="font-semibold text-foreground">{card.term}</span>, is this statement correct?
+                </p>
 
-                <div className="bg-surface rounded-xl p-6 mb-6 border border-border">
-                    <p className="text-foreground text-lg">"{displayedDefinition}"</p>
+                <div className="bg-surface rounded-xl p-4 sm:p-6 mb-5 sm:mb-6 border border-border">
+                    <p className="text-foreground text-base sm:text-lg leading-relaxed">&ldquo;{displayedDefinition}&rdquo;</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     {[true, false].map((val) => {
                         const isCorrectChoice = val === isStatementTrue;
-                        let bgClass = 'bg-surface border-border hover:border-brand-primary/50';
+                        let bgClass = 'bg-surface border-border hover:border-brand-primary/40';
 
                         if (showResult) {
-                            if (isCorrectChoice) bgClass = 'bg-success/10 border-success/50';
-                            else if (selected === val) bgClass = 'bg-error/10 border-error/50';
+                            if (isCorrectChoice) bgClass = 'bg-success/10 border-success/55';
+                            else if (selected === val) bgClass = 'bg-error/10 border-error/55';
                         } else if (selected === val) {
                             bgClass = 'bg-brand-primary/10 border-brand-primary';
                         }
@@ -942,10 +945,10 @@ function TrueFalseQuestion({ card, allCards, onAnswer, onSkip }: { card: LearnCa
                             <button
                                 key={String(val)}
                                 onClick={() => handleSelect(val)}
-                                className={`p-6 rounded-2xl border-2 text-center font-black text-lg transition-all ${bgClass} text-foreground flex flex-col items-center gap-2`}
+                                className={`p-4 sm:p-5 rounded-xl border-2 text-center font-semibold text-base sm:text-lg transition-all ${bgClass} text-foreground flex flex-col items-center gap-1.5`}
                             >
-                                <span className="text-2xl">{val ? '✓' : '✗'}</span>
-                                <span className="text-[10px] uppercase tracking-widest">{val ? 'True' : 'False'}</span>
+                                <span className="text-xl sm:text-2xl" aria-hidden>{val ? '✓' : '✗'}</span>
+                                <span className="text-xs uppercase tracking-wide text-foreground-secondary">{val ? 'True' : 'False'}</span>
                             </button>
                         );
                     })}
@@ -953,11 +956,11 @@ function TrueFalseQuestion({ card, allCards, onAnswer, onSkip }: { card: LearnCa
             </div>
 
             {showResult && selected !== isStatementTrue && (
-                <div className="flex flex-col items-center mt-8 gap-4">
-                    <p className="text-sm font-medium text-foreground-muted animate-pulse">Click the correct answer or press any key to continue</p>
+                <div className="flex flex-col items-center mt-6 sm:mt-8 gap-3 text-center px-2">
+                    <p className="text-sm text-foreground-secondary">Tap the correct answer or press any key to continue.</p>
                     <button
                         onClick={() => onAnswer(false)}
-                        className="px-12 py-4 rounded-2xl bg-brand-primary text-black font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-brand-primary/20"
+                        className="w-full sm:w-auto px-8 py-3 rounded-xl bg-brand-primary text-black font-semibold hover:opacity-95 active:scale-[0.99] transition-all"
                     >
                         Continue
                     </button>
@@ -1238,73 +1241,58 @@ export function LearnMode({ cards, settings, onComplete, onExit }: LearnModeProp
         : learnQueue.length + mastered.length + skipped.length;
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-background relative overflow-hidden">
-            {/* Progress Bar Area */}
-            <div className="px-12 py-8 flex flex-col gap-6 bg-surface/5 border-b border-border/50">
-                <div className="flex items-center justify-between w-full max-w-5xl mx-auto px-2">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.2em] mb-1">Current Progress</span>
+        <div className="flex-1 flex flex-col min-h-0 h-full bg-background relative overflow-hidden">
+            {/* Progress */}
+            <div className="shrink-0 px-4 sm:px-8 lg:px-10 py-4 sm:py-6 flex flex-col gap-4 sm:gap-5 bg-surface/5 border-b border-border/50">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full max-w-3xl mx-auto">
+                    <div>
+                        <span className="text-xs font-semibold text-foreground-muted uppercase tracking-wide block mb-1">Progress</span>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-black text-foreground">{mastered.length}</span>
-                            <span className="text-sm font-bold text-foreground-muted">/ {totalCards} mastered</span>
+                            <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{mastered.length}</span>
+                            <span className="text-sm text-foreground-secondary">/ {totalCards} mastered</span>
                         </div>
                     </div>
-                    <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-black text-brand-primary uppercase tracking-[0.2em] mb-1">Session Accuracy</span>
-                        <span className="text-2xl font-black text-brand-primary">{stats.correctFirst > 0 ? Math.round((stats.correctFirst / stats.totalQuestions) * 100) : 100}%</span>
+                    <div className="sm:text-right">
+                        <span className="text-xs font-semibold text-brand-primary uppercase tracking-wide block mb-1">First-try accuracy</span>
+                        <span className="text-2xl sm:text-3xl font-bold text-brand-primary tabular-nums">
+                            {stats.correctFirst > 0 ? Math.round((stats.correctFirst / stats.totalQuestions) * 100) : stats.totalQuestions === 0 ? '—' : 100}%
+                        </span>
                     </div>
                 </div>
 
-                <div className="w-full max-w-5xl mx-auto h-8 bg-surface/30 rounded-full p-1.5 flex gap-1.5 relative overflow-visible shadow-inner">
-                    {/* Segmented Bar */}
-                    {[1, 2, 3, 4, 5, 6].map((idx) => {
-                        const segmentCapacity = 1 / 6;
-                        const progress = mastered.length / totalCards;
-                        const segmentProgress = Math.min(1, Math.max(0, (progress - (idx - 1) * segmentCapacity) / segmentCapacity));
-
-                        return (
-                            <div key={idx} className="flex-1 h-full bg-surface-active rounded-full relative overflow-hidden group">
-                                <motion.div
-                                    className="absolute inset-0 bg-brand-primary shadow-[0_0_15px_rgba(0,255,136,0.3)]"
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${segmentProgress * 100}%` }}
-                                    transition={{ duration: 0.8, ease: "circOut" }}
-                                />
-                                {idx < 6 && (
-                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-3 bg-background/20 z-10" />
-                                )}
-                            </div>
-                        );
-                    })}
-
-                    {/* Checkpoints */}
-                    <div className="absolute left-0 -top-1 h-10 w-10 rounded-full bg-surface border-4 border-surface-active flex items-center justify-center z-20 shadow-xl -translate-x-1/2">
-                        <span className="text-[10px] font-black text-foreground">0</span>
+                <div className="w-full max-w-3xl mx-auto">
+                    <div className="flex justify-between text-xs text-foreground-muted mb-1.5 px-0.5">
+                        <span>0</span>
+                        <span>{totalCards} cards</span>
                     </div>
-                    <div className="absolute right-0 -top-1 h-10 w-10 rounded-full bg-surface border-4 border-surface-active flex items-center justify-center z-20 shadow-xl translate-x-1/2">
-                        <span className="text-[10px] font-black text-foreground">{totalCards}</span>
+                    <div className="h-2.5 sm:h-3 bg-surface/40 rounded-full overflow-hidden border border-border/30">
+                        <motion.div
+                            className="h-full bg-brand-primary rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${totalCards > 0 ? Math.min(100, (mastered.length / totalCards) * 100) : 0}%` }}
+                            transition={{ duration: 0.45, ease: 'circOut' }}
+                        />
                     </div>
                 </div>
 
-                {/* Live Insight Row */}
-                <div className="flex items-center justify-center gap-8 w-full max-w-5xl mx-auto py-2">
+                <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-2 sm:gap-3 w-full max-w-3xl mx-auto pt-1">
                     {Object.keys(missedCardCounts).length > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-1.5 bg-error/5 border border-error/20 rounded-full animate-in fade-in slide-in-from-bottom-2">
-                            <span className="text-[9px] font-black text-error uppercase tracking-wider">Tricky Concept:</span>
-                            <span className="text-xs font-bold text-foreground">{Object.values(missedCardCounts).pop()}</span>
+                        <div className="flex items-center gap-2 px-3 py-2 bg-error/5 border border-error/20 rounded-xl text-left sm:text-center justify-center sm:justify-start">
+                            <span className="text-xs font-semibold text-error shrink-0">Needs work</span>
+                            <span className="text-sm text-foreground truncate">{Object.values(missedCardCounts).pop()}</span>
                         </div>
                     )}
                     {mastered.length > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-1.5 bg-success/5 border border-success/20 rounded-full animate-in fade-in slide-in-from-bottom-2">
-                            <span className="text-[9px] font-black text-success uppercase tracking-wider">Mastered:</span>
-                            <span className="text-xs font-bold text-foreground">{mastered[mastered.length - 1].term}</span>
+                        <div className="flex items-center gap-2 px-3 py-2 bg-success/5 border border-success/20 rounded-xl text-left sm:text-center justify-center sm:justify-start">
+                            <span className="text-xs font-semibold text-success shrink-0">Last mastered</span>
+                            <span className="text-sm text-foreground truncate">{mastered[mastered.length - 1].term}</span>
                         </div>
                     )}
                 </div>
             </div>
 
             {/* Content */}
-            <main className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
+            <main className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto min-h-0">
                 <AnimatePresence mode="wait">
                     {/* STUDY MODE */}
                     {goal === 'study' && currentCard && (

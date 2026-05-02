@@ -1,371 +1,233 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookOpen, FolderPlus, Sparkles, Flame, Sun, Moon, Bell, Mic, Layers, FileText, FileUp, ClipboardPaste } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { 
+    Upload, 
+    Mic, 
+    Layers, 
+    FileText, 
+    Podcast, 
+    FolderOpen,
+    Sparkles,
+    Flame,
+    Search,
+    Plus,
+    Moon,
+    Sun
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { FadeInUp } from '../components/ui/MotionWrapper';
-import { CreateModal } from '../components/CreateModal';
-import { CreateFolderModal } from '../components/CreateFolderModal';
-import { RecentDeckCard } from '../components/ui/RecentDeckCard';
-import { useDecks } from '../contexts/DecksContext';
+import { useAuth } from '../../lib/auth';
+import { db, type DeckRow } from '../../services/database';
 import { useTheme } from '../contexts/ThemeContext';
-import { useStudyProgress } from '../contexts/StudyProgressContext';
+import { useDecks } from '../contexts/DecksContext';
 
 export default function DashboardPage() {
     const navigate = useNavigate();
-    const {
-        createFolder,
-        getActiveDecks,
-        setActiveDeck
-    } = useDecks();
+    const { userName, userEmail } = useAuth();
     const { resolvedTheme, toggleTheme } = useTheme();
-    const { getStreak, getDeckStats } = useStudyProgress();
+    const { decks, decksLoading } = useDecks();
+    const [recentDecks, setRecentDecks] = useState<DeckRow[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
-    const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
-    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-    const [isStreakMenuOpen, setIsStreakMenuOpen] = useState(false);
+    const first = userName?.split(/\s+/)[0] || userEmail?.split('@')[0] || 'User';
 
-    // Mock username for now, in a real app this would come from a user context
-    const username = "Kortez";
-    const streak = getStreak();
+    useEffect(() => {
+        if (!decksLoading) {
+            setRecentDecks(decks.slice(0, 4));
+            setLoading(false);
+        }
+    }, [decks, decksLoading]);
 
-    // Get recent decks
-    const activeDecks = getActiveDecks();
-    // const totalCards = activeDecks.reduce((sum, deck) => sum + deck.cards.length, 0); // Unused for now
-
-    const recentDecks = activeDecks
-        .sort((a, b) => {
-            const dateA = new Date(a.lastStudied || a.createdAt).getTime();
-            const dateB = new Date(b.lastStudied || b.createdAt).getTime();
-            return dateB - dateA;
-        })
-        .slice(0, 4); // Increased to 4 to fit grid better on responsive
-
-    const handleDeckClick = (deckId: string) => {
-        setActiveDeck(deckId);
-        navigate(`/dashboard/decks/${deckId}`);
-    };
-
-    const formatLastStudied = (lastStudied?: string) => {
-        if (!lastStudied) return 'Never';
-        const date = new Date(lastStudied);
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const diffDays = Math.floor(diffHours / 24);
-
-        if (diffMins < 1) return 'Just now';
-        if (diffMins < 60) return `${diffMins}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
-        return date.toLocaleDateString();
-    };
+    const actionCards = [
+        {
+            title: 'Upload a file',
+            description: 'Get notes or flashcards to practice with.',
+            icon: Upload,
+            color: 'blue',
+            action: () => navigate('/dashboard/decks?tab=lectures')
+        },
+        {
+            title: 'Live Record Class',
+            description: 'Start recording and let Viszmo turn them into notes.',
+            icon: Mic,
+            color: 'red',
+            action: () => navigate('/dashboard/decks?tab=lectures')
+        },
+        {
+            title: 'Flashcards',
+            description: 'Access learn mode, podcasts, or a 1:1 voice tutor.',
+            icon: Layers,
+            color: 'amber',
+            action: () => navigate('/dashboard/decks')
+        },
+        {
+            title: 'Notes',
+            description: 'Access practice tests, podcasts, or a 1:1 voice tutor.',
+            icon: FileText,
+            color: 'indigo',
+            action: () => navigate('/dashboard/decks')
+        },
+        {
+            title: 'Podcast',
+            description: 'Upload a file to generate a podcast.',
+            icon: Podcast,
+            color: 'purple',
+            action: () => navigate('/dashboard/decks?tab=podcasts')
+        }
+    ];
 
     return (
-        <div className="p-8 max-w-7xl mx-auto min-h-screen h-screen overflow-hidden" onClick={() => {
-            setIsAddMenuOpen(false);
-            setIsNotificationOpen(false);
-            setIsStreakMenuOpen(false);
-        }}>
-            {/* Header Row */}
-            <div className="flex items-center justify-between mb-12">
-                <FadeInUp>
-                    <h1 className="text-3xl font-bold text-foreground-muted">
-                        Welcome, <span className="text-white font-black">{username}</span>
-                    </h1>
-                </FadeInUp>
+        <div className="w-full h-full overflow-y-auto bg-background">
+            {/* Header (Mirroring dashvis skeleton) */}
+            <header className="h-16 flex items-center px-6 shrink-0 relative gap-2 bg-surface border-b border-border sticky top-0 z-10">
+                <div className="flex-1 hidden md:block"></div>
 
-                {/* Mini Utility Container */}
-                <div className="flex items-center gap-2 p-1.5 bg-surface/50 backdrop-blur-md border border-border rounded-2xl shadow-sm relative z-20">
-                    {/* Theme Toggle */}
-                    <motion.button
-                        whileHover={{ backgroundColor: 'rgba(var(--brand-primary), 0.1)' }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={toggleTheme}
-                        className="w-10 h-10 flex items-center justify-center rounded-xl text-foreground-muted hover:text-foreground transition-colors"
-                        title="Toggle Theme"
+                {/* Centered Search Bar */}
+                <div className="flex-1 md:flex-none w-full max-w-xl md:absolute md:left-1/2 md:-translate-x-1/2">
+                    <div className="relative flex items-center w-full h-11 rounded-2xl bg-surface border border-border px-4 focus-within:border-brand-primary focus-within:shadow-sm transition-all">
+                        <Search size={18} className="text-foreground-secondary mr-2 shrink-0" />
+                        <input 
+                            type="text" 
+                            placeholder="Search for anything" 
+                            className="bg-transparent border-none outline-none text-sm text-foreground w-full placeholder:text-foreground-muted"
+                        />
+                    </div>
+                </div>
+                
+                {/* Header Actions */}
+                <div className="flex-1 flex justify-end items-center gap-3 shrink-0 ml-4 md:ml-0">
+                    <button 
+                        onClick={() => navigate('/dashboard/decks')}
+                        className="h-11 px-6 rounded-full bg-brand-primary text-white flex items-center gap-2 hover:bg-brand-primary/90 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-primary/20 font-bold text-sm shrink-0" 
                     >
-                        {resolvedTheme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                    </motion.button>
+                        <Plus size={18} />
+                        <span className="hidden sm:inline">Create</span>
+                    </button>
 
-                    <div className="w-px h-6 bg-border" />
-
-
-
-                    {/* Streak Counter */}
-                    <div className="relative">
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsStreakMenuOpen(!isStreakMenuOpen);
-                                setIsAddMenuOpen(false); // Close other menu
-                                setIsNotificationOpen(false);
-                            }}
-                            className={`h-10 px-3 flex items-center gap-2 rounded-xl bg-orange-500/10 text-orange-500 font-bold text-sm min-w-[3rem] justify-center hover:bg-orange-500/20 transition-colors ${isStreakMenuOpen ? 'ring-2 ring-orange-500/20' : ''}`}
-                            title="Streak"
-                        >
-                            <Flame className="w-4 h-4 fill-current" />
-                            <span>{streak}</span>
-                        </motion.button>
-
-                        <AnimatePresence>
-                            {isStreakMenuOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
-                                    animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-                                    exit={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
-                                    className="absolute top-full right-0 mt-3 w-80 bg-background-elevated/90 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl shadow-black/50 overflow-hidden z-50 ring-1 ring-white/5"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <div className="p-6 text-center relative overflow-hidden">
-                                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-orange-500/20 blur-3xl rounded-full pointer-events-none" />
-                                        <div className="relative z-10">
-                                            <div className="w-20 h-20 bg-gradient-to-br from-orange-400/20 to-orange-600/20 rounded-3xl flex items-center justify-center mx-auto mb-4 text-orange-500 shadow-inner ring-1 ring-white/10">
-                                                <Flame className="w-10 h-10 fill-current drop-shadow-lg" />
-                                            </div>
-                                            <h3 className="text-3xl font-black text-foreground mb-1 tracking-tight">{streak} Day Streak!</h3>
-                                            <p className="text-sm font-medium text-foreground-secondary">You're on fire! 🔥</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-5 border-t border-white/5 bg-white/2">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider">Daily Goal</span>
-                                            <span className="text-xs font-bold text-foreground">3/5 cards</span>
-                                        </div>
-                                        <div className="h-2.5 w-full bg-surface/50 rounded-full overflow-hidden border border-white/5">
-                                            <div className="h-full bg-gradient-to-r from-orange-500 to-red-500 w-[60%] rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
-                                        </div>
-                                        <p className="text-xs text-center text-foreground-muted mt-4 font-medium leading-relaxed">Study <span className="text-orange-500 font-bold">2 more cards</span> to keep your streak alive.</p>
-                                    </div>
-
-                                    <div className="p-3 border-t border-white/5 bg-black/20 backdrop-blur-md">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setIsStreakMenuOpen(false);
-                                                navigate('/dashboard/streak');
-                                            }}
-                                            className="w-full py-2.5 rounded-xl text-xs font-bold text-orange-500 hover:text-orange-400 hover:bg-orange-500/10 transition-all flex items-center justify-center gap-2 group"
-                                        >
-                                            View Full Calendar
-                                            <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                    <div className="h-11 px-4 rounded-full bg-surface-hover border border-border flex items-center gap-2 cursor-pointer hover:bg-surface-active hover:scale-105 active:scale-95 transition-all">
+                        <Flame size={18} className="text-orange-500 fill-orange-500" />
+                        <span className="text-base font-bold text-foreground">0</span>
                     </div>
 
-                    <div className="w-px h-6 bg-border" />
+                    <button 
+                        onClick={toggleTheme}
+                        className="h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center" 
+                    >
+                        {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+                </div>
+            </header>
 
-                    {/* Quick Add Button */}
-                    <div className="relative">
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsAddMenuOpen(!isAddMenuOpen);
-                                setIsNotificationOpen(false);
-                                setIsStreakMenuOpen(false);
-                            }}
-                            className="flex items-center justify-center w-10 h-10 bg-brand-primary text-white rounded-xl font-bold shadow-lg shadow-brand-primary/25 hover:bg-brand-primary/90 transition-all border border-white/10"
-                            title="Create New"
-                        >
-                            <Plus className={`w-5 h-5 transition-transform duration-300 ${isAddMenuOpen ? 'rotate-45' : ''}`} />
-                        </motion.button>
+            <div className="max-w-6xl mx-auto px-6 py-12 space-y-16">
+                {/* Welcome Section */}
+                <div>
+                    <h1 className="text-4xl font-bold text-foreground tracking-tight mb-2">
+                        Welcome, {first}
+                    </h1>
+                    <p className="text-foreground-secondary text-lg font-medium">
+                        What would you like to study today?
+                    </p>
+                </div>
 
-                        <AnimatePresence>
-                            {isAddMenuOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
-                                    animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-                                    exit={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
-                                    className="absolute top-full right-0 mt-3 w-56 bg-background-elevated border border-border rounded-2xl shadow-2xl overflow-hidden py-2"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <button
-                                        onClick={() => {
-                                            navigate('/dashboard/decks?tab=lectures');
-                                            setIsAddMenuOpen(false);
-                                        }}
-                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors"
-                                    >
-                                        <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500">
-                                            <Mic className="w-4 h-4" />
-                                        </div>
-                                        <span>Record Lecture</span>
-                                    </button>
-
-                                    <button
-                                        onClick={() => {
-                                            setIsCreateModalOpen(true);
-                                            setIsAddMenuOpen(false);
-                                        }}
-                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors"
-                                    >
-                                        <div className="w-8 h-8 rounded-lg bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-                                            <FileUp className="w-4 h-4" />
-                                        </div>
-                                        <span>Upload Content</span>
-                                    </button>
-
-                                    <button
-                                        onClick={() => {
-                                            setIsCreateModalOpen(true);
-                                            setIsAddMenuOpen(false);
-                                        }}
-                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors"
-                                    >
-                                        <div className="w-8 h-8 rounded-lg bg-brand-secondary/10 flex items-center justify-center text-brand-secondary">
-                                            <Sparkles className="w-4 h-4" />
-                                        </div>
-                                        <span>Paste Notes</span>
-                                    </button>
-
-                                    <div className="h-px bg-border my-1 mx-2" />
-
-                                    <button
-                                        onClick={() => {
-                                            setIsCreateModalOpen(true);
-                                            setIsAddMenuOpen(false);
-                                        }}
-                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-colors"
-                                    >
-                                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                                            <BookOpen className="w-4 h-4" />
-                                        </div>
-                                        <span>Write Manually</span>
-                                    </button>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                {/* Action Cards Row - Horizontal Scroll as in dashvis */}
+                <div>
+                    <div className="flex items-center justify-between mb-6 px-2">
+                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-foreground-muted">Quick Actions</h2>
                     </div>
+                    <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar -mx-2 px-2">
+                        {actionCards.map((card, idx) => (
+                            <div 
+                                key={idx}
+                                className="min-w-[280px] flex-1 bg-surface border border-border rounded-3xl p-6 flex flex-col justify-between hover:border-brand-primary/50 transition-all snap-start group shadow-sm hover:shadow-xl hover:shadow-brand-primary/5"
+                            >
+                                <div>
+                                    <div className={`w-14 h-14 rounded-2xl bg-${card.color}-500/10 flex items-center justify-center mb-6 border border-${card.color}-500/20 group-hover:scale-110 transition-transform`}>
+                                        <card.icon size={28} className={`text-${card.color}-500 ${card.color === 'amber' || card.color === 'indigo' ? 'fill-current/20' : ''}`} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-foreground mb-2">{card.title}</h3>
+                                    <p className="text-sm text-foreground-secondary leading-relaxed mb-8 font-medium">
+                                        {card.description}
+                                    </p>
+                                </div>
+                                <button 
+                                    onClick={card.action}
+                                    className="self-start px-6 py-2.5 rounded-full bg-surface-hover border border-border text-sm font-bold text-foreground hover:bg-foreground hover:text-background transition-all active:scale-95"
+                                >
+                                    Start
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Recent Items / Empty State */}
+                <div>
+                    <div className="flex items-center justify-between mb-8 px-2">
+                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-foreground-muted">Recent Materials</h2>
+                        {recentDecks.length > 0 && (
+                            <button onClick={() => navigate('/dashboard/decks')} className="text-xs font-bold text-brand-primary hover:underline">
+                                View All Library
+                            </button>
+                        )}
+                    </div>
+
+                    {loading || decksLoading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="h-32 rounded-3xl bg-surface-hover animate-pulse" />
+                            ))}
+                        </div>
+                    ) : recentDecks.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center text-center py-20 bg-surface/30 border border-dashed border-border rounded-[40px] px-6">
+                            <div className="relative mb-8 scale-110">
+                                <div className="w-20 h-24 bg-brand-primary rounded-2xl shadow-2xl rotate-[-10deg] absolute -left-6 -top-4 opacity-40 blur-[1px]"></div>
+                                <div className="w-20 h-24 bg-surface border border-border rounded-2xl shadow-2xl relative z-10 flex items-center justify-center">
+                                    <FolderOpen size={40} className="text-foreground-muted" />
+                                </div>
+                            </div>
+                            <h2 className="text-2xl font-bold text-foreground mb-3">Start creating or explore resources</h2>
+                            <p className="text-foreground-secondary max-w-sm font-medium">
+                                Recent files will appear here for quick access. Start by creating your first study deck!
+                            </p>
+                            <button 
+                                onClick={() => navigate('/dashboard/decks')}
+                                className="mt-8 px-8 py-3 bg-brand-primary text-white font-bold rounded-2xl shadow-lg shadow-brand-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                            >
+                                <Plus size={20} />
+                                Create New
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
+                            {recentDecks.map((deck) => (
+                                <button
+                                    key={deck.id}
+                                    onClick={() => navigate(`/dashboard/decks/${deck.id}`)}
+                                    className="group flex flex-col bg-surface border border-border rounded-3xl p-6 hover:border-brand-primary/50 transition-all text-left shadow-sm hover:shadow-lg"
+                                >
+                                    <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 flex items-center justify-center mb-4 text-brand-primary group-hover:scale-110 transition-transform">
+                                        <Layers size={24} />
+                                    </div>
+                                    <h3 className="font-bold text-foreground truncate group-hover:text-brand-primary transition-colors">
+                                        {deck.title}
+                                    </h3>
+                                    <p className="text-xs text-foreground-secondary font-bold mt-1 uppercase tracking-wider">
+                                        {deck.cardCount || 0} Cards
+                                    </p>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
-
-            {/* Recent Decks Section */}
-            {recentDecks.length > 0 && (
-                <FadeInUp delay={0.1} className="mb-12">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold text-foreground">Pick up where you left off</h2>
-                        <button
-                            onClick={() => navigate('/dashboard/decks')}
-                            className="text-sm font-medium text-brand-primary hover:text-brand-primary/80 transition-colors"
-                        >
-                            View All
-                        </button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {recentDecks.map((d, index) => {
-                            const stats = getDeckStats(
-                                d.id,
-                                d.cards.map((c) => c.id),
-                            );
-                            return (
-                                <RecentDeckCard
-                                    key={d.id}
-                                    deck={d}
-                                    stats={stats}
-                                    delay={(index) * 0.05}
-                                    handleDeckClick={handleDeckClick}
-                                    formatLastStudied={formatLastStudied}
-                                />
-                            );
-                        })}
-                    </div>
-                </FadeInUp>
-            )}
-
-            {/* Create Section */}
-            <FadeInUp delay={0.3} className="mb-12">
-                <h2 className="text-xl font-bold text-foreground mb-6">Create</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-
-                    {/* Upload Card */}
-                    <div
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="bg-surface border border-dashed border-brand-primary/50 relative overflow-hidden group hover:border-brand-primary transition-all cursor-pointer rounded-3xl p-5 h-full hover:bg-surface-hover"
-                    >
-                        <div className="absolute top-3 right-3 bg-brand-primary/20 text-brand-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" />
-                            Ultra
-                        </div>
-                        <div className="mb-4 p-3 bg-brand-primary/10 text-brand-primary rounded-2xl w-fit">
-                            <Sparkles className="w-6 h-6" />
-                        </div>
-                        <h3 className="font-bold text-foreground text-sm mb-1">
-                            Upload a PDF, PPT, Video, or Audio
-                        </h3>
-                        <p className="text-xs text-foreground-secondary leading-relaxed">
-                            Get flashcards or notes instantly.
-                        </p>
-                    </div>
-
-                    {/* Live Recording Card */}
-                    <div className="bg-surface border border-border relative overflow-hidden group hover:border-red-500/50 transition-all cursor-pointer rounded-3xl p-5 hover:bg-surface-hover h-full">
-                        <div className="absolute top-3 right-3 bg-red-500/20 text-red-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" />
-                            Ultra
-                        </div>
-                        <div className="mb-4 p-3 bg-red-500/10 text-red-500 rounded-2xl w-fit">
-                            <Mic className="w-6 h-6" />
-                        </div>
-                        <h3 className="font-bold text-foreground text-sm mb-1">
-                            Create from live recording
-                        </h3>
-                        <p className="text-xs text-foreground-secondary leading-relaxed">
-                            Start a live lecture recording now.
-                        </p>
-                    </div>
-
-                    {/* Manual Flashcards Card */}
-                    <div
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="bg-surface border border-border relative overflow-hidden group hover:border-orange-500/50 transition-all cursor-pointer rounded-3xl p-5 hover:bg-surface-hover h-full"
-                    >
-                        <div className="mb-4 p-3 bg-orange-500/10 text-orange-500 rounded-2xl w-fit">
-                            <Layers className="w-6 h-6" />
-                        </div>
-                        <h3 className="font-bold text-foreground text-sm mb-1">
-                            Create flashcards manually
-                        </h3>
-                        <p className="text-xs text-foreground-secondary leading-relaxed">
-                            Create flashcards without AI for free.
-                        </p>
-                    </div>
-
-                    {/* Manual Notes Card */}
-                    <div className="bg-surface border border-border relative overflow-hidden group hover:border-blue-500/50 transition-all cursor-pointer rounded-3xl p-5 hover:bg-surface-hover h-full">
-                        <div className="mb-4 p-3 bg-blue-500/10 text-blue-500 rounded-2xl w-fit">
-                            <FileText className="w-6 h-6" />
-                        </div>
-                        <h3 className="font-bold text-foreground text-sm mb-1">
-                            Create notes manually
-                        </h3>
-                        <p className="text-xs text-foreground-secondary leading-relaxed">
-                            Create notes without AI for free.
-                        </p>
-                    </div>
-
-                </div>
-            </FadeInUp>
-            {/* Modals */}
-            <CreateModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-            />
-            <CreateFolderModal
-                isOpen={isCreateFolderModalOpen}
-                onClose={() => setIsCreateFolderModalOpen(false)}
-                onCreate={(name, color) => createFolder(name, color)}
-            />
+            <style>{`
+                .hide-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .hide-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+            `}</style>
         </div>
     );
 }

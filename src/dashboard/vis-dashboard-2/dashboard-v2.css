@@ -1,9 +1,14 @@
-/* Vis Dashboard 2 — parallel design workspace (scoped, does not replace v1) */
-/* Tokens mirror v1 so shared Tailwind utilities resolve correctly inside this root. */
+/* Vis Dashboard 2 — independent design system (scoped; v1 dashboard unchanged) */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap');
+
+/* Optional shell accents for the v2 app (independent of v1 sidebar) */
+#viszmo-dashboard-v2-root .vd2-app {
+  min-height: 100vh;
+}
 
 #viszmo-dashboard-v2-root {
+  /* Brand + surfaces: aligned with standalone dashvis `index.css` :root / .dark */
   --color-brand-primary: #0ea5e9;
   --color-brand-primary-hover: #0284c7;
   --color-brand-primary-light: #e0f2fe;
@@ -11,18 +16,18 @@
   --color-brand-secondary-hover: #4f46e5;
   --color-brand-accent: #8b5cf6;
 
-  --color-background: #f8fafc;
+  --color-background: #ffffff;
   --color-background-card: #ffffff;
-  --color-background-card-alt: #fdfbf7;
+  --color-background-card-alt: #f8fafc;
   --color-background-elevated: #ffffff;
   --color-background-glass: rgba(255, 255, 255, 0.8);
 
-  --color-surface: #ffffff;
+  --color-surface: #f8fafc;
   --color-surface-hover: #f1f5f9;
   --color-surface-active: #e2e8f0;
 
   --color-foreground: #0f172a;
-  --color-foreground-secondary: #64748b;
+  --color-foreground-secondary: #475569;
   --color-foreground-muted: #94a3b8;
   --color-foreground-inverse: #ffffff;
 
@@ -55,8 +60,9 @@
 
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 72px;
+  --vd2-rail-width: 4.5rem;
 
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   background-color: var(--color-background);
   color: var(--color-foreground);
   min-height: 100vh;
@@ -70,20 +76,20 @@
   --color-brand-secondary-hover: #6366f1;
   --color-brand-accent: #a78bfa;
 
-  --color-background: #0c0c0d;
-  --color-background-card: #111112;
-  --color-background-card-alt: #161618;
-  --color-background-elevated: #1a1a1c;
+  --color-background: #0f0f11;
+  --color-background-card: #18181b;
+  --color-background-card-alt: #18181b;
+  --color-background-elevated: #27272a;
   --color-background-glass: rgba(12, 12, 13, 0.8);
 
-  --color-surface: #111112;
-  --color-surface-hover: #1a1a1c;
-  --color-surface-active: #242426;
+  --color-surface: #18181b;
+  --color-surface-hover: #27272a;
+  --color-surface-active: #3f3f46;
 
-  --color-foreground: #ededed;
+  --color-foreground: #fafafa;
   --color-foreground-secondary: #a1a1aa;
   --color-foreground-muted: #71717a;
-  --color-foreground-inverse: #0c0c0d;
+  --color-foreground-inverse: #0f0f11;
 
   --color-border: #27272a;
   --color-border-light: #18181b;
@@ -129,9 +135,10 @@
 #viszmo-dashboard-v2-root h4,
 #viszmo-dashboard-v2-root h5,
 #viszmo-dashboard-v2-root h6 {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Outfit', 'Inter', sans-serif;
   font-weight: 700;
   color: var(--color-foreground);
+  letter-spacing: -0.02em;
 }
 
 #viszmo-dashboard-v2-root *:focus-visible {
@@ -242,6 +249,15 @@
   position: relative;
 }
 
+/* When main is a flex child under .vd2-app, fill remaining height instead of 100vh */
+#viszmo-dashboard-v2-root .vd2-app .vd2-main--fill {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Subtle grid like the marketing site */
 #viszmo-dashboard-v2-root .vd2-main-bg {
   position: absolute;
@@ -309,4 +325,297 @@
 #viszmo-dashboard-v2-root .vd2-icon-btn:hover {
   background: var(--color-surface-hover);
   color: var(--color-foreground);
+}
+
+/* New shell: fixed icon rail + main canvas */
+#viszmo-dashboard-v2-root .vd2-rail {
+  width: var(--vd2-rail-width);
+  flex-shrink: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0;
+  gap: 0.5rem;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-background-card);
+  box-shadow: var(--shadow-sm);
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+
+@media (min-width: 768px) {
+  #viszmo-dashboard-v2-root .vd2-rail {
+    display: flex;
+  }
+}
+
+#viszmo-dashboard-v2-root.dark .vd2-rail {
+  background: var(--color-background-card);
+  border-right-color: var(--color-border);
+}
+
+#viszmo-dashboard-v2-root .vd2-rail-mark {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: -0.04em;
+  color: var(--color-foreground-inverse);
+  background: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-brand-secondary) 100%);
+  box-shadow: var(--shadow-primary);
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+}
+
+#viszmo-dashboard-v2-root .vd2-rail-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding-top: 0.25rem;
+}
+
+#viszmo-dashboard-v2-root .vd2-rail-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  color: var(--color-foreground-secondary);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+
+#viszmo-dashboard-v2-root .vd2-rail-link:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-foreground);
+}
+
+#viszmo-dashboard-v2-root .vd2-rail-link-active {
+  background: color-mix(in srgb, var(--color-brand-primary) 14%, transparent);
+  color: var(--color-brand-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-brand-primary) 28%, transparent);
+}
+
+#viszmo-dashboard-v2-root .vd2-rail-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+  width: calc(100% - 0.5rem);
+  margin: 0 auto;
+}
+
+@keyframes vd2-mtabs-rise {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile tab bar (hidden on md+ where rail is visible) */
+#viszmo-dashboard-v2-root .vd2-mtabs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.5rem 0.5rem env(safe-area-inset-bottom, 0.5rem);
+  border-top: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-background-card) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: vd2-mtabs-rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (min-width: 768px) {
+  #viszmo-dashboard-v2-root .vd2-mtabs {
+    display: none;
+  }
+}
+
+#viszmo-dashboard-v2-root .vd2-mtab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-width: 3.5rem;
+  padding: 0.35rem 0.25rem;
+  border-radius: 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-foreground-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+#viszmo-dashboard-v2-root .vd2-mtab:hover {
+  color: var(--color-foreground);
+  background: var(--color-surface-hover);
+}
+
+#viszmo-dashboard-v2-root .vd2-mtab-active {
+  color: var(--color-brand-primary);
+  background: color-mix(in srgb, var(--color-brand-primary) 10%, transparent);
+}
+
+#viszmo-dashboard-v2-root .vd2-mob-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3.25rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-background) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@media (min-width: 768px) {
+  #viszmo-dashboard-v2-root .vd2-mob-header {
+    display: none;
+  }
+}
+
+#viszmo-dashboard-v2-root .vd2-bento {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  #viszmo-dashboard-v2-root .vd2-bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+#viszmo-dashboard-v2-root .vd2-bento-hero {
+  grid-column: 1 / -1;
+  border-radius: 1.25rem;
+  padding: 1.5rem clamp(1.25rem, 4vw, 2.5rem);
+  background: linear-gradient(
+    125deg,
+    color-mix(in srgb, var(--color-brand-primary) 20%, var(--color-background-card)) 0%,
+    var(--color-background-card) 50%,
+    color-mix(in srgb, var(--color-brand-secondary) 12%, var(--color-background-card)) 100%
+  );
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+#viszmo-dashboard-v2-root.dark .vd2-bento-hero {
+  background: linear-gradient(
+    125deg,
+    color-mix(in srgb, var(--color-brand-primary) 16%, #18181b) 0%,
+    #111112 50%,
+    color-mix(in srgb, var(--color-brand-secondary) 10%, #111112) 100%
+  );
+}
+
+#viszmo-dashboard-v2-root .vd2-tile {
+  border-radius: 1rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-background-card);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  font: inherit;
+}
+
+#viszmo-dashboard-v2-root .vd2-tile:hover {
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--color-brand-primary) 30%, var(--color-border));
+  transform: translateY(-1px);
+}
+
+/* Slide-in motion (account menus, page content, mobile nav) */
+@keyframes vd2-slide-in-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes vd2-slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes vd2-outlet-slide {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+#viszmo-dashboard-v2-root .vd2-popover-panel {
+  box-shadow: var(--shadow-lg), 0 0 0 1px color-mix(in srgb, var(--color-brand-primary) 12%, transparent);
+}
+
+#viszmo-dashboard-v2-root .vd2-popover-panel--rail {
+  animation: vd2-slide-in-from-left 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#viszmo-dashboard-v2-root .vd2-popover-panel--mobile {
+  animation: vd2-slide-in-from-top 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#viszmo-dashboard-v2-root .vd2-popover-panel-accent {
+  border-top: 3px solid var(--color-brand-primary);
+  border-radius: 0.75rem;
+}
+
+#viszmo-dashboard-v2-root .vd2-outlet-slide {
+  animation: vd2-outlet-slide 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #viszmo-dashboard-v2-root .vd2-popover-panel--rail,
+  #viszmo-dashboard-v2-root .vd2-popover-panel--mobile,
+  #viszmo-dashboard-v2-root .vd2-outlet-slide,
+  #viszmo-dashboard-v2-root .vd2-mtabs {
+    animation: none !important;
+  }
 }

@@ -7,7 +7,7 @@ interface RenameDeckModalProps {
     onClose: () => void;
     currentName: string;
     onRename: (newName: string) => void;
-    type: 'deck' | 'folder';
+    type: 'deck' | 'workspace';
 }
 
 export function RenameDeckModal({ isOpen, onClose, currentName, onRename, type }: RenameDeckModalProps) {
@@ -64,7 +64,7 @@ export function RenameDeckModal({ isOpen, onClose, currentName, onRename, type }
                                     <PenLine className="w-5 h-5 text-brand-primary" />
                                 </div>
                                 <h2 className="text-xl font-bold text-foreground">
-                                    Rename {type === 'deck' ? 'Deck' : 'Folder'}
+                                    Rename {type === 'deck' ? 'Deck' : 'Workspace'}
                                 </h2>
                             </div>
                             <button
@@ -78,7 +78,7 @@ export function RenameDeckModal({ isOpen, onClose, currentName, onRename, type }
                         {/* Body */}
                         <form onSubmit={handleSubmit} className="p-6">
                             <label className="block text-sm font-bold text-foreground-secondary mb-2">
-                                {type === 'deck' ? 'Deck' : 'Folder'} Name
+                                {type === 'deck' ? 'Deck' : 'Workspace'} Name
                             </label>
                             <input
                                 ref={inputRef}

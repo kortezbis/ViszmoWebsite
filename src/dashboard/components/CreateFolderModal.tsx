@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface CreateFolderModalProps {
+interface CreateWorkspaceModalProps {
     isOpen: boolean;
     onClose: () => void;
     onCreate: (name: string, color: string) => void;
@@ -19,7 +19,7 @@ const COLORS = [
     { name: 'Slate', class: 'bg-slate-500' },
 ];
 
-export function CreateFolderModal({ isOpen, onClose, onCreate }: CreateFolderModalProps) {
+export function CreateWorkspaceModal({ isOpen, onClose, onCreate }: CreateWorkspaceModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
     const [name, setName] = useState('');
     const [selectedColor, setSelectedColor] = useState(COLORS[0].class);
@@ -67,7 +67,7 @@ export function CreateFolderModal({ isOpen, onClose, onCreate }: CreateFolderMod
                         className="w-full max-w-md bg-white dark:bg-[#18181b] rounded-2xl border border-black/5 dark:border-white/10 shadow-xl overflow-hidden relative z-10 p-6"
                     >
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">New Folder</h2>
+                            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">New Workspace</h2>
                             <button
                                 onClick={onClose}
                                 className="p-2 -mr-2 rounded-full hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 transition-colors"
@@ -82,7 +82,7 @@ export function CreateFolderModal({ isOpen, onClose, onCreate }: CreateFolderMod
                                 <input
                                     autoFocus
                                     type="text"
-                                    placeholder="Folder Name"
+                                    placeholder="Workspace Name"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all text-sm"
@@ -119,7 +119,7 @@ export function CreateFolderModal({ isOpen, onClose, onCreate }: CreateFolderMod
                                     disabled={!name.trim()}
                                     className="px-6 py-2 bg-brand-primary text-white text-sm font-bold rounded-xl shadow-sm hover:bg-brand-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    Create Folder
+                                    Create Workspace
                                 </button>
                             </div>
                         </form>

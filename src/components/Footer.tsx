@@ -54,7 +54,7 @@ export const Footer = ({ onOpenModal = () => { } }: FooterProps) => {
                         <div className="flex flex-col gap-4">
                             <h4 className="font-semibold text-slate-900">Platform</h4>
                             <ul className="flex flex-col gap-3 text-sm text-slate-500">
-                                <li><span className="text-slate-400 cursor-not-allowed">Download Mobile App</span></li>
+                                <li><button onClick={onOpenModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Mobile App</button></li>
                                 <li><span className="text-slate-400 cursor-not-allowed">Download Windows</span></li>
                                 <li>
                                     <span className="text-slate-400 cursor-not-allowed flex items-center gap-2">

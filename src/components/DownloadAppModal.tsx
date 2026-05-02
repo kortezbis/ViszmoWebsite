@@ -42,25 +42,14 @@ export const DownloadAppModal = ({ isOpen, onClose }: DownloadAppModalProps) => 
                             <p className="text-slate-500 font-medium">Available on the App Store</p>
                         </div>
 
-                        {/* QR Code Placeholder */}
-                        <div className="relative mb-8 p-6 bg-slate-50 rounded-3xl border border-slate-100 group transition-all">
-                            {/* Placeholder QR Design */}
-                            <div className="w-48 h-48 relative flex items-center justify-center">
-                                {/* Using an external API for a real-looking QR placeholder */}
+                        {/* QR Code */}
+                        <div className="relative mb-8 group transition-all">
+                            <div className="w-56 h-56 relative flex items-center justify-center">
                                 <img 
-                                    src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://viszmo.com" 
-                                    alt="QR Code" 
+                                    src="/viszmo-QRcode.jpg" 
+                                    alt="Viszmo QR Code" 
                                     className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-opacity"
                                 />
-                                
-                                {/* Center Icon Placeholder (Star like in image) */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center">
-                                        <svg viewBox="0 0 24 24" className="w-7 h-7 text-amber-400 fill-current">
-                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                        </svg>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 

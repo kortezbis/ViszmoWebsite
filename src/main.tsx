@@ -6,6 +6,8 @@ import App from './App.tsx'
 import { ProfileProvider } from './contexts/ProfileContext'
 import { AuthProvider } from './lib/auth'
 
+import { AuthModalProvider } from './contexts/AuthModalContext'
+
 // Ensure root element exists
 const rootElement = document.getElementById('root')
 if (!rootElement) {
@@ -13,7 +15,7 @@ if (!rootElement) {
 }
 
 // Set background immediately
-document.body.style.backgroundColor = '#050505'
+document.body.style.backgroundColor = '#ffffff'
 document.body.style.margin = '0'
 document.body.style.padding = '0'
 
@@ -21,7 +23,9 @@ createRoot(rootElement).render(
   <StrictMode>
     <AuthProvider>
       <ProfileProvider>
-        <App />
+        <AuthModalProvider>
+          <App />
+        </AuthModalProvider>
       </ProfileProvider>
     </AuthProvider>
   </StrictMode>,

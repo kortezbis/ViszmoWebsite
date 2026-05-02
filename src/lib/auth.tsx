@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './supabase';
 import type { Session, User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
+import { useAuthModal } from '../contexts/AuthModalContext';
 
 interface AuthContextType {
     session: Session | null;
@@ -89,11 +90,22 @@ export function SignedOut({ children }: { children: ReactNode }) {
     return !isSignedIn ? <>{children}</> : null;
 }
 
+
 export function RedirectToSignIn({ afterSignInUrl = '/dashboard' }: { afterSignInUrl?: string }) {
+    const { openAuthModal } = useAuthModal();
     const navigate = useNavigate();
+    
     useEffect(() => {
-        navigate(`/login?redirect=${encodeURIComponent(afterSignInUrl)}`, { replace: true });
-    }, [afterSignInUrl, navigate]);
+        // Open modal and optionally stay on the current page or go home if we were trying to hit a deep link
+        openAuthModal('login');
+        // If we are at root or a public page, stay there. 
+        // If we were trying to hit a protected page directly, we might want to navigate to home first 
+        // so there is a background under the modal.
+        if (window.location.pathname !== '/') {
+            navigate('/', { replace: true });
+        }
+    }, [openAuthModal, navigate]);
+    
     return null;
 }
 

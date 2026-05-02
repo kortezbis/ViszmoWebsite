@@ -183,12 +183,12 @@ export const HowItWorksPage = ({ onOpenDownload }: { onOpenDownload?: () => void
                         </p>
                         <div className="flex flex-col items-center gap-6 pt-4">
                             <div className="flex flex-col sm:flex-row items-center gap-4">
-                                <div className="btn-wrapper opacity-80 cursor-default">
+                                <div className="btn-wrapper">
                                     <button
-                                        className="btn cursor-default"
-                                        disabled
+                                        className="btn"
+                                        onClick={() => navigate('/dashboard')}
                                     >
-                                        <span className="btn-text">Coming Soon</span>
+                                        <span className="btn-text">Get Started</span>
                                     </button>
                                 </div>
                                 <div className="explore-btn-wrap" onClick={() => navigate('/pricing')}>

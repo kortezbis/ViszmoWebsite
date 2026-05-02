@@ -24,13 +24,8 @@ import StreakPage from './pages/StreakPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 /**
- * Viszmo Dashboard Sub-Application
- *
- * Mounted at /dashboard/* in the root App.tsx router.
- *
- * All styles are scoped to #viszmo-dashboard-root — nothing leaks
- * to the landing page. Dark mode is also scoped to this wrapper div,
- * not document.documentElement.
+ * Classic Viszmo dashboard: Layout + React Router. Mounted at /dashboard/*
+ * Build the dashvis-based experience at /dashboard-v2 (see VisDashboard2App).
  */
 export default function DashboardApp() {
     return (
@@ -39,41 +34,34 @@ export default function DashboardApp() {
                 <ThemeProvider defaultTheme="system">
                     <SettingsProvider>
                         <StudyProgressProvider>
-                                <DecksProvider>
-                                    <SidebarProvider>
-                                        <Layout>
-                                            <Routes>
-                                                {/* Dashboard home */}
-                                                <Route index element={<DashboardPage />} />
-
-                                                {/* Study modes */}
-                                                <Route path="flashcards" element={<GamePage initialModeName="Flashcards" />} />
-                                                <Route path="learn" element={<GamePage initialModeName="Learn" />} />
-                                                <Route path="quiz" element={<GamePage initialModeName="Rapid Fire" />} />
-                                                <Route path="match" element={<GamePage initialModeName="Matching" />} />
-                                                <Route path="written" element={<GamePage initialModeName="Written" />} />
-                                                <Route path="speaking" element={<GamePage initialModeName="Speaking Drill" />} />
-                                                <Route path="test" element={<GamePage initialModeName="Practice Test" />} />
-
-                                                {/* Content */}
-                                                <Route path="canvas" element={<CanvasPage />} />
-                                                <Route path="transcripts/:transcriptId" element={<TranscriptDetailPage />} />
-                                                <Route path="transcripts" element={<TranscriptPage />} />
-                                                <Route path="decks/:deckId" element={<DeckDetailPage />} />
-                                                <Route path="workspaces/:workspaceId" element={<WorkspaceDetailPage />} />
-                                                <Route path="decks" element={<MyDecksPage />} />
-                                                <Route path="edit-deck" element={<EditDeckPage />} />
-                                                <Route path="edit-deck/:deckId" element={<EditDeckPage />} />
-
-                                                {/* Utilities */}
-                                                <Route path="chat" element={<ChatPage />} />
-                                                <Route path="summarizers" element={<SummarizersPage />} />
-                                                <Route path="notifications" element={<NotificationsPage />} />
-                                                <Route path="streak" element={<StreakPage />} />
-                                            </Routes>
-                                        </Layout>
-                                    </SidebarProvider>
-                                </DecksProvider>
+                            <DecksProvider>
+                                <SidebarProvider>
+                                    <Layout>
+                                        <Routes>
+                                            <Route index element={<DashboardPage />} />
+                                            <Route path="flashcards" element={<GamePage initialModeName="Flashcards" />} />
+                                            <Route path="learn" element={<GamePage initialModeName="Learn" />} />
+                                            <Route path="quiz" element={<GamePage initialModeName="Rapid Fire" />} />
+                                            <Route path="match" element={<GamePage initialModeName="Matching" />} />
+                                            <Route path="written" element={<GamePage initialModeName="Written" />} />
+                                            <Route path="speaking" element={<GamePage initialModeName="Speaking Drill" />} />
+                                            <Route path="test" element={<GamePage initialModeName="Practice Test" />} />
+                                            <Route path="canvas" element={<CanvasPage />} />
+                                            <Route path="transcripts/:transcriptId" element={<TranscriptDetailPage />} />
+                                            <Route path="transcripts" element={<TranscriptPage />} />
+                                            <Route path="decks/:deckId" element={<DeckDetailPage />} />
+                                            <Route path="workspaces/:workspaceId" element={<WorkspaceDetailPage />} />
+                                            <Route path="decks" element={<MyDecksPage />} />
+                                            <Route path="edit-deck" element={<EditDeckPage />} />
+                                            <Route path="edit-deck/:deckId" element={<EditDeckPage />} />
+                                            <Route path="chat" element={<ChatPage />} />
+                                            <Route path="summarizers" element={<SummarizersPage />} />
+                                            <Route path="notifications" element={<NotificationsPage />} />
+                                            <Route path="streak" element={<StreakPage />} />
+                                        </Routes>
+                                    </Layout>
+                                </SidebarProvider>
+                            </DecksProvider>
                         </StudyProgressProvider>
                     </SettingsProvider>
                 </ThemeProvider>

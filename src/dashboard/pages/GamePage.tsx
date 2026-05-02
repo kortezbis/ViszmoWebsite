@@ -129,8 +129,9 @@ export default function GamePage({ initialModeName }: GamePageProps) {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const deckIdFromUrl = searchParams.get('deckId');
+    const workspaceIdFromUrl = searchParams.get('workspaceId');
     const { setHideSidebar } = useSidebar();
-    const { decks, setActiveDeck, activeDeck } = useDecks();
+    const { decks, workspaces, setActiveDeck, activeDeck } = useDecks();
     const { getDueCards, getNewCards, getDeckStats } = useStudyProgress();
     const { resolvedTheme } = useTheme();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -147,11 +148,38 @@ export default function GamePage({ initialModeName }: GamePageProps) {
     useEffect(() => {
         if (deckIdFromUrl) {
             setActiveDeck(deckIdFromUrl);
+        } else if (workspaceIdFromUrl) {
+            setActiveDeck(null); // Clear active deck so we use synthetic workspace deck
         }
-    }, [deckIdFromUrl, setActiveDeck]);
+    }, [deckIdFromUrl, workspaceIdFromUrl, setActiveDeck]);
 
-    // Use activeDeck or empty fallback
-    const deck = activeDeck || { id: 'none', title: 'No Deck Selected', cards: [], color: 'bg-gray-500' };
+    // Create a synthetic deck if workspaceId is provided
+    const workspaceDeck = useMemo(() => {
+        if (!workspaceIdFromUrl) return null;
+        const workspace = workspaces.find(w => w.id === workspaceIdFromUrl);
+        if (!workspace) return null;
+        
+        // Find all decks in this workspace and its sub-workspaces
+        const getWorkspaceDecks = (wsId: string): typeof decks => {
+            const directDecks = decks.filter(d => d.workspaceId === wsId && !d.isDeleted);
+            const subWs = workspaces.filter(w => w.parentId === wsId);
+            return directDecks.concat(subWs.flatMap(w => getWorkspaceDecks(w.id)));
+        };
+        
+        const allDecks = getWorkspaceDecks(workspaceIdFromUrl);
+        const allCards = allDecks.flatMap(d => d.cards || []);
+        
+        return {
+            id: `workspace-${workspaceIdFromUrl}`,
+            title: `Study All: ${workspace.name}`,
+            cards: allCards,
+            color: workspace.color || '#3B82F6',
+            workspaceId: workspaceIdFromUrl
+        } as any;
+    }, [workspaceIdFromUrl, workspaces, decks]);
+
+    // Use activeDeck, workspaceDeck, or fallback
+    const deck = workspaceDeck || activeDeck || { id: 'none', title: 'No Deck Selected', cards: [], color: 'bg-gray-500' };
 
     useEffect(() => {
         setHideSidebar(isGameStarted);
@@ -489,7 +517,7 @@ export default function GamePage({ initialModeName }: GamePageProps) {
 
             {/* Main Content */}
             {isGameStarted || currentMode.name === 'Flashcards' ? (
-                <main className={`flex-1 w-full bg-background relative flex flex-col min-h-0 ${['Matching', 'Gravity', 'Canvas'].includes(currentMode.name) ? 'overflow-hidden' : 'overflow-y-auto'} ${!['Flashcards', 'Matching', 'Practice Test', 'Speaking Drill', 'Canvas'].includes(currentMode.name) ? 'items-center justify-center' : ''}`}>
+                <main className={`flex-1 w-full bg-background relative flex flex-col min-h-0 ${['Matching', 'Gravity', 'Canvas'].includes(currentMode.name) ? 'overflow-hidden' : 'overflow-y-auto'} ${!['Flashcards', 'Learn', 'Matching', 'Practice Test', 'Speaking Drill', 'Canvas'].includes(currentMode.name) ? 'items-center justify-center' : ''}`}>
                     {renderGame()}
                 </main>
             ) : (
