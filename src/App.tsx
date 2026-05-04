@@ -38,6 +38,7 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { ContactUsPage } from './pages/ContactUsPage';
 import { HelpCenterPage } from './pages/HelpCenterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { DesktopAuthSuccessPage } from './pages/DesktopAuthSuccessPage';
 
 
 // List of school logo filenames
@@ -547,6 +548,112 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                 </svg>
               </a>
             </motion.div>
+
+            {/* Card 3: Live Lecture Listener */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="group bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-200/60 hover:border-slate-300/80 hover:shadow-xl transition-all duration-300"
+            >
+              {/* Audio Visualization */}
+              <div className="w-full min-h-[224px] bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl mb-6 relative overflow-hidden flex flex-col items-center justify-center p-8 transition-all duration-300 group-hover:scale-[1.02]">
+                {/* Live Badge */}
+                <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full border border-blue-100 shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Live Listening</span>
+                </div>
+
+                <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-blue-200 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                </div>
+
+                <div className="flex gap-1 items-center h-4">
+                  {[0.5, 0.8, 0.4, 0.9, 0.6, 0.3, 0.7].map((h, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1 bg-blue-400 rounded-full"
+                      animate={{ height: [`${h * 100}%`, `${(h * 0.4 + 0.1) * 100}%`, `${h * 100}%`] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.1 }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                Live Lecture Listener
+              </h3>
+
+              <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                Let Viszmo attend your lectures. Whether via the sidekick or your browser, it captures live audio from Zoom, YouTube, or class to generate perfect, real-time notes.
+              </p>
+
+              <a
+                href="#"
+                className="inline-flex items-center gap-2 text-[#0ea5e9] font-semibold text-sm group-hover:gap-3 transition-all duration-300"
+              >
+                Learn more
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </motion.div>
+
+            {/* Card 4: AI Podcast Creator */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="group bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-200/60 hover:border-slate-300/80 hover:shadow-xl transition-all duration-300"
+            >
+              {/* Podcast Visualization */}
+              <div className="w-full min-h-[224px] bg-gradient-to-br from-rose-50 to-orange-50 rounded-xl mb-6 flex flex-col items-center justify-center p-8 transition-all duration-300 group-hover:scale-[1.02]">
+                <div className="flex items-end gap-1.5 h-16 mb-6">
+                  {[0.4, 0.7, 0.5, 0.9, 0.6, 1.0, 0.8, 0.5, 0.7, 0.4].map((height, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-2 bg-rose-500 rounded-full"
+                      animate={{ height: [`${height * 100}%`, `${(height * 0.5 + 0.2) * 100}%`, `${height * 100}%`] }}
+                      transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.1, ease: "easeInOut" }}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center gap-4 px-4 py-2 bg-white rounded-full shadow-sm border border-rose-100">
+                  <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Generating Audio...</span>
+                    <span className="text-xs font-bold text-slate-700">Physics 101 - Week 4 Summary</span>
+                  </div>
+                </div>
+              </div>
+
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
+                AI Podcast Creator
+              </h3>
+
+              <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                Turn your study notes into engaging, high-quality audio podcasts. Learn on the go by listening to personalized audio guides generated instantly from your materials.
+              </p>
+
+              <a
+                href="#"
+                className="inline-flex items-center gap-2 text-[#0ea5e9] font-semibold text-sm group-hover:gap-3 transition-all duration-300"
+              >
+                Learn more
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </motion.div>
+
           </div>
         </div>
       </section>
@@ -674,7 +781,7 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
   const { showSurvey, setShowSurvey } = useProfile();
   const { openAuthModal } = useAuthModal();
 
-  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup'];
+  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup', '/desktop-success'];
   const isPublicPath = publicPaths.includes(location.pathname) || location.pathname.startsWith('/login') || location.pathname.startsWith('/signup');
 
   const routes = (
@@ -685,6 +792,7 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
         <Route path="/pricing" element={<PricingPage onOpenDownload={onOpenDownload} />} />
         <Route path="/how-it-works" element={<HowItWorksPage onOpenDownload={onOpenDownload} />} />
         <Route path="/study-overlay" element={<StudyOverlayPage />} />
+        <Route path="/desktop-success" element={<DesktopAuthSuccessPage />} />
 
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />

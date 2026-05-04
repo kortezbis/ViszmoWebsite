@@ -176,11 +176,7 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenAuth = () => { } }: Navb
 
 
                                 <div className="flex flex-col gap-3 mt-4">
-                                    {isSignedIn ? (
-                                        <div className="w-full py-4 text-center text-sm font-bold text-slate-400 bg-slate-50 rounded-2xl border border-slate-100 cursor-not-allowed">
-                                            Dashboard (Soon)
-                                        </div>
-                                    ) : (
+                                    {!isSignedIn && (
                                         <button
                                             onClick={() => {
                                                 onOpenAuth('login');
