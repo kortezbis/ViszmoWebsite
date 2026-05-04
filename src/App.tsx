@@ -38,7 +38,6 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { ContactUsPage } from './pages/ContactUsPage';
 import { HelpCenterPage } from './pages/HelpCenterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { DesktopAuthSuccessPage } from './pages/DesktopAuthSuccessPage';
 
 
 // List of school logo filenames
@@ -781,7 +780,7 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
   const { showSurvey, setShowSurvey } = useProfile();
   const { openAuthModal } = useAuthModal();
 
-  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup', '/desktop-success'];
+  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup'];
   const isPublicPath = publicPaths.includes(location.pathname) || location.pathname.startsWith('/login') || location.pathname.startsWith('/signup');
 
   const routes = (
@@ -792,7 +791,6 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
         <Route path="/pricing" element={<PricingPage onOpenDownload={onOpenDownload} />} />
         <Route path="/how-it-works" element={<HowItWorksPage onOpenDownload={onOpenDownload} />} />
         <Route path="/study-overlay" element={<StudyOverlayPage />} />
-        <Route path="/desktop-success" element={<DesktopAuthSuccessPage />} />
 
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
