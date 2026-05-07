@@ -8,7 +8,10 @@ type BillingCycle = 'monthly' | 'annual';
 
 const AnimatedPrice = ({ value }: { value: number }) => {
     const count = useMotionValue(value);
-    const rounded = useTransform(count, (latest) => latest.toFixed(2));
+    const rounded = useTransform(count, (latest) => {
+        const val = Number(latest.toFixed(2));
+        return val % 1 === 0 ? val.toString() : val.toFixed(2);
+    });
 
     useEffect(() => {
         const controls = animate(count, value, { duration: 0.5, ease: "circOut" });
