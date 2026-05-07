@@ -17,6 +17,7 @@ import { useSidebar } from '../contexts/SidebarContext';
 import { useDecks } from '../contexts/DecksContext';
 import { useStudyProgress } from '../contexts/StudyProgressContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { db } from '../../services/database';
 import { SettingsModal } from '../components/SettingsModal';
 import { CreateModal } from '../components/CreateModal';
 import { FlashcardGame } from '../components/FlashcardGame';
@@ -30,13 +31,13 @@ import { FadeInUp } from '../components/ui/MotionWrapper';
 
 
 const GAME_MODES = [
-    { name: 'Flashcards', icon: Layers, image: '/dashimages/flashcard.png.png', color: 'text-blue-400', path: '/dashboard/flashcards' },
-    { name: 'Learn', icon: BrainCircuit, image: '/dashimages/guide.png.png', color: 'text-brand-primary', path: '/dashboard/learn' },
-    { name: 'Rapid Fire', icon: Zap, image: '/dashimages/hotdeal.png.png', color: 'text-yellow-400', path: '/dashboard/quiz' },
-    { name: 'Matching', icon: Puzzle, image: '/dashimages/puzzle.png.png', color: 'text-green-400', path: '/dashboard/match' },
-    { name: 'Written', icon: PenTool, image: '/dashimages/writing.png.png', color: 'text-purple-400', path: '/dashboard/written' },
-    { name: 'Speaking Drill', icon: Mic, image: '/dashimages/speech.png.png', color: 'text-red-400', path: '/dashboard/speaking' },
-    { name: 'Practice Test', icon: ClipboardCheck, image: '/dashimages/test.png.png', color: 'text-orange-400', path: '/dashboard/test' },
+    { name: 'Flashcards', icon: Layers, image: '/dashimages/branding/gamemodes/flashcard.png', color: 'text-blue-400', path: '/dashboard/flashcards' },
+    { name: 'Learn', icon: BrainCircuit, image: '/dashimages/branding/gamemodes/learn.png', color: 'text-brand-primary', path: '/dashboard/learn' },
+    { name: 'Rapid Fire', icon: Zap, image: '/dashimages/branding/gamemodes/hotdeal.png', color: 'text-yellow-400', path: '/dashboard/quiz' },
+    { name: 'Matching', icon: Puzzle, image: '/dashimages/branding/gamemodes/puzzle.png', color: 'text-green-400', path: '/dashboard/match' },
+    { name: 'Written', icon: PenTool, image: '/dashimages/branding/gamemodes/writing.png', color: 'text-purple-400', path: '/dashboard/written' },
+    { name: 'Speaking Drill', icon: Mic, image: '/dashimages/branding/gamemodes/speech.png', color: 'text-red-400', path: '/dashboard/speaking' },
+    { name: 'Practice Test', icon: ClipboardCheck, image: '/dashimages/branding/gamemodes/test.png', color: 'text-orange-400', path: '/dashboard/test' },
 ];
 
 const CONTENT: Record<string, { title: string; description: string; buttonText: string }> = {
@@ -144,6 +145,48 @@ export default function GamePage({ initialModeName }: GamePageProps) {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDeckDropdownOpen, setIsDeckDropdownOpen] = useState(false);
     const [jumpToCardIndex, setJumpToCardIndex] = useState<number | null>(null);
+    const [localCards, setLocalCards] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const mapRowToCard = (row: any) => ({
+        id: row.id,
+        front: row.front,
+        back: row.back,
+        term: row.front,
+        definition: row.back,
+        image: row.frontImage,
+        backImage: row.backImage,
+        starred: row.isStarred,
+        createdAt: new Date(row.createdAt).toISOString(),
+    });
+
+    useEffect(() => {
+        let isMounted = true;
+        const fetchCards = async () => {
+            setIsLoading(true);
+            try {
+                const targetDeckId = deckIdFromUrl || (!workspaceIdFromUrl && activeDeck ? activeDeck.id : null);
+                
+                if (targetDeckId) {
+                    const rows = await db.getFlashcardsByDeckId(targetDeckId);
+                    if (isMounted) setLocalCards(rows.map(mapRowToCard));
+                } else if (workspaceIdFromUrl) {
+                    // Use the optimized single-query method
+                    const rows = await db.getFlashcardsByWorkspace(workspaceIdFromUrl);
+                    if (isMounted) setLocalCards(rows.map(mapRowToCard));
+                } else {
+                    if (isMounted) setLocalCards([]);
+                }
+            } catch (err) {
+                console.error("Failed to fetch cards in GamePage", err);
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+
+        fetchCards();
+        return () => { isMounted = false; };
+    }, [deckIdFromUrl, workspaceIdFromUrl, activeDeck?.id]);
 
     useEffect(() => {
         if (deckIdFromUrl) {
@@ -153,33 +196,21 @@ export default function GamePage({ initialModeName }: GamePageProps) {
         }
     }, [deckIdFromUrl, workspaceIdFromUrl, setActiveDeck]);
 
-    // Create a synthetic deck if workspaceId is provided
-    const workspaceDeck = useMemo(() => {
-        if (!workspaceIdFromUrl) return null;
-        const workspace = workspaces.find(w => w.id === workspaceIdFromUrl);
-        if (!workspace) return null;
-        
-        // Find all decks in this workspace and its sub-workspaces
-        const getWorkspaceDecks = (wsId: string): typeof decks => {
-            const directDecks = decks.filter(d => d.workspaceId === wsId && !d.isDeleted);
-            const subWs = workspaces.filter(w => w.parentId === wsId);
-            return directDecks.concat(subWs.flatMap(w => getWorkspaceDecks(w.id)));
-        };
-        
-        const allDecks = getWorkspaceDecks(workspaceIdFromUrl);
-        const allCards = allDecks.flatMap(d => d.cards || []);
-        
-        return {
-            id: `workspace-${workspaceIdFromUrl}`,
-            title: `Study All: ${workspace.name}`,
-            cards: allCards,
-            color: workspace.color || '#3B82F6',
-            workspaceId: workspaceIdFromUrl
-        } as any;
-    }, [workspaceIdFromUrl, workspaces, decks]);
-
-    // Use activeDeck, workspaceDeck, or fallback
-    const deck = workspaceDeck || activeDeck || { id: 'none', title: 'No Deck Selected', cards: [], color: 'bg-gray-500' };
+    // Use the fetched local cards as the deck cards
+    const deck = useMemo(() => {
+        const base = activeDeck || { id: 'none', title: 'No Deck Selected', cards: [], color: 'bg-gray-500' };
+        if (workspaceIdFromUrl) {
+            const workspace = workspaces.find(w => w.id === workspaceIdFromUrl);
+            return {
+                id: `workspace-${workspaceIdFromUrl}`,
+                title: workspace ? `Study All: ${workspace.name}` : 'Workspace',
+                cards: localCards,
+                color: workspace?.color || '#3B82F6',
+                workspaceId: workspaceIdFromUrl
+            } as any;
+        }
+        return { ...base, cards: localCards };
+    }, [activeDeck, localCards, workspaceIdFromUrl, workspaces]);
 
     useEffect(() => {
         setHideSidebar(isGameStarted);
@@ -201,8 +232,20 @@ export default function GamePage({ initialModeName }: GamePageProps) {
         }
     }, [currentMode.name]);
 
+    const hubLink = useMemo(() => {
+        const params = new URLSearchParams();
+        if (deckIdFromUrl) params.set('deckId', deckIdFromUrl);
+        if (workspaceIdFromUrl) params.set('workspaceId', workspaceIdFromUrl);
+        const search = params.toString();
+        return `/dashboard/hub${search ? `?${search}` : ''}`;
+    }, [deckIdFromUrl, workspaceIdFromUrl]);
+
     const handleStartClick = () => {
-        setIsGameStarted(true);
+        if (SUB_MODES[currentMode.name]) {
+            setIsModeSelectionOpen(true);
+        } else {
+            setIsGameStarted(true);
+        }
     };
 
     const processedCards = useMemo(() => {
@@ -400,7 +443,11 @@ export default function GamePage({ initialModeName }: GamePageProps) {
                                         <button
                                             key={mode.name}
                                             onClick={() => {
-                                                navigate(mode.path);
+                                                const params = new URLSearchParams();
+                                                if (deckIdFromUrl) params.set('deckId', deckIdFromUrl);
+                                                if (workspaceIdFromUrl) params.set('workspaceId', workspaceIdFromUrl);
+                                                const search = params.toString();
+                                                navigate(`${mode.path}${search ? `?${search}` : ''}`);
                                             }}
                                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${currentMode.name === mode.name ? 'bg-brand-primary/10 text-brand-primary' : 'text-foreground hover:bg-zinc-100 dark:hover:bg-white/5'}`}
                                         >
@@ -415,10 +462,10 @@ export default function GamePage({ initialModeName }: GamePageProps) {
                                     <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1.5 mx-1"></div>
 
                                     <Link
-                                        to="/"
+                                        to={hubLink}
                                         className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                                     >
-                                        <span>Back to Dashboard</span>
+                                        <span>Back to Study Hub</span>
                                     </Link>
                                 </div>
                             </motion.div>
@@ -506,7 +553,7 @@ export default function GamePage({ initialModeName }: GamePageProps) {
                         </button>
                     )}
                     <Link
-                        to="/"
+                        to={hubLink}
                         className="w-10 h-10 flex items-center justify-center rounded-full text-foreground-secondary hover:text-foreground hover:bg-surface-hover transition-all"
                         title="Close"
                     >
@@ -518,57 +565,69 @@ export default function GamePage({ initialModeName }: GamePageProps) {
             {/* Main Content */}
             {isGameStarted || currentMode.name === 'Flashcards' ? (
                 <main className={`flex-1 w-full bg-background relative flex flex-col min-h-0 ${['Matching', 'Gravity', 'Canvas'].includes(currentMode.name) ? 'overflow-hidden' : 'overflow-y-auto'} ${!['Flashcards', 'Learn', 'Matching', 'Practice Test', 'Speaking Drill', 'Canvas'].includes(currentMode.name) ? 'items-center justify-center' : ''}`}>
-                    {renderGame()}
+                    {(isLoading && localCards.length === 0) ? (
+                        <div className="flex-1 flex items-center justify-center">
+                            <div className="w-10 h-10 border-3 border-brand-primary border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    ) : (
+                        renderGame()
+                    )}
                 </main>
             ) : (
-                <main className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-4xl mx-auto w-full">
-                    <div className="w-full flex flex-col items-center">
-                        {/* Illustration */}
-                        <FadeInUp delay={0.1}>
-                            <div className="w-48 h-48 mb-8 relative flex items-center justify-center">
-                                <div className="absolute inset-0 bg-brand-primary/20 blur-3xl rounded-full"></div>
-                                <img
-                                    src={currentMode.image}
-                                    alt={currentMode.name}
-                                    className="relative z-10 w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
-                                />
-                            </div>
-                        </FadeInUp>
+                <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                    {/* Mode Icon */}
+                    <FadeInUp delay={0.05}>
+                        <div className="w-32 h-32 mb-6 relative flex items-center justify-center">
+                            <div className="absolute inset-0 bg-brand-primary/15 blur-3xl rounded-full" />
+                            <img
+                                src={currentMode.image}
+                                alt={currentMode.name}
+                                className="relative z-10 w-full h-full object-contain drop-shadow-2xl"
+                            />
+                        </div>
+                    </FadeInUp>
 
-                        <FadeInUp delay={0.2}>
-                            <h2 className="text-2xl font-bold mb-4">{content.title}</h2>
-                        </FadeInUp>
+                    <FadeInUp delay={0.1}>
+                        <h2 className="text-3xl font-black mb-3 tracking-tight">{currentMode.name}</h2>
+                    </FadeInUp>
 
-                        <FadeInUp delay={0.3}>
-                            <p className="text-foreground-secondary mb-10 max-w-md leading-relaxed">
-                                {content.description}
+                    <FadeInUp delay={0.15}>
+                        <p className="text-foreground-secondary mb-10 max-w-sm leading-relaxed text-base">
+                            {content.description}
+                        </p>
+                    </FadeInUp>
+
+                    <FadeInUp delay={0.2} className="w-full max-w-md flex flex-col items-center gap-4">
+                        {/* Primary: Start */}
+                        <div className="btn-wrapper w-full">
+                            <button
+                                onClick={handleStartClick}
+                                disabled={isLoading || processedCards.length === 0}
+                                className={`btn-custom w-full h-14 rounded-full text-lg shadow-xl flex items-center justify-center gap-2 ${resolvedTheme === 'dark' ? 'btn-white' : 'btn-black'} ${(isLoading || processedCards.length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                <span className="btn-text">Start game</span>
+                            </button>
+                        </div>
+
+                        {/* Secondary: Options */}
+                        {currentMode.name !== 'Learn' && (
+                            <button onClick={() => setIsSettingsOpen(true)} className="btn-liquid">
+                                <div className="button-outer">
+                                    <div className="button-inner">
+                                        <Settings className="w-4 h-4 mr-2" />
+                                        <span>Options</span>
+                                    </div>
+                                </div>
+                            </button>
+                        )}
+
+                        {/* Empty deck warning */}
+                        {!isLoading && processedCards.length === 0 && (
+                            <p className="text-sm text-foreground-secondary text-center pt-2">
+                                No cards to study. <button onClick={() => setIsCreateModalOpen(true)} className="text-brand-primary font-semibold hover:underline">Add cards</button>
                             </p>
-                        </FadeInUp>
-
-                        <FadeInUp delay={0.4} className="w-full max-w-md">
-                            <div className="btn-wrapper mb-4 w-full">
-                                <button
-                                    onClick={handleStartClick}
-                                    className={`btn-custom w-full h-14 rounded-full text-lg shadow-xl ${resolvedTheme === 'dark' ? 'btn-white' : 'btn-black'}`}
-                                >
-                                    <span className="btn-text">{content.buttonText}</span>
-                                </button>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                                {currentMode.name !== 'Learn' && (
-                                    <button onClick={() => setIsSettingsOpen(true)} className="btn-liquid">
-                                        <div className="button-outer">
-                                            <div className="button-inner">
-                                                <Settings className="w-4 h-4 mr-2" />
-                                                <span>Options</span>
-                                            </div>
-                                        </div>
-                                    </button>
-                                )}
-                            </div>
-                        </FadeInUp>
-                    </div>
+                        )}
+                    </FadeInUp>
                 </main>
             )}
             {/* Mode Selection Modal */}

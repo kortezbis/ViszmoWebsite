@@ -4,6 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    scrollbar-gutter: stable;
+}
+
+html {
+    scrollbar-gutter: stable;
+}
+
 @layer utilities {
     .animate-in {
         animation-duration: 400ms;

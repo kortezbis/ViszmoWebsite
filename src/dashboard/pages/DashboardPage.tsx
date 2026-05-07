@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { 
-    Upload, 
-    Mic, 
-    Layers, 
-    FileText, 
-    Podcast, 
+import {
+    Upload,
+    Mic,
+    Layers,
+    FileText,
+    Podcast,
     FolderOpen,
     Sparkles,
     Flame,
@@ -52,15 +52,15 @@ export default function DashboardPage() {
             action: () => navigate('/dashboard/decks?tab=lectures')
         },
         {
-            title: 'Flashcards',
-            description: 'Access learn mode, podcasts, or a 1:1 voice tutor.',
+            title: 'Flashcard Set',
+            description: 'Flashcard set • Create or study terms',
             icon: Layers,
             color: 'amber',
             action: () => navigate('/dashboard/decks')
         },
         {
-            title: 'Notes',
-            description: 'Access practice tests, podcasts, or a 1:1 voice tutor.',
+            title: 'My Deck',
+            description: 'Organize your sets',
             icon: FileText,
             color: 'indigo',
             action: () => navigate('/dashboard/decks')
@@ -84,19 +84,19 @@ export default function DashboardPage() {
                 <div className="flex-1 md:flex-none w-full max-w-xl md:absolute md:left-1/2 md:-translate-x-1/2">
                     <div className="relative flex items-center w-full h-11 rounded-2xl bg-surface border border-border px-4 focus-within:border-brand-primary focus-within:shadow-sm transition-all">
                         <Search size={18} className="text-foreground-secondary mr-2 shrink-0" />
-                        <input 
-                            type="text" 
-                            placeholder="Search for anything" 
+                        <input
+                            type="text"
+                            placeholder="Search for anything"
                             className="bg-transparent border-none outline-none text-sm text-foreground w-full placeholder:text-foreground-muted"
                         />
                     </div>
                 </div>
-                
+
                 {/* Header Actions */}
                 <div className="flex-1 flex justify-end items-center gap-3 shrink-0 ml-4 md:ml-0">
-                    <button 
+                    <button
                         onClick={() => navigate('/dashboard/decks')}
-                        className="h-11 px-6 rounded-full bg-brand-primary text-white flex items-center gap-2 hover:bg-brand-primary/90 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-primary/20 font-bold text-sm shrink-0" 
+                        className="h-11 px-6 rounded-full bg-brand-primary text-white flex items-center gap-2 hover:bg-brand-primary/90 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-primary/20 font-bold text-sm shrink-0"
                     >
                         <Plus size={18} />
                         <span className="hidden sm:inline">Create</span>
@@ -107,9 +107,9 @@ export default function DashboardPage() {
                         <span className="text-base font-bold text-foreground">0</span>
                     </div>
 
-                    <button 
+                    <button
                         onClick={toggleTheme}
-                        className="h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center" 
+                        className="h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center"
                     >
                         {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
@@ -134,20 +134,18 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar -mx-2 px-2">
                         {actionCards.map((card, idx) => (
-                            <div 
+                            <div
                                 key={idx}
                                 className="min-w-[280px] flex-1 bg-surface border border-border rounded-3xl p-6 flex flex-col justify-between hover:border-brand-primary/50 transition-all snap-start group shadow-sm hover:shadow-xl hover:shadow-brand-primary/5"
                             >
                                 <div>
-                                    <div className={`w-14 h-14 rounded-2xl bg-${card.color}-500/10 flex items-center justify-center mb-6 border border-${card.color}-500/20 group-hover:scale-110 transition-transform`}>
-                                        <card.icon size={28} className={`text-${card.color}-500 ${card.color === 'amber' || card.color === 'indigo' ? 'fill-current/20' : ''}`} />
-                                    </div>
+
                                     <h3 className="text-xl font-bold text-foreground mb-2">{card.title}</h3>
                                     <p className="text-sm text-foreground-secondary leading-relaxed mb-8 font-medium">
                                         {card.description}
                                     </p>
                                 </div>
-                                <button 
+                                <button
                                     onClick={card.action}
                                     className="self-start px-6 py-2.5 rounded-full bg-surface-hover border border-border text-sm font-bold text-foreground hover:bg-foreground hover:text-background transition-all active:scale-95"
                                 >
@@ -164,7 +162,7 @@ export default function DashboardPage() {
                         <h2 className="text-xs font-black uppercase tracking-[0.2em] text-foreground-muted">Recent Materials</h2>
                         {recentDecks.length > 0 && (
                             <button onClick={() => navigate('/dashboard/decks')} className="text-xs font-bold text-brand-primary hover:underline">
-                                View All Library
+                                View Library
                             </button>
                         )}
                     </div>
@@ -187,7 +185,7 @@ export default function DashboardPage() {
                             <p className="text-foreground-secondary max-w-sm font-medium">
                                 Recent files will appear here for quick access. Start by creating your first study deck!
                             </p>
-                            <button 
+                            <button
                                 onClick={() => navigate('/dashboard/decks')}
                                 className="mt-8 px-8 py-3 bg-brand-primary text-white font-bold rounded-2xl shadow-lg shadow-brand-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
                             >

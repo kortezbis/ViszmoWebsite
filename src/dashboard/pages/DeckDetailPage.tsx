@@ -18,6 +18,7 @@ import {
 import { FadeInUp } from '../components/ui/MotionWrapper';
 import { useDecks, getDeckCardCount } from '../contexts/DecksContext';
 import { db, type FlashcardRow, type LectureNote } from '../../services/database';
+import { CreateModal } from '../components/CreateModal';
 
 type TabId = 'Cards' | 'Lectures' | 'Study Guides' | 'Podcasts';
 
@@ -32,6 +33,8 @@ export default function DeckDetailPage() {
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [generateMenuOpen, setGenerateMenuOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [modalInitialStep, setModalInitialStep] = useState<any>(undefined);
     
     // Lectures State
     const [lectures, setLectures] = useState<LectureNote[]>([]);
@@ -91,7 +94,7 @@ export default function DeckDetailPage() {
 
     const handleStudyDeck = () => {
         if (!deckId) return;
-        navigate(`/dashboard/flashcards?deckId=${encodeURIComponent(deckId)}`);
+        navigate(`/dashboard/hub?deckId=${encodeURIComponent(deckId)}`);
     };
 
     const handleDeleteDeck = async () => {
@@ -116,7 +119,7 @@ export default function DeckDetailPage() {
             <div className="w-full h-full flex flex-col items-center justify-center gap-4 py-20 px-6">
                 <p className="text-foreground-secondary font-medium">Deck not found.</p>
                 <button onClick={() => navigate('/dashboard/decks')} className="text-brand-primary font-bold hover:underline">
-                    Back to library
+                    Back to Library
                 </button>
             </div>
         );
@@ -230,9 +233,7 @@ export default function DeckDetailPage() {
                                                 className="w-full flex items-start gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-surface-hover transition-colors"
                                                 onClick={() => navigate('/dashboard/transcripts')}
                                             >
-                                                <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
-                                                    <Mic size={18} />
-                                                </div>
+
                                                 <div>
                                                     <span className="block font-bold text-foreground text-sm">Lecture</span>
                                                     <span className="block text-xs text-foreground-secondary mt-0.5 leading-snug">
@@ -370,9 +371,7 @@ export default function DeckDetailPage() {
                                             className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-5 hover:border-brand-primary/50 transition-all shadow-sm w-full text-left"
                                         >
                                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                                                <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center shrink-0">
-                                                    <Mic size={20} className="text-brand-primary" />
-                                                </div>
+
                                                 <div className="flex flex-col min-w-0">
                                                     <h3 className="text-lg font-bold text-foreground group-hover:text-brand-primary transition-colors mb-1 truncate">
                                                         {lecture.title}
@@ -392,21 +391,34 @@ export default function DeckDetailPage() {
 
                 {(activeTab === 'Study Guides' || activeTab === 'Podcasts') && (
                     <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border rounded-3xl bg-surface/50 animate-in fade-in duration-300">
-                        <div className="w-16 h-16 bg-surface-active rounded-2xl flex items-center justify-center mb-4">
-                            {activeTab === 'Study Guides' ? <BookMarked size={32} className="text-brand-primary" /> : <Podcast size={32} className="text-brand-primary" />}
-                        </div>
+
                         <h3 className="text-xl font-bold mb-2 text-foreground">No {activeTab} yet</h3>
                         <p className="text-foreground-secondary text-sm max-w-sm mb-6 font-medium">
                             {activeTab === 'Study Guides' ? 'Generate a comprehensive study guide for this deck.' : 'Create an AI-narrated podcast summary.'}
                         </p>
                         <button 
+                            onClick={() => {
+                                if (activeTab === 'Study Guides') {
+                                    setModalInitialStep('generate');
+                                    setIsCreateModalOpen(true);
+                                } else {
+                                    setModalInitialStep('podcast');
+                                    setIsCreateModalOpen(true);
+                                }
+                            }}
                             className="flex items-center gap-2 px-6 py-2 bg-brand-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-brand-primary/20"
                         >
-                            <Sparkles size={18} />
                             Generate {activeTab === 'Study Guides' ? 'Guide' : 'Podcast'}
                         </button>
                     </div>
                 )}
+
+                <CreateModal 
+                    isOpen={isCreateModalOpen} 
+                    onClose={() => { setIsCreateModalOpen(false); setModalInitialStep(undefined); }}
+                    initialWorkspaceId={deck?.workspaceId}
+                    initialStep={modalInitialStep}
+                />
             </div>
         </div>
     );

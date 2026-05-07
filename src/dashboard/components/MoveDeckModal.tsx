@@ -48,7 +48,7 @@ export function MoveDeckModal({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: "spring", duration: 0.5 }}
-                        className="relative bg-surface border border-border rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
+                        className="relative bg-surface rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}

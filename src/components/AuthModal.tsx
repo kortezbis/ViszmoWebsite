@@ -129,7 +129,7 @@ export const AuthModal = ({ isOpen, onClose, initialView = 'login' }: AuthModalP
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="relative w-full max-w-[800px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-slate-100"
+                        className="relative w-full max-w-[800px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
                     >
                         {/* Left Side: Branding/Info (Desktop Only) */}
                         <div className="hidden md:flex md:w-[35%] bg-slate-50 p-10 flex-col justify-between border-r border-slate-100">

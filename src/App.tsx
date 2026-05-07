@@ -19,7 +19,7 @@ import { DownloadAppModal } from './components/DownloadAppModal';
 import { useProfile } from './contexts/ProfileContext';
 import { AuthModalProvider, useAuthModal } from './contexts/AuthModalContext';
 import DashboardApp from './dashboard/DashboardApp';
-import VisDashboard2App from './dashboard/vis-dashboard-2/VisDashboard2App';
+// VisDashboard2App import removed
 
 import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
 import { BrowserRouter, Routes, Route, useLocation, Outlet } from 'react-router-dom';
@@ -785,7 +785,7 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
 
   const routes = (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location} key={location.pathname.startsWith('/dashboard') ? 'dashboard' : location.pathname}>
         <Route path="/" element={<LandingPage onOpenDownload={onOpenDownload} onOpenAuth={openAuthModal} />} />
         <Route path="/features" element={<FeaturesPage onOpenDownload={onOpenDownload} />} />
         <Route path="/pricing" element={<PricingPage onOpenDownload={onOpenDownload} />} />
@@ -823,17 +823,7 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
           </>
         } />
 
-        {/* New dashboard workspace (separate layout + routes) */}
-        <Route path="/dashboard-v2/*" element={
-          <>
-            <SignedIn>
-              <VisDashboard2App />
-            </SignedIn>
-            <SignedOut>
-              <RedirectToSignIn afterSignInUrl="/dashboard-v2" />
-            </SignedOut>
-          </>
-        } />
+        {/* Dashboard-v2 route removed */}
       </Routes>
     </AnimatePresence>
   );

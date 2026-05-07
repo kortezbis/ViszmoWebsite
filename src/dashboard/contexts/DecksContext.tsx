@@ -49,6 +49,7 @@ export interface Workspace {
     color: string;
     parentId: string | null;
     createdAt: string;
+    stats?: { cardCount: number; mastery: number; subdeckCount: number };
 }
 
 function mapRowToCard(row: FlashcardRow): Card {
@@ -167,7 +168,8 @@ export function DecksProvider({ children }: { children: ReactNode }) {
                 name: r.name,
                 color: r.color,
                 parentId: r.parentId,
-                createdAt: new Date(r.createdAt).toISOString()
+                createdAt: new Date(r.createdAt).toISOString(),
+                stats: r.stats
             }));
 
             setDecks(nextDecks);

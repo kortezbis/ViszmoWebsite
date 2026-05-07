@@ -217,7 +217,7 @@ export const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) =>
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="relative w-full max-w-[800px] max-h-[90vh] bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col border border-white/20"
+                        className="relative w-full max-w-[800px] max-h-[90vh] bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col"
                     >
                         <AnimatePresence mode="wait">
                             {isPreparing ? (

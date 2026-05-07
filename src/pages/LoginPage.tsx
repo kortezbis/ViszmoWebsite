@@ -9,7 +9,8 @@ import { Logo } from '../components/Logo';
 export const LoginPage = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const redirectTo = searchParams.get('redirect') || '/dashboard';
+    const rawRedirect = searchParams.get('redirect') || '/dashboard';
+    const redirectTo = rawRedirect.startsWith('http') ? '/dashboard' : (rawRedirect.startsWith('/') ? rawRedirect : `/${rawRedirect}`);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -56,16 +57,16 @@ export const LoginPage = () => {
         setError('');
         setLoading(true);
         try {
-            const { error: authError } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: `${window.location.origin}${redirectTo}`,
-                    queryParams: {
-                        access_type: 'offline',
-                        prompt: 'consent',
-                    }
-                },
-            });
+        const { error: authError } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}${redirectTo}`,
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent',
+                }
+            },
+        });
             if (authError) throw authError;
         } catch (err: any) {
             setError(err.message || 'Error initiating Google login');
@@ -77,14 +78,14 @@ export const LoginPage = () => {
         setError('');
         setLoading(true);
         try {
-            const { error: authError } = await supabase.auth.signInWithOAuth({
-                provider: 'apple',
-                options: {
-                    redirectTo: `${window.location.origin}${redirectTo}`,
-                    // Apple requires some specific scopes for better profile data
-                    scopes: 'email name'
-                },
-            });
+        const { error: authError } = await supabase.auth.signInWithOAuth({
+            provider: 'apple',
+            options: {
+                redirectTo: `${window.location.origin}${redirectTo}`,
+                // Apple requires some specific scopes for better profile data
+                scopes: 'email name'
+            },
+        });
             if (authError) throw authError;
         } catch (err: any) {
             setError(err.message || 'Error initiating Apple login');

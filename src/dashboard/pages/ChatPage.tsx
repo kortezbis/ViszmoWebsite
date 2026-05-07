@@ -16,7 +16,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { chatGeneral, type ChatMessage } from '../../dashvis/lib/aiGateway';
+import { chatGeneral, type ChatMessage } from '../../services/aiGateway';
 import { 
   getChats, 
   getChatMessages, 
@@ -24,7 +24,7 @@ import {
   saveMessage, 
   deleteChat,
   type WsChat 
-} from '../../dashvis/lib/chatData';
+} from '../../services/chatData';
 import { db, type LectureNote } from '../../services/database';
 import { chatWithLectureTranscript } from '../../services/lectureChat';
 

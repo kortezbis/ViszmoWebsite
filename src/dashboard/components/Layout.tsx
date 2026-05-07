@@ -206,95 +206,7 @@ function Sidebar({
                 </div>
                 */}
 
-                <div className="mt-6 space-y-1">
-                    {!isCollapsed && (
-                        <div className="px-4 mb-2 text-xs font-bold text-foreground-muted uppercase tracking-wider">
-                            Practice
-                        </div>
-                    )}
-
-                    <div className="space-y-1">
-                        {/* Always visible modes */}
-                        {[
-                            { name: 'Learn', icon: BrainCircuit, path: '/dashboard/learn' },
-                            { name: 'Flashcards', icon: Layers, path: '/dashboard/flashcards' },
-                            { name: 'Rapid Fire', icon: Zap, path: '/dashboard/quiz' },
-                            { name: 'Matching', icon: Puzzle, path: '/dashboard/match' },
-                        ].map((mode) => {
-                            const isModeActive = isActive(mode.path);
-                            return (
-                                <button
-                                    key={mode.path}
-                                    onClick={() => onSelectMode(mode.path)}
-                                    className={`${isModeActive ? 'sidebar-item-active' : 'sidebar-item'} w-full group relative ${isCollapsed ? 'justify-center' : ''}`}
-                                    title={isCollapsed ? mode.name : ""}
-                                >
-                                    <mode.icon className="w-5 h-5 shrink-0" />
-                                    {!isCollapsed && (
-                                        <span>
-                                            {mode.name}
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        })}
-
-                        {/* Collapsible modes */}
-                        <AnimatePresence initial={false}>
-                            {(isCollapsed || showAllModes) && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                                    className="overflow-hidden space-y-1"
-                                >
-                                    {[
-                                        { name: 'Written', icon: PenTool, path: '/dashboard/written' },
-                                        { name: 'Speaking Drill', icon: Mic, path: '/dashboard/speaking' },
-                                        { name: 'Practice Test', icon: ClipboardCheck, path: '/dashboard/test' },
-                                    ].map((mode) => {
-                                        const isModeActive = isActive(mode.path);
-                                        return (
-                                            <button
-                                                key={mode.path}
-                                                onClick={() => onSelectMode(mode.path)}
-                                                className={`${isModeActive ? 'sidebar-item-active' : 'sidebar-item'} w-full group relative ${isCollapsed ? 'justify-center' : ''}`}
-                                                title={isCollapsed ? mode.name : ""}
-                                            >
-                                                <mode.icon className="w-5 h-5 shrink-0" />
-                                                {!isCollapsed && (
-                                                    <span>
-                                                        {mode.name}
-                                                    </span>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-
-                        {!isCollapsed && (
-                            <button
-                                onClick={() => setShowAllModes(!showAllModes)}
-                                className="sidebar-item w-full group relative !text-brand-primary/80 hover:!text-brand-primary"
-                            >
-                                {showAllModes ? (
-                                    <>
-                                        <ChevronUp className="w-5 h-5 shrink-0" />
-                                        <span>Show Less</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <MoreHorizontal className="w-5 h-5 shrink-0" />
-                                        <span>Show More</span>
-                                    </>
-                                )}
-                            </button>
-                        )}
-                    </div>
-                </div>
+                {/* Practice section removed to clean up sidebar */}
             </nav>
 
             {/* Footer Section */}
@@ -423,7 +335,7 @@ export function Layout({ children }: LayoutProps) {
     const { hideSidebar } = useSidebar();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
+    const navigate = useNavigate();
     return (
         <div className="min-h-screen bg-background text-foreground overflow-hidden">
             {/* <PixelTransition isActive={showTransition} onComplete={() => setShowTransition(false)} /> */}
@@ -436,7 +348,7 @@ export function Layout({ children }: LayoutProps) {
                         setIsCollapsed={setIsCollapsed}
                         isUserMenuOpen={isUserMenuOpen}
                         setIsUserMenuOpen={setIsUserMenuOpen}
-                        onSelectMode={(path) => { window.location.href = path; }}
+                        onSelectMode={(path) => { navigate(path); }}
                         hideSidebar={hideSidebar}
                     />
                 )}
@@ -452,8 +364,11 @@ export function Layout({ children }: LayoutProps) {
             )}
 
             <div
-                className={`flex-1 h-screen overflow-y-auto transition-all duration-300 ${hideSidebar ? 'ml-0' : (isCollapsed ? 'ml-[80px]' : 'ml-[280px]')}`}
-                style={{ width: hideSidebar ? '100%' : `calc(100% - ${isCollapsed ? 80 : 280}px)` }}
+                className={`flex-1 min-h-screen overflow-y-auto transition-all duration-300 ${hideSidebar ? 'ml-0' : (isCollapsed ? 'ml-[80px]' : 'ml-[280px]')}`}
+                style={{ 
+                    width: hideSidebar ? '100%' : `calc(100% - ${isCollapsed ? 80 : 280}px)`,
+                    scrollbarGutter: 'stable'
+                }}
             >
                 {children}
             </div>

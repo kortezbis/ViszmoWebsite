@@ -806,7 +806,7 @@ export function SettingsModal({ isOpen, onClose, mode, description, currentSetti
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="bg-white dark:bg-[#0c0c0d] dark:border dark:border-white/10 rounded-[2.5rem] w-full max-w-2xl shadow-2xl relative z-10 max-h-[85vh] flex flex-col overflow-hidden"
+                        className="bg-white dark:bg-[#0c0c0d] rounded-[2.5rem] w-full max-w-2xl shadow-2xl relative z-10 max-h-[85vh] flex flex-col overflow-hidden"
                     >
                         {/* Header */}
                         <div className="p-8 pb-2 shrink-0 bg-white dark:bg-[#0c0c0d] z-20">

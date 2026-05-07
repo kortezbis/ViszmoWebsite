@@ -28,6 +28,18 @@ export interface StudyGuide {
     createdAt: number;
 }
 
+export interface PodcastRow {
+    id: string;
+    userId: string;
+    workspaceId?: string;
+    title: string;
+    script?: any;
+    audioUrl?: string;
+    voiceId?: string;
+    createdAt: number;
+    updatedAt: number;
+}
+
 export interface DeckRow {
     id: string;
     userId: string;
@@ -77,10 +89,19 @@ function formatLectureDateLong(ts: number): string {
 }
 
 class DatabaseService {
+    private cachedUser: any = null;
+    private lastAuthCheck = 0;
+
     async ensureSessionReady(timeout = 3500) {
+        // Cache auth for 30 seconds to avoid constant remote calls
+        if (this.cachedUser && Date.now() - this.lastAuthCheck < 30000) {
+            return this.cachedUser;
+        }
+
         try {
-            await waitForSupabaseSession(timeout);
-            await getAuthenticatedUser();
+            this.cachedUser = await getAuthenticatedUser();
+            this.lastAuthCheck = Date.now();
+            return this.cachedUser;
         } catch (e: unknown) {
             const msg = e instanceof Error ? e.message : String(e);
             console.error('[DB] Auth check failed:', msg);
@@ -90,8 +111,7 @@ class DatabaseService {
 
     /** All decks for the user (flat). Nested workspace/subfolder UI can filter by `workspace_id` later. */
     async getDecks(): Promise<DeckRow[]> {
-        await this.ensureSessionReady();
-        const user = await getAuthenticatedUser();
+        const user = await this.ensureSessionReady();
 
         const { data, error } = await supabase
             .from('decks')
@@ -141,8 +161,7 @@ class DatabaseService {
     }
 
     async createDeck(title: string, workspaceId?: string): Promise<DeckRow> {
-        await this.ensureSessionReady();
-        const user = await getAuthenticatedUser();
+        const user = await this.ensureSessionReady();
 
         const { data, error } = await supabase
             .from('decks')
@@ -191,17 +210,47 @@ class DatabaseService {
 
     async deleteDeck(deckId: string): Promise<void> {
         await this.ensureSessionReady();
-        const { error: cardsErr } = await supabase.from('cards').delete().eq('deck_id', deckId);
-        if (cardsErr) {
-            console.error('[DB] deleteDeck cards:', cardsErr.message);
-            throw cardsErr;
-        }
-        const { error: deckErr } = await supabase.from('decks').delete().eq('id', deckId);
-        if (deckErr) {
-            console.error('[DB] deleteDeck:', deckErr.message);
-            throw deckErr;
+        const { error } = await supabase
+            .from('decks')
+            .update({ 
+                is_deleted: true,
+                deleted_at: new Date().toISOString()
+            })
+            .eq('id', deckId);
+            
+        if (error) {
+            console.error('[DB] soft deleteDeck:', error.message);
+            throw error;
         }
     }
+
+    async restoreDeck(deckId: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase
+            .from('decks')
+            .update({ 
+                is_deleted: false,
+                deleted_at: null
+            })
+            .eq('id', deckId);
+            
+        if (error) {
+            console.error('[DB] restoreDeck:', error.message);
+            throw error;
+        }
+    }
+
+    async permanentlyDeleteDeck(deckId: string): Promise<void> {
+        await this.ensureSessionReady();
+        // Delete cards first
+        await supabase.from('cards').delete().eq('deck_id', deckId);
+        const { error } = await supabase.from('decks').delete().eq('id', deckId);
+        if (error) {
+            console.error('[DB] permanentlyDeleteDeck:', error.message);
+            throw error;
+        }
+    }
+
 
     async getFlashcardsByDeckId(deckId: string): Promise<FlashcardRow[]> {
         await this.ensureSessionReady();
@@ -359,13 +408,13 @@ class DatabaseService {
     }
 
     async getLectureNotes(): Promise<LectureNote[]> {
-        await this.ensureSessionReady();
-        const user = await getAuthenticatedUser();
+        const user = await this.ensureSessionReady();
 
         const { data, error } = await supabase
             .from('transcripts')
-            .select('*')
+            .select('id, profile_id, title, summary, key_takeaways, glossary, duration, created_at, metadata')
             .eq('profile_id', user.id)
+            .is('deleted_at', null)
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -382,7 +431,7 @@ class DatabaseService {
                 workspaceId: meta?.workspaceId,
                 flashcardDeckId: meta?.flashcardDeckId,
                 title: (row.title as string) || 'Untitled Lecture',
-                content: (row.content as string) || '',
+                content: '', // Omitted for list performance
                 summary: row.summary as string | undefined,
                 keyTakeaways: (row.key_takeaways as string[]) || [],
                 glossary: (row.glossary as { term: string; definition: string }[]) || [],
@@ -464,21 +513,16 @@ class DatabaseService {
 
     async getFlashcardsByWorkspace(wsId: string): Promise<FlashcardRow[]> {
         await this.ensureSessionReady();
-        // 1. Get all decks in this workspace
-        const { data: decks } = await supabase
-            .from('decks')
-            .select('id')
-            .eq('workspace_id', wsId)
-            .eq('is_deleted', false);
         
-        if (!decks || decks.length === 0) return [];
-        const deckIds = decks.map(d => d.id);
-
-        // 2. Get all cards for those decks
+        // Use a join to get cards for all non-deleted decks in this workspace in one go
         const { data, error } = await supabase
             .from('cards')
-            .select('*')
-            .in('deck_id', deckIds)
+            .select(`
+                *,
+                decks!inner(workspace_id, is_deleted)
+            `)
+            .eq('decks.workspace_id', wsId)
+            .eq('decks.is_deleted', false)
             .order('created_at', { ascending: true });
 
         if (error) {
@@ -486,7 +530,7 @@ class DatabaseService {
             return [];
         }
 
-        return (data || []).map((row) => ({
+        return (data || []).map((row: any) => ({
             id: row.id,
             deckId: row.deck_id,
             front: row.front,
@@ -557,12 +601,12 @@ class DatabaseService {
     }
 
     async getWorkspaces(): Promise<WorkspaceRow[]> {
-        await this.ensureSessionReady();
-        const user = await getAuthenticatedUser();
+        const user = await this.ensureSessionReady();
         const { data, error } = await supabase
             .from('workspaces')
             .select('*')
             .eq('profile_id', user.id)
+            .eq('is_deleted', false)
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -580,27 +624,30 @@ class DatabaseService {
             createdAt: new Date(row.created_at as string).getTime(),
         }));
 
-        // Optimize stats fetching: instead of N queries, fetch all required data in bulk
-        const [allDecksRes, allCardsRes] = await Promise.all([
-            supabase.from('decks').select('id, workspace_id').eq('is_deleted', false),
-            // Fetching just deck_id for cards is sufficient to count them locally
-            supabase.from('cards').select('deck_id')
-        ]);
+        // Optimize stats fetching: fetch all decks with their card counts in one go
+        const { data: allDecks, error: decksErr } = await supabase
+            .from('decks')
+            .select('id, workspace_id, cards(count)')
+            .eq('profile_id', user.id)
+            .eq('is_deleted', false);
 
-        const allDecks = allDecksRes.data || [];
-        const allCards = allCardsRes.data || [];
+        if (decksErr) {
+            console.error('[DB] stats fetch error:', decksErr.message);
+        }
 
         // Build dictionaries for O(1) lookups
         const deckCardCounts: Record<string, number> = {};
-        allCards.forEach((c: { deck_id: string }) => {
-            deckCardCounts[c.deck_id] = (deckCardCounts[c.deck_id] || 0) + 1;
+        (allDecks || []).forEach((d: any) => {
+            deckCardCounts[d.id] = d.cards?.[0]?.count || 0;
         });
 
         // Group decks by workspace
         const wsDeckIds: Record<string, string[]> = {};
-        allDecks.forEach((d: { id: string, workspace_id: string }) => {
-            if (!wsDeckIds[d.workspace_id]) wsDeckIds[d.workspace_id] = [];
-            wsDeckIds[d.workspace_id].push(d.id);
+        (allDecks || []).forEach((d: any) => {
+            if (d.workspace_id) {
+                if (!wsDeckIds[d.workspace_id]) wsDeckIds[d.workspace_id] = [];
+                wsDeckIds[d.workspace_id].push(d.id);
+            }
         });
 
         // Compute subdeck maps
@@ -677,7 +724,7 @@ class DatabaseService {
         await this.ensureSessionReady();
         const { data, error } = await supabase
             .from('transcripts')
-            .select('*')
+            .select('id, profile_id, title, duration, created_at, metadata')
             .filter('metadata->>workspaceId', 'eq', wsId);
 
         if (error) {
@@ -685,24 +732,24 @@ class DatabaseService {
             return [];
         }
 
-        return (data || []).map((row: Record<string, unknown>) => {
+        return (data || []).map((row: any) => {
             const meta = row.metadata as { workspaceId?: string; flashcardDeckId?: string } | null;
             const created = new Date(row.created_at as string).getTime();
             return {
-                id: row.id as string,
-                userId: row.profile_id as string,
+                id: row.id,
+                userId: row.profile_id,
                 workspaceId: wsId,
                 flashcardDeckId: meta?.flashcardDeckId,
-                title: (row.title as string) || 'Untitled Lecture',
-                content: (row.content as string) || '',
-                summary: row.summary as string | undefined,
-                keyTakeaways: (row.key_takeaways as string[]) || [],
-                glossary: (row.glossary as { term: string; definition: string }[]) || [],
+                title: row.title || 'Untitled Lecture',
+                content: '', // Omitted for workspace list performance
+                summary: undefined,
+                keyTakeaways: [],
+                glossary: [],
                 date: formatLectureDateLong(created),
-                duration: (row.duration as string) || '0:00',
+                duration: row.duration || '0:00',
                 createdAt: created,
                 updatedAt: created,
-            };
+            } as LectureNote;
         });
     }
 
@@ -711,7 +758,7 @@ class DatabaseService {
         await this.ensureSessionReady();
         const { data, error } = await supabase
             .from('study_guides')
-            .select('*')
+            .select('id, profile_id, title, topic, created_at')
             .eq('workspace_id', wsId)
             .order('created_at', { ascending: false });
 
@@ -720,24 +767,24 @@ class DatabaseService {
             return [];
         }
 
-        return (data || []).map((row: Record<string, unknown>) => ({
-            id: row.id as string,
-            userId: row.profile_id as string,
+        return (data || []).map((row: any) => ({
+            id: row.id,
+            userId: row.profile_id,
             workspaceId: wsId,
-            title: row.title as string,
-            topic: row.topic as string | null,
-            content: row.content as string,
+            title: row.title,
+            topic: row.topic,
+            content: '', // Omitted for workspace list performance
             createdAt: new Date(row.created_at as string).getTime(),
-        }));
+        } as StudyGuide));
     }
 
     async getStudyGuides(): Promise<StudyGuide[]> {
-        await this.ensureSessionReady();
-        const user = await getAuthenticatedUser();
+        const user = await this.ensureSessionReady();
         const { data, error } = await supabase
             .from('study_guides')
-            .select('*')
+            .select('id, profile_id, workspace_id, title, topic, created_at')
             .eq('profile_id', user.id)
+            .is('deleted_at', null)
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -751,14 +798,37 @@ class DatabaseService {
             workspaceId: (row.workspace_id as string | null) ?? undefined,
             title: row.title as string,
             topic: row.topic as string | null,
-            content: row.content as string,
+            content: '', // Omitted for list performance
             createdAt: new Date(row.created_at as string).getTime(),
         }));
     }
 
-    async createWorkspace(name: string, color: string, iconName?: string, parentId?: string): Promise<WorkspaceRow> {
+    async getStudyGuideById(id: string): Promise<StudyGuide | undefined> {
         await this.ensureSessionReady();
-        const user = await getAuthenticatedUser();
+        const { data, error } = await supabase
+            .from('study_guides')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error || !data) {
+            if (error) console.error('[DB] getStudyGuideById:', error.message);
+            return undefined;
+        }
+
+        return {
+            id: data.id,
+            userId: data.profile_id,
+            workspaceId: data.workspace_id ?? undefined,
+            title: data.title,
+            topic: data.topic,
+            content: data.content,
+            createdAt: new Date(data.created_at).getTime(),
+        };
+    }
+
+    async createWorkspace(name: string, color: string, iconName?: string, parentId?: string): Promise<WorkspaceRow> {
+        const user = await this.ensureSessionReady();
 
         const { data, error } = await supabase
             .from('workspaces')
@@ -804,14 +874,321 @@ class DatabaseService {
 
     async deleteWorkspace(wsId: string): Promise<void> {
         await this.ensureSessionReady();
-        // Cascading delete is usually handled by Supabase DB constraints (ON DELETE CASCADE),
-        // but we'll call the delete on the workspace itself.
-        const { error } = await supabase.from('workspaces').delete().eq('id', wsId);
+        const { error } = await supabase
+            .from('workspaces')
+            .update({ 
+                is_deleted: true,
+                deleted_at: new Date().toISOString()
+            })
+            .eq('id', wsId);
 
         if (error) {
-            console.error('[DB] deleteWorkspace:', error.message);
+            console.error('[DB] soft deleteWorkspace:', error.message);
             throw error;
         }
+    }
+
+    async restoreWorkspace(wsId: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase
+            .from('workspaces')
+            .update({ 
+                is_deleted: false,
+                deleted_at: null
+            })
+            .eq('id', wsId);
+
+        if (error) {
+            console.error('[DB] restoreWorkspace:', error.message);
+            throw error;
+        }
+    }
+
+    async permanentlyDeleteWorkspace(wsId: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase.from('workspaces').delete().eq('id', wsId);
+        if (error) {
+            console.error('[DB] permanentlyDeleteWorkspace:', error.message);
+            throw error;
+        }
+    }
+
+    async getDeletedItems(): Promise<{ 
+        workspaces: WorkspaceRow[]; 
+        decks: DeckRow[]; 
+        lectures: LectureNote[];
+        studyGuides: StudyGuide[];
+        practiceTests: any[];
+    }> {
+        const user = await this.ensureSessionReady();
+
+        const [wsRes, deckRes, transcriptRes, guideRes, testRes] = await Promise.all([
+            supabase.from('workspaces').select('*').eq('profile_id', user.id).eq('is_deleted', true),
+            supabase.from('decks').select('*').eq('profile_id', user.id).eq('is_deleted', true),
+            supabase.from('transcripts').select('*').eq('profile_id', user.id).not('deleted_at', 'is', null),
+            supabase.from('study_guides').select('*').eq('profile_id', user.id).not('deleted_at', 'is', null),
+            supabase.from('practice_tests').select('*').eq('profile_id', user.id).not('deleted_at', 'is', null)
+        ]);
+
+        const workspaces = (wsRes.data || []).map(r => ({
+            id: r.id,
+            profileId: r.profile_id,
+            name: r.name,
+            color: r.color,
+            iconName: r.icon_name,
+            parentId: r.parent_id,
+            createdAt: new Date(r.created_at).getTime()
+        }));
+
+        const decks = (deckRes.data || []).map(r => ({
+            id: r.id,
+            userId: r.profile_id,
+            workspaceId: r.workspace_id,
+            title: r.title,
+            description: r.description,
+            cardCount: 0,
+            createdAt: new Date(r.created_at).getTime(),
+            updatedAt: new Date(r.updated_at).getTime()
+        }));
+
+        const lectures = (transcriptRes.data || []).map(row => {
+            const meta = row.metadata as { workspaceId?: string; flashcardDeckId?: string } | null;
+            const created = new Date(row.created_at as string).getTime();
+            return {
+                id: row.id,
+                userId: row.profile_id,
+                workspaceId: meta?.workspaceId,
+                flashcardDeckId: meta?.flashcardDeckId,
+                title: row.title || 'Untitled Lecture',
+                content: row.content || '',
+                date: formatLectureDateLong(created),
+                duration: row.duration || '0:00',
+                createdAt: created,
+                updatedAt: created,
+            };
+        });
+
+        const studyGuides = (guideRes.data || []).map(row => ({
+            id: row.id,
+            userId: row.profile_id,
+            workspaceId: row.workspace_id,
+            title: row.title,
+            topic: row.topic,
+            content: row.content,
+            createdAt: new Date(row.created_at).getTime(),
+        }));
+
+        const practiceTests = (testRes.data || []).map(row => ({
+            id: row.id,
+            profileId: row.profile_id,
+            workspaceId: row.workspace_id,
+            title: row.title,
+            score: row.score,
+            createdAt: new Date(row.created_at).getTime(),
+        }));
+
+        return { workspaces, decks, lectures, studyGuides, practiceTests };
+    }
+
+    async deleteLectureNote(id: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase
+            .from('transcripts')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('id', id);
+        if (error) throw error;
+    }
+
+    async restoreLectureNote(id: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase
+            .from('transcripts')
+            .update({ deleted_at: null })
+            .eq('id', id);
+        if (error) throw error;
+    }
+
+    async permanentlyDeleteLectureNote(id: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase.from('transcripts').delete().eq('id', id);
+        if (error) throw error;
+    }
+
+    async deleteStudyGuide(id: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase
+            .from('study_guides')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('id', id);
+        if (error) throw error;
+    }
+
+    async restoreStudyGuide(id: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase
+            .from('study_guides')
+            .update({ deleted_at: null })
+            .eq('id', id);
+        if (error) throw error;
+    }
+
+    async permanentlyDeleteStudyGuide(id: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase.from('study_guides').delete().eq('id', id);
+        if (error) throw error;
+    }
+
+    async restorePracticeTest(id: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase
+            .from('practice_tests')
+            .update({ deleted_at: null })
+            .eq('id', id);
+        if (error) throw error;
+    }
+
+    async permanentlyDeletePracticeTest(id: string): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase.from('practice_tests').delete().eq('id', id);
+        if (error) throw error;
+    }
+
+    async getPodcasts(): Promise<PodcastRow[]> {
+        const user = await this.ensureSessionReady();
+        const { data, error } = await supabase
+            .from('podcasts')
+            .select('*')
+            .eq('profile_id', user.id)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        return (data || []).map(r => ({
+            id: r.id,
+            userId: r.profile_id,
+            workspaceId: r.workspace_id,
+            title: r.title,
+            script: r.script,
+            audioUrl: r.audio_url,
+            voiceId: r.voice_id,
+            createdAt: new Date(r.created_at).getTime(),
+            updatedAt: new Date(r.updated_at).getTime()
+        }));
+    }
+
+    async getPodcastsByWorkspace(wsId: string): Promise<PodcastRow[]> {
+        await this.ensureSessionReady();
+        const { data, error } = await supabase
+            .from('podcasts')
+            .select('*')
+            .eq('workspace_id', wsId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('[DB] getPodcastsByWorkspace:', error.message);
+            return [];
+        }
+
+        return (data || []).map(r => ({
+            id: r.id,
+            userId: r.profile_id,
+            workspaceId: r.workspace_id,
+            title: r.title,
+            script: r.script,
+            audioUrl: r.audio_url,
+            voiceId: r.voice_id,
+            createdAt: new Date(r.created_at).getTime(),
+            updatedAt: new Date(r.updated_at).getTime()
+        }));
+    }
+
+    async getWorkspaceContent(wsId?: string): Promise<string> {
+        await this.ensureSessionReady();
+        let notes: any[] = [];
+        let cards: any[] = [];
+
+        if (wsId) {
+            [notes, cards] = await Promise.all([
+                this.getNotesByWorkspace(wsId),
+                this.getFlashcardsByWorkspace(wsId)
+            ]);
+        } else {
+            const user = await this.ensureSessionReady();
+            const [notesRes, decksRes] = await Promise.all([
+                supabase.from('transcripts').select('*').eq('profile_id', user.id).is('deleted_at', null),
+                supabase.from('decks').select('id').eq('profile_id', user.id).is('deleted_at', null)
+            ]);
+            notes = notesRes.data || [];
+            const deckIds = (decksRes.data || []).map(d => d.id);
+            if (deckIds.length > 0) {
+                const { data } = await supabase.from('cards').select('*').in('deck_id', deckIds);
+                cards = data || [];
+            }
+        }
+
+        let content = '';
+        if (notes.length > 0) {
+            content += "LECTURE NOTES:\n";
+            notes.forEach(n => {
+                content += `Title: ${n.title}\nContent: ${n.content}\n\n`;
+            });
+        }
+        if (cards.length > 0) {
+            content += "FLASHCARDS:\n";
+            cards.forEach(c => {
+                content += `Q: ${c.front}\nA: ${c.back}\n\n`;
+            });
+        }
+
+        return content;
+    }
+
+    async savePodcast(params: {
+        id: string;
+        workspaceId: string;
+        title: string;
+        audioUrl: string;
+        script?: { text: string };
+        voiceId?: string;
+    }): Promise<void> {
+        await this.ensureSessionReady();
+        const { error } = await supabase
+            .from('podcasts')
+            .upsert({
+                id: params.id,
+                workspace_id: params.workspaceId,
+                title: params.title,
+                script: params.script,
+                audio_url: params.audioUrl,
+                voice_id: params.voiceId
+            });
+        
+        if (error) throw error;
+    }
+
+    async uploadPodcastAudio(path: string, blob: Blob): Promise<string> {
+        const { data, error } = await supabase.storage
+            .from('podcasts')
+            .upload(path, blob, {
+                contentType: 'audio/mpeg',
+                upsert: true
+            });
+        
+        if (error) throw error;
+        
+        const { data: { publicUrl } } = supabase.storage.from('podcasts').getPublicUrl(path);
+        return publicUrl;
+    }
+
+    async emptyTrash(): Promise<void> {
+        const user = await this.ensureSessionReady();
+
+        await Promise.all([
+            supabase.from('workspaces').delete().eq('profile_id', user.id).eq('is_deleted', true),
+            supabase.from('decks').delete().eq('profile_id', user.id).eq('is_deleted', true),
+            supabase.from('transcripts').delete().eq('profile_id', user.id).not('deleted_at', 'is', null),
+            supabase.from('study_guides').delete().eq('profile_id', user.id).not('deleted_at', 'is', null),
+            supabase.from('practice_tests').delete().eq('profile_id', user.id).not('deleted_at', 'is', null)
+        ]);
     }
 }
 

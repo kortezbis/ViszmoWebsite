@@ -1,21 +1,31 @@
 import { useCallback, useEffect, useState } from 'react';
-import { MoreVertical, FolderOpen, Trash2, Mic, BookMarked, Edit2, Plus, ChevronRight, X, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { db, type WorkspaceRow, type DeckRow, type LectureNote, type StudyGuide } from '../../services/database';
+import { MoreVertical, FolderOpen, Trash2, Mic, BookMarked, Edit2, Plus, ChevronRight, X, Loader2, BookOpen, Layers, Podcast, Search, Flame, Moon, Sun } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { db, type WorkspaceRow, type DeckRow, type LectureNote, type StudyGuide, type PodcastRow } from '../../services/database';
 import { useDecks } from '../contexts/DecksContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { CreateModal } from '../components/CreateModal';
 
-type TabId = 'Library' | 'Lectures' | 'Study Guides';
+type TabId = 'My Deck' | 'Lectures' | 'Study Guides' | 'Trash';
 type RenameTargetType = 'myDecks' | 'lecture' | 'studyGuides';
 
 export default function MyDecksPage() {
+    const { resolvedTheme, toggleTheme } = useTheme();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<TabId>('Library');
+    const [activeTab, setActiveTab] = useState<TabId>('My Deck');
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
     const [closingMenuId, setClosingMenuId] = useState<string | null>(null);
     
     const { workspaces: allWorkspaces, decksLoading, refreshDecks: refreshContextDecks } = useDecks();
     const [lectures, setLectures] = useState<LectureNote[]>([]);
     const [studyGuides, setStudyGuides] = useState<StudyGuide[]>([]);
+    const [deletedItems, setDeletedItems] = useState<{ 
+        workspaces: WorkspaceRow[]; 
+        decks: DeckRow[]; 
+        lectures: LectureNote[];
+        studyGuides: StudyGuide[];
+        practiceTests: any[];
+    }>({ workspaces: [], decks: [], lectures: [], studyGuides: [], practiceTests: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     
@@ -28,12 +38,19 @@ export default function MyDecksPage() {
     
     // Create Modal State (from dashvis logic, though dashvis handles it elsewhere, I'll keep functionality here)
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isUnifiedModalOpen, setIsUnifiedModalOpen] = useState(false);
+    const [isUnifiedModalClosing, setIsUnifiedModalClosing] = useState(false);
     const [isCreateModalClosing, setIsCreateModalClosing] = useState(false);
+    const [modalInitialStep, setModalInitialStep] = useState<any>(undefined);
     const [createName, setCreateName] = useState('');
     const [createSaving, setCreateSaving] = useState(false);
+    const [createColor, setCreateColor] = useState('#3B82F6');
 
+    const COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#0EA5E9'];
+
+    const [podcasts, setPodcasts] = useState<PodcastRow[]>([]);
     const [isDeleteHolding, setIsDeleteHolding] = useState<string | null>(null);
-    const tabs: TabId[] = ['Library', 'Lectures', 'Study Guides'];
+    const tabs: TabId[] = ['My Deck', 'Lectures', 'Study Guides', 'Trash'];
 
     const workspaces = allWorkspaces.filter(w => !w.parentId);
 
@@ -43,13 +60,17 @@ export default function MyDecksPage() {
         }
         setError(null);
         try {
-            const [l, g] = await Promise.all([
+            const [l, g, d, p] = await Promise.all([
                 db.getLectureNotes(),
-                db.getStudyGuides()
+                db.getStudyGuides(),
+                db.getDeletedItems(),
+                db.getPodcasts()
             ]);
             
             setLectures(l);
             setStudyGuides(g);
+            setDeletedItems(d);
+            setPodcasts(p);
         } catch (e) {
             setError(e instanceof Error ? e.message : 'Could not load library');
         } finally {
@@ -57,9 +78,18 @@ export default function MyDecksPage() {
         }
     }, []);
 
+    const location = useLocation();
+
     useEffect(() => {
         void load();
-    }, [load]);
+        
+        // Handle tab from URL query param
+        const params = new URLSearchParams(location.search);
+        const tabParam = params.get('tab');
+        if (tabParam === 'lectures') setActiveTab('Lectures');
+        else if (tabParam === 'study-guides') setActiveTab('Study Guides');
+
+    }, [load, location.search]);
 
     const closeMenu = () => {
         if (!activeMenuId) return;
@@ -80,7 +110,7 @@ export default function MyDecksPage() {
     };
 
     const renameModalLabel = (type: RenameTargetType): string => {
-        if (type === 'myDecks') return 'Library';
+        if (type === 'myDecks') return 'My Deck';
         if (type === 'lecture') return 'Lecture';
         return 'Study Guide';
     };
@@ -156,34 +186,108 @@ export default function MyDecksPage() {
         if (!createName.trim()) return;
         setCreateSaving(true);
         try {
-            await db.createWorkspace(createName.trim(), '#3B82F6', undefined);
-            closeCreateModal();
+            await db.createWorkspace(createName.trim(), createColor);
+            setCreateName('');
+            setCreateColor('#3B82F6');
+            setIsCreateModalOpen(false);
             void load({ isRefresh: true });
         } catch (e) {
-            alert(e instanceof Error ? e.message : 'Create failed');
+            alert('Failed to create deck');
         } finally {
             setCreateSaving(false);
         }
     };
 
+    const handleRestore = async (id: string, type: 'workspace' | 'deck' | 'lecture' | 'studyGuide' | 'practiceTest') => {
+        try {
+            if (type === 'workspace') await db.restoreWorkspace(id);
+            else if (type === 'deck') await db.restoreDeck(id);
+            else if (type === 'lecture') await db.restoreLectureNote(id);
+            else if (type === 'studyGuide') await db.restoreStudyGuide(id);
+            else if (type === 'practiceTest') await db.restorePracticeTest(id);
+            refreshContextDecks();
+            void load({ isRefresh: true });
+        } catch (e) {
+            alert('Restore failed');
+        }
+    };
+
+    const handlePermanentDelete = async (id: string, type: 'workspace' | 'deck' | 'lecture' | 'studyGuide' | 'practiceTest') => {
+        if (!confirm('Are you sure you want to permanently delete this item?')) return;
+        try {
+            if (type === 'workspace') await db.permanentlyDeleteWorkspace(id);
+            else if (type === 'deck') await db.permanentlyDeleteDeck(id);
+            else if (type === 'lecture') await db.permanentlyDeleteLectureNote(id);
+            else if (type === 'studyGuide') await db.permanentlyDeleteStudyGuide(id);
+            else if (type === 'practiceTest') await db.permanentlyDeletePracticeTest(id);
+            void load({ isRefresh: true });
+        } catch (e) {
+            alert('Delete failed');
+        }
+    };
+
+    const handleEmptyTrash = async () => {
+        if (!confirm('Are you sure you want to permanently delete all items in the trash? This action cannot be undone.')) return;
+        try {
+            setLoading(true);
+            await db.emptyTrash();
+            void load({ isRefresh: true });
+        } catch (e) {
+            alert('Failed to empty trash');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="w-full h-full overflow-y-auto bg-background" onClick={closeMenu}>
-            {/* Sticky Header exactly as in dashvis */}
-            <div className="sticky top-14 md:top-0 z-10 bg-surface">
+            {/* Header (Mirroring DashboardPage) */}
+            <header className="h-16 flex items-center px-6 shrink-0 relative gap-2 bg-surface border-b border-border sticky top-0 z-[20]">
+                <div className="flex-1 hidden md:block"></div>
+
+                {/* Centered Search Bar */}
+                <div className="flex-1 md:flex-none w-full max-w-xl md:absolute md:left-1/2 md:-translate-x-1/2">
+                    <div className="relative flex items-center w-full h-11 rounded-2xl bg-surface border border-border px-4 focus-within:border-brand-primary focus-within:shadow-sm transition-all">
+                        <Search size={18} className="text-foreground-secondary mr-2 shrink-0" />
+                        <input
+                            type="text"
+                            placeholder="Search for anything"
+                            className="bg-transparent border-none outline-none text-sm text-foreground w-full placeholder:text-foreground-muted"
+                        />
+                    </div>
+                </div>
+
+                {/* Header Actions */}
+                <div className="flex-1 flex justify-end items-center gap-3 shrink-0 ml-4 md:ml-0">
+                    <button
+                        onClick={() => setIsUnifiedModalOpen(true)}
+                        className="h-11 px-6 rounded-full bg-brand-primary text-white flex items-center gap-2 hover:bg-brand-primary/90 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-primary/20 font-bold text-sm shrink-0"
+                    >
+                        <Plus size={18} />
+                        <span className="hidden sm:inline">Create</span>
+                    </button>
+
+                    <div className="h-11 px-4 rounded-full bg-surface-hover border border-border flex items-center gap-2 cursor-pointer hover:bg-surface-active hover:scale-105 active:scale-95 transition-all">
+                        <Flame size={18} className="text-orange-500 fill-orange-500" />
+                        <span className="text-base font-bold text-foreground">0</span>
+                    </div>
+
+                    <button
+                        onClick={toggleTheme}
+                        className="h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center"
+                    >
+                        {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+                </div>
+            </header>
+
+            {/* Sticky Header exactly as in dashvis - adjusted for top bar */}
+            <div className="sticky top-16 z-10 bg-surface">
                 <div className="max-w-4xl mx-auto px-6 pt-8 pb-4">
                     <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold font-heading text-foreground mb-2">Library</h1>
-                            <p className="text-foreground-secondary">Manage and organize all your study materials here.</p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => setIsCreateModalOpen(true)}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-brand-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                            >
-                                <Plus size={18} />
-                                <span className="hidden sm:inline">New Library</span>
-                            </button>
+                            <h1 className="text-3xl font-bold font-heading text-foreground mb-2">My Deck</h1>
+                            <p className="text-foreground-secondary">Organize your sets</p>
                         </div>
                     </div>
 
@@ -216,30 +320,45 @@ export default function MyDecksPage() {
             </div>
 
             <div className="max-w-4xl mx-auto px-6 py-8 pb-40">
-                {activeTab === 'Library' && (
+                {activeTab === 'My Deck' && (
                     <div>
-                        <h4 className="text-xs font-bold text-foreground-secondary uppercase tracking-wider mb-4">Library</h4>
-                        {loading || decksLoading ? (
-                            <div className="space-y-3">
+                        <h4 className="text-xs font-bold text-foreground-secondary uppercase tracking-wider mb-4">My Deck</h4>
+                        {decksLoading ? (
+                            <div className="space-y-4">
                                 {[1, 2, 3].map((i) => (
-                                    <div key={i} className="h-20 rounded-2xl bg-surface-hover/40 border border-border animate-pulse" />
+                                    <div key={i} className="flex items-center gap-4 p-5 rounded-2xl bg-surface/50 border border-border animate-pulse">
+                                        <div className="w-4 h-4 rounded-full bg-foreground/10" />
+                                        <div className="flex-1 space-y-2">
+                                            <div className="h-4 w-1/3 bg-foreground/10 rounded-full" />
+                                            <div className="h-3 w-1/4 bg-foreground/5 rounded-full" />
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         ) : workspaces.length === 0 ? (
-                            <button
-                                type="button"
-                                onClick={() => setIsCreateModalOpen(true)}
-                                className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all"
-                            >
-                                <Plus size={20} />
-                                <span className="font-medium">New Library</span>
-                            </button>
+                            <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-surface/30 border border-border border-dashed rounded-[2rem] animate-in fade-in zoom-in duration-700">
+                                <div className="w-20 h-20 rounded-3xl bg-brand-primary/10 flex items-center justify-center mb-6">
+                                    <FolderOpen size={40} className="text-brand-primary" />
+                                </div>
+                                <h3 className="text-2xl font-black text-foreground mb-3 tracking-tight">Your deck is empty</h3>
+                                <p className="text-foreground-secondary max-w-sm mb-8 leading-relaxed font-medium">
+                                    Create your first workspace to start organizing your flashcards, lectures, and study guides.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCreateModalOpen(true)}
+                                    className="px-8 py-3.5 bg-brand-primary text-white font-black rounded-2xl shadow-lg shadow-brand-primary/20 hover:shadow-xl hover:shadow-brand-primary/30 hover:-translate-y-0.5 transition-all flex items-center gap-2.5"
+                                >
+                                    <Plus size={20} />
+                                    <span>Create Workspace</span>
+                                </button>
+                            </div>
                         ) : (
                             <div className="flex flex-col gap-3">
                                 {workspaces.map((ws) => (
                                     <div
                                         key={ws.id}
-                                        className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-5 hover:border-brand-primary/50 transition-all shadow-sm relative"
+                                        className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/50 transition-all shadow-sm relative"
                                     >
                                         <button
                                             type="button"
@@ -349,9 +468,7 @@ export default function MyDecksPage() {
                             </div>
                         ) : lectures.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border rounded-3xl bg-surface-hover/20">
-                                <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mb-4">
-                                    <Mic size={32} className="text-red-500" />
-                                </div>
+
                                 <h3 className="text-xl font-bold mb-2 text-foreground">No lectures yet</h3>
                                 <p className="text-foreground-secondary text-sm max-w-sm font-medium">
                                     Your recorded lectures and transcripts will appear here.
@@ -361,15 +478,13 @@ export default function MyDecksPage() {
                             lectures.map((n) => (
                                 <div
                                     key={n.id}
-                                    className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-5 hover:border-brand-primary/30 transition-all shadow-sm relative cursor-pointer"
+                                    className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/30 transition-all shadow-sm relative cursor-pointer"
                                     onClick={() => navigate(`/dashboard/transcripts/${n.id}`)}
                                 >
                                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                                        <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
-                                            <Mic size={20} className="text-red-500" />
-                                        </div>
+
                                         <div className="flex flex-col min-w-0">
-                                            <h3 className="text-lg font-bold text-foreground group-hover:text-brand-primary transition-colors mb-1 truncate">
+                                            <h3 className="font-bold text-foreground group-hover:text-brand-primary transition-colors mb-0.5 truncate">
                                                 {n.title}
                                             </h3>
                                             <div className="flex items-center gap-2 text-sm text-foreground-secondary font-medium">
@@ -396,9 +511,7 @@ export default function MyDecksPage() {
                             </div>
                         ) : studyGuides.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border rounded-3xl bg-surface-hover/20">
-                                <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-4">
-                                    <BookMarked size={32} className="text-amber-500" />
-                                </div>
+
                                 <h3 className="text-xl font-bold mb-2 text-foreground">No study guides yet</h3>
                                 <p className="text-foreground-secondary text-sm max-w-sm font-medium">
                                     Generated study guides from your account will appear here.
@@ -408,20 +521,118 @@ export default function MyDecksPage() {
                             studyGuides.map((g) => (
                                 <div
                                     key={g.id}
-                                    className="flex items-center justify-between bg-surface border border-border rounded-2xl p-5 hover:border-brand-primary/30 transition-all shadow-sm"
+                                    onClick={() => navigate(`/dashboard/study-guides/${g.id}`)}
+                                    className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/30 transition-all shadow-sm cursor-pointer"
                                 >
                                     <div className="flex items-center gap-4 min-w-0">
-                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                                            <BookMarked size={20} className="text-amber-500" />
-                                        </div>
+
                                         <div className="min-w-0">
-                                            <h3 className="text-lg font-bold text-foreground mb-1 truncate">{g.title}</h3>
+                                            <h3 className="font-bold text-foreground mb-0.5 truncate">{g.title}</h3>
                                             {g.topic && <p className="text-sm text-foreground-secondary font-medium truncate">{g.topic}</p>}
                                         </div>
                                     </div>
-                                    <ChevronRight size={20} className="text-zinc-300" />
+                                    <ChevronRight size={20} className="text-zinc-300 group-hover:text-brand-primary transition-colors" />
                                 </div>
                             ))
+                        )}
+                    </div>
+                )}
+
+                {activeTab === 'Trash' && (
+                    <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-xs font-bold text-foreground-secondary uppercase tracking-wider">Deleted Items</h4>
+                            {(deletedItems.workspaces.length > 0 || deletedItems.decks.length > 0 || deletedItems.lectures.length > 0 || deletedItems.studyGuides.length > 0 || deletedItems.practiceTests.length > 0) && (
+                                <button
+                                    onClick={handleEmptyTrash}
+                                    className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors flex items-center gap-1.5"
+                                >
+                                    <Trash2 size={14} />
+                                    Empty Trash
+                                </button>
+                            )}
+                        </div>
+                        {(deletedItems.workspaces.length === 0 && deletedItems.decks.length === 0 && deletedItems.lectures.length === 0 && deletedItems.studyGuides.length === 0 && deletedItems.practiceTests.length === 0) ? (
+                            <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border rounded-3xl bg-surface-hover/20">
+                                <div className="w-16 h-16 bg-zinc-500/10 rounded-2xl flex items-center justify-center mb-4">
+                                    <Trash2 size={32} className="text-zinc-500" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2 text-foreground">Trash is empty</h3>
+                                <p className="text-foreground-secondary text-sm max-w-sm font-medium">
+                                    Items you delete will stay here for 30 days before being permanently removed.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-3">
+                                {deletedItems.workspaces.map(ws => (
+                                    <div key={ws.id} className="flex items-center justify-between bg-surface/50 border border-border border-dashed rounded-2xl p-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ws.color }} />
+                                            <span className="font-bold text-foreground/60">{ws.name} (Set)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => handleRestore(ws.id, 'workspace')} className="px-3 py-1.5 text-xs font-bold text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors">Restore</button>
+                                            <button onClick={() => handlePermanentDelete(ws.id, 'workspace')} className="px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">Delete Forever</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {deletedItems.decks.map(deck => (
+                                    <div key={deck.id} className="flex items-center justify-between bg-surface/50 border border-border border-dashed rounded-2xl p-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-8 h-8 bg-zinc-500/10 rounded-lg flex items-center justify-center">
+                                                <Layers size={16} className="text-zinc-500" />
+                                            </div>
+                                            <span className="font-bold text-foreground/60">{deck.title} (Deck)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => handleRestore(deck.id, 'deck')} className="px-3 py-1.5 text-xs font-bold text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors">Restore</button>
+                                            <button onClick={() => handlePermanentDelete(deck.id, 'deck')} className="px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">Delete Forever</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {deletedItems.lectures.map(lec => (
+                                    <div key={lec.id} className="flex items-center justify-between bg-surface/50 border border-border border-dashed rounded-2xl p-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center">
+                                                <Mic size={16} className="text-red-500" />
+                                            </div>
+                                            <span className="font-bold text-foreground/60">{lec.title} (Lecture)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => handleRestore(lec.id, 'lecture')} className="px-3 py-1.5 text-xs font-bold text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors">Restore</button>
+                                            <button onClick={() => handlePermanentDelete(lec.id, 'lecture')} className="px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">Delete Forever</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {deletedItems.studyGuides.map(guide => (
+                                    <div key={guide.id} className="flex items-center justify-between bg-surface/50 border border-border border-dashed rounded-2xl p-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                                                <BookMarked size={16} className="text-amber-500" />
+                                            </div>
+                                            <span className="font-bold text-foreground/60">{guide.title} (Study Guide)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => handleRestore(guide.id, 'studyGuide')} className="px-3 py-1.5 text-xs font-bold text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors">Restore</button>
+                                            <button onClick={() => handlePermanentDelete(guide.id, 'studyGuide')} className="px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">Delete Forever</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {deletedItems.practiceTests.map(test => (
+                                    <div key={test.id} className="flex items-center justify-between bg-surface/50 border border-border border-dashed rounded-2xl p-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                                                <BookOpen size={16} className="text-emerald-500" />
+                                            </div>
+                                            <span className="font-bold text-foreground/60">{test.title} (Practice Test)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => handleRestore(test.id, 'practiceTest')} className="px-3 py-1.5 text-xs font-bold text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors">Restore</button>
+                                            <button onClick={() => handlePermanentDelete(test.id, 'practiceTest')} className="px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">Delete Forever</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         )}
                     </div>
                 )}
@@ -431,16 +642,16 @@ export default function MyDecksPage() {
             {(isCreateModalOpen || isCreateModalClosing) && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={closeCreateModal} />
-                    <div className={`bg-surface border border-border rounded-3xl p-6 w-full max-w-md shadow-2xl relative z-10 ${isCreateModalClosing ? 'popover-modal-closing' : 'popover-modal-animate'}`}>
+                    <div className={`bg-surface rounded-3xl p-6 w-full max-w-md shadow-2xl relative z-10 ${isCreateModalClosing ? 'popover-modal-closing' : 'popover-modal-animate'}`}>
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-foreground">New Library</h3>
+                            <h3 className="text-xl font-bold text-foreground">Create Deck</h3>
                             <button onClick={closeCreateModal} className="p-2 hover:bg-surface-hover rounded-full text-foreground-secondary transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-foreground-muted ml-1">Library Name</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-foreground-muted ml-1">Deck Name</label>
                                 <input
                                     className="w-full bg-surface-hover border border-border rounded-xl px-4 py-3 text-foreground font-bold focus:outline-none focus:border-brand-primary transition-colors"
                                     value={createName}
@@ -449,6 +660,39 @@ export default function MyDecksPage() {
                                     autoFocus
                                 />
                             </div>
+
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-foreground-muted ml-1">Color</label>
+                                <div className="grid grid-cols-4 gap-3">
+                                    {COLORS.map(color => (
+                                        <button
+                                            key={color}
+                                            type="button"
+                                            onClick={() => setCreateColor(color)}
+                                            className={`h-10 rounded-xl transition-all relative flex items-center justify-center ${createColor === color ? 'ring-2 ring-white scale-110 shadow-md z-10' : 'hover:scale-105 opacity-90 hover:opacity-100'}`}
+                                            style={{ backgroundColor: color }}
+                                        >
+                                            {createColor === color && (
+                                                <div className="absolute inset-0 ring-2 ring-white rounded-xl" />
+                                            )}
+                                        </button>
+                                    ))}
+                                    <div className="relative group/custom">
+                                        <input
+                                            type="color"
+                                            value={COLORS.includes(createColor) ? '#ffffff' : createColor}
+                                            onChange={(e) => setCreateColor(e.target.value)}
+                                            className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                                        />
+                                        <div 
+                                            className={`h-10 rounded-xl border-2 border-dashed border-border flex items-center justify-center transition-all ${!COLORS.includes(createColor) ? 'border-none ring-2 ring-white scale-110' : 'hover:bg-surface-hover'}`}
+                                            style={!COLORS.includes(createColor) ? { backgroundColor: createColor } : {}}
+                                        >
+                                            <Plus size={18} className={!COLORS.includes(createColor) ? 'text-white' : 'text-foreground-secondary'} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <button
                                 type="button"
                                 onClick={handleCreateSave}
@@ -456,7 +700,7 @@ export default function MyDecksPage() {
                                 className="w-full py-3.5 rounded-xl bg-brand-primary text-white font-bold shadow-lg shadow-brand-primary/20 hover:bg-brand-primary/90 transition-all disabled:opacity-50 active:scale-[0.98] flex items-center justify-center gap-2"
                             >
                                 {createSaving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-                                Create Library
+                                Create Deck
                             </button>
                         </div>
                     </div>
@@ -467,7 +711,7 @@ export default function MyDecksPage() {
             {(isRenameModalOpen || isRenameModalClosing) && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={closeRenameModal} />
-                    <div className={`bg-surface border border-border rounded-3xl p-6 w-full max-w-md shadow-2xl relative z-10 ${isRenameModalClosing ? 'popover-modal-closing' : 'popover-modal-animate'}`}>
+                    <div className={`bg-surface rounded-3xl p-6 w-full max-w-md shadow-2xl relative z-10 ${isRenameModalClosing ? 'popover-modal-closing' : 'popover-modal-animate'}`}>
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-foreground">Rename {renameTarget ? renameModalLabel(renameTarget.type) : 'Item'}</h3>
                             <button onClick={closeRenameModal} className="p-2 hover:bg-surface-hover rounded-full text-foreground-secondary transition-colors">
@@ -501,6 +745,12 @@ export default function MyDecksPage() {
                     </div>
                 </div>
             )}
+            {/* Unified Create Modal — uses shared CreateModal for mobile parity */}
+            <CreateModal 
+                isOpen={isUnifiedModalOpen} 
+                onClose={() => { setIsUnifiedModalOpen(false); setModalInitialStep(undefined); }}
+                initialStep={modalInitialStep}
+            />
         </div>
     );
 }

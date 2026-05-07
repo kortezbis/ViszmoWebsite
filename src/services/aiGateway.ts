@@ -90,3 +90,53 @@ export async function invokeAiGateway<T>(
 
     throw new Error(gatewayUserMessage(undefined, res.status));
 }
+
+// ——— Typed helpers (mirrors gemini.ts from iOS app) ———
+
+export interface ChatMessage {
+    role: 'user' | 'assistant';
+    text: string;
+}
+
+export const chatGeneral = (question: string, history: ChatMessage[] = []): Promise<{ reply: string }> =>
+    invokeAiGateway<{ reply: string }>('general_chat', { question, history });
+
+export interface PodcastScript {
+    title: string;
+    intro: string;
+    segments: {
+        speaker: string;
+        text: string;
+    }[];
+    outro: string;
+}
+
+export const generatePodcastScript = async (topic: string, content: string): Promise<PodcastScript> => {
+    const question = `Create a conversational podcast script (host-style) summarizing the following study material about "${topic}". 
+  The podcast should be engaging, educational, and easy to listen to. 
+  Include an intro, several segments with speaker names (e.g., "Host"), and an outro.
+  
+  Material:
+  ${content}
+  
+  Format the output as JSON with the following structure:
+  {
+    "title": "Podcast Title",
+    "intro": "Intro text...",
+    "segments": [{ "speaker": "Host", "text": "Segment text..." }],
+    "outro": "Outro text..."
+  }
+  
+  Return ONLY the JSON object, no other text.`;
+
+    const res = await invokeAiGateway<{ reply: string }>('general_chat', { question, history: [] });
+
+    try {
+        const jsonMatch = res.reply.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? jsonMatch[0] : res.reply;
+        return JSON.parse(jsonStr) as PodcastScript;
+    } catch (e) {
+        console.error('Failed to parse podcast script JSON:', e, res.reply);
+        throw new Error('AI returned an invalid podcast script format.');
+    }
+};

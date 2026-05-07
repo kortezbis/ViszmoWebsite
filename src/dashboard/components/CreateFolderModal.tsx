@@ -64,7 +64,7 @@ export function CreateWorkspaceModal({ isOpen, onClose, onCreate }: CreateWorksp
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ duration: 0.2 }}
-                        className="w-full max-w-md bg-white dark:bg-[#18181b] rounded-2xl border border-black/5 dark:border-white/10 shadow-xl overflow-hidden relative z-10 p-6"
+                        className="w-full max-w-md bg-white dark:bg-[#18181b] rounded-2xl shadow-xl overflow-hidden relative z-10 p-6"
                     >
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">New Workspace</h2>
