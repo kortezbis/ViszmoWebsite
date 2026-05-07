@@ -364,11 +364,11 @@ export function Layout({ children }: LayoutProps) {
             )}
 
             <div
-                className={`flex-1 min-h-screen overflow-y-auto transition-all duration-300 ${hideSidebar ? 'ml-0' : (isCollapsed ? 'ml-[80px]' : 'ml-[280px]')}`}
-                style={{ 
-                    width: hideSidebar ? '100%' : `calc(100% - ${isCollapsed ? 80 : 280}px)`,
-                    scrollbarGutter: 'stable'
-                }}
+            className={`flex-1 min-h-screen overflow-y-auto transition-all duration-300 ${hideSidebar ? 'ml-0' : (isCollapsed ? 'ml-[80px]' : 'ml-[240px]')}`}
+            style={{ 
+                width: hideSidebar ? '100%' : `calc(100% - ${isCollapsed ? 80 : 240}px)`,
+                scrollbarGutter: 'stable'
+            }}
             >
                 {children}
             </div>

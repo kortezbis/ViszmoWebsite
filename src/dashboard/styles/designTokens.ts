@@ -245,7 +245,7 @@ export const breakpoints = {
 
 export const layout = {
     sidebar: {
-        width: '280px',
+        width: '240px',
         collapsedWidth: '80px',
     },
     header: {

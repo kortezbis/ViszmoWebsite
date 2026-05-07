@@ -228,7 +228,7 @@ export function MinimalLayout({ children }: MinimalLayoutProps) {
                 className={
                     hideSidebar
                         ? 'min-h-screen w-full overflow-y-auto'
-                        : 'min-h-screen w-full overflow-y-auto pt-14 md:pt-0 transition-[margin] duration-200 ease-out md:ml-[280px] md:w-[calc(100%-280px)]'
+                        : 'min-h-screen w-full overflow-y-auto pt-14 md:pt-0 transition-[margin] duration-200 ease-out md:ml-[240px] md:w-[calc(100%-240px)]'
                 }
             >
                 {children}
