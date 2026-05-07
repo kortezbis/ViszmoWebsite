@@ -42,8 +42,8 @@ export const Pricing = () => {
         {
             id: 'plus',
             name: 'Plus',
-            monthly: { price: 8.99, period: '/mo' },
-            annual: { price: 6.74, period: '/mo', total: 80.88, label: 'Billed $80.88/year' },
+            monthly: { price: 11.99, period: '/mo' },
+            annual: { price: 8.99, period: '/mo', total: 107.88, label: 'Billed $107.88/year' },
             features: [
                 'Best for beginners',
                 '500 AI messages/day',
@@ -57,8 +57,8 @@ export const Pricing = () => {
         {
             id: 'pro',
             name: 'Pro',
-            monthly: { price: 16.99, period: '/mo' },
-            annual: { price: 12.74, period: '/mo', total: 152.88, label: 'Billed $152.88/year' },
+            monthly: { price: 19.99, period: '/mo' },
+            annual: { price: 14.99, period: '/mo', total: 179.88, label: 'Billed $179.88/year' },
             features: [
                 'Best for long-term learning',
                 'Unlimited AI messages',
