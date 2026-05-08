@@ -78,7 +78,7 @@ const FAQItem = ({ question, answer, isOpen, onClick }: { question: string; answ
     );
 };
 
-export const StudyOverlayPage = () => {
+export const StudyOverlayPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
     const navigate = useNavigate();
     const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
@@ -86,7 +86,7 @@ export const StudyOverlayPage = () => {
         {
             icon: <Download className="w-10 h-10 text-blue-500" />,
             title: "Download & Install",
-            description: "Get Viszmo for Windows. Installation takes less than a minute. Your AI sidekick is ready to go immediately."
+            description: "Create your account. Get started in less than a minute. Your AI sidekick is ready to go immediately."
         },
         {
             icon: <Zap className="w-10 h-10 text-indigo-500" />,
@@ -174,8 +174,8 @@ export const StudyOverlayPage = () => {
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                             <div className="btn-wrapper">
-                                <button className="btn" onClick={() => navigate('/dashboard')}>
-                                    <span className="btn-text">Go to Dashboard</span>
+                                <button className="btn" onClick={() => onOpenDownload?.()}>
+                                    <span className="btn-text">Download Now</span>
                                 </button>
                             </div>
                             <button 
@@ -223,18 +223,50 @@ export const StudyOverlayPage = () => {
                                 </div>
                                 {/* Mock Overlay UI */}
                                 <motion.div 
-                                    animate={{ y: [0, -10, 0] }}
-                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                    className="absolute top-8 right-8 w-64 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-slate-100"
+                                    animate={{ y: [0, -8, 0] }}
+                                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                                    className="absolute top-8 right-8 w-72 bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl p-4 border border-white/20 overflow-hidden"
                                 >
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-6 h-6 bg-[#0ea5e9] rounded-md" />
-                                        <div className="h-2 w-20 bg-slate-200 rounded-full" />
+                                    {/* Mock Top Bar */}
+                                    <div className="flex items-center justify-between mb-4 px-1">
+                                        <div className="flex gap-1">
+                                            <div className="w-2 h-2 rounded-full bg-slate-200" />
+                                            <div className="w-2 h-2 rounded-full bg-slate-200" />
+                                        </div>
+                                        <div className="flex items-center gap-2 bg-slate-100/50 rounded-full px-3 py-1">
+                                            <div className="w-2 h-2 rounded-full bg-[#0ea5e9] animate-pulse" />
+                                            <div className="h-1.5 w-12 bg-slate-300 rounded-full" />
+                                        </div>
+                                        <div className="w-5 h-5 rounded-full bg-slate-100" />
                                     </div>
-                                    <div className="space-y-2">
-                                        <div className="h-1.5 w-full bg-slate-100 rounded-full" />
-                                        <div className="h-1.5 w-full bg-slate-100 rounded-full" />
-                                        <div className="h-1.5 w-2/3 bg-slate-100 rounded-full" />
+
+                                    {/* Mock Search Bar */}
+                                    <div className="h-10 w-full bg-slate-50 border border-slate-100 rounded-xl mb-4 flex items-center px-3 gap-2">
+                                        <Search className="w-4 h-4 text-slate-300" />
+                                        <div className="h-2 w-24 bg-slate-200 rounded-full" />
+                                        <div className="ml-auto w-6 h-6 bg-[#0ea5e9]/10 rounded-lg flex items-center justify-center">
+                                            <div className="w-3 h-3 text-[#0ea5e9]">
+                                                <ArrowRight className="w-full h-full" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Mock Message */}
+                                    <div className="space-y-3">
+                                        <div className="flex gap-2">
+                                            <div className="w-6 h-6 rounded-full bg-slate-100 flex-shrink-0" />
+                                            <div className="space-y-1.5 flex-1">
+                                                <div className="h-2 w-full bg-slate-100 rounded-full" />
+                                                <div className="h-2 w-5/6 bg-slate-100 rounded-full" />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 flex-row-reverse">
+                                            <div className="w-6 h-6 rounded-full bg-[#0ea5e9]/10 flex-shrink-0" />
+                                            <div className="space-y-1.5 flex-1 flex flex-col items-end">
+                                                <div className="h-2 w-full bg-slate-100 rounded-full" />
+                                                <div className="h-2 w-4/6 bg-slate-100 rounded-full" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </motion.div>
                             </div>
@@ -371,8 +403,8 @@ export const StudyOverlayPage = () => {
                     
                     <div className="flex flex-col items-center gap-8">
                         <div className="btn-wrapper scale-110">
-                            <button className="btn" onClick={() => navigate('/dashboard')}>
-                                <span className="btn-text">Get Started Now</span>
+                            <button className="btn" onClick={() => onOpenDownload?.()}>
+                                <span className="btn-text">Get Viszmo Free</span>
                             </button>
                         </div>
                         <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest uppercase">

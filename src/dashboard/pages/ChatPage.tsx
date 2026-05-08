@@ -181,10 +181,10 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans">
+    <div className="flex h-screen text-foreground overflow-hidden font-sans">
       {/* Chat History Sidebar */}
       <div 
-        className={`bg-surface border-r border-border flex flex-col transition-all duration-300 overflow-hidden ${
+        className={`bg-surface flex flex-col transition-all duration-300 overflow-hidden ${
           isHistoryOpen ? 'w-72' : 'w-0 opacity-0 pointer-events-none'
         }`}
       >
@@ -241,7 +241,7 @@ export default function ChatPage() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col relative min-w-0">
         {/* Header */}
-        <header className="h-16 flex items-center justify-between px-4 z-10 border-b border-border md:border-none">
+        <header className="h-16 flex items-center justify-between px-4 z-10">
           <div className="flex items-center gap-2">
             <button 
                 onClick={() => setIsHistoryOpen(!isHistoryOpen)}

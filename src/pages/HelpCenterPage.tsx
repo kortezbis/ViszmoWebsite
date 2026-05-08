@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { StaticPageLayout } from '../components/StaticPageLayout';
+import { SEO } from '../dashboard/components/SEO';
 import { Download, Zap, Users, HelpCircle, Monitor, Layout, AlertTriangle, MessageSquare, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export const HelpCenterPage = () => {
+export const HelpCenterPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
     return (
+        <>
+            <SEO 
+                title="Help Center & FAQ | Viszmo" 
+                description="Find answers to common questions about Viszmo. Learn how to use the AI overlay, generate study materials, and troubleshoot common issues." 
+                noindex={false} 
+            />
         <StaticPageLayout
             title="How can we help?"
             subtitle="Find answers to common questions, learn how to use Viszmo, and get support when you need it."
@@ -13,13 +20,16 @@ export const HelpCenterPage = () => {
 
             {/* Top Quick Links */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-                <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100/50 hover:bg-white hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5 transition-all group text-center cursor-pointer">
+                <div 
+                    onClick={() => onOpenDownload?.()}
+                    className="p-6 rounded-2xl bg-slate-50 border border-slate-100/50 hover:bg-white hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5 transition-all group text-center cursor-pointer"
+                >
                     <div className="mx-auto text-[#0ea5e9] mb-6 group-hover:scale-110 transition-transform">
                         <Download className="w-10 h-10 mx-auto" />
                     </div>
                     <div className="group inline-block bg-[#0ea5e9] shadow-[#0ea5e9]/20 -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105 mb-2">
                         <h3 className="text-sm font-black text-white uppercase tracking-wider transform skew-x-12 transition-all duration-300 group-hover:skew-x-0 whitespace-nowrap">
-                            Download Viszmo
+                            Download Now
                         </h3>
                     </div>
                     <p className="text-xs text-slate-500 font-medium mt-2">Get started for free</p>
@@ -218,6 +228,7 @@ export const HelpCenterPage = () => {
                 </p>
             </div>
         </StaticPageLayout>
+        </>
     );
 };
 

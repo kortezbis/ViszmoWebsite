@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Logo } from '../components/Logo';
+import { SEO } from '../dashboard/components/SEO';
 
 export const LoginPage = () => {
     const navigate = useNavigate();
@@ -95,6 +96,11 @@ export const LoginPage = () => {
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 md:py-12 relative z-10 w-full">
+            <SEO 
+                title="Login" 
+                description="Log in to your Viszmo account to access your AI study tools, flashcards, and lecture transcripts." 
+                noindex={false} 
+            />
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

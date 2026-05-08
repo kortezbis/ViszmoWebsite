@@ -7,11 +7,34 @@ import { SetPasswordModal } from '../components/SetPasswordModal';
 import { Navbar } from '../components/Navbar';
 
 import { useAuth } from '../lib/auth';
+import { supabase } from '../lib/supabase';
 
 export const AccountPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
-    const { userEmail, userName, userIdentities } = useAuth();
+    const { userEmail, userName, userIdentities, getToken } = useAuth();
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isConnecting, setIsConnecting] = useState<string | null>(null);
+    const [isPortalLoading, setIsPortalLoading] = useState(false);
+
+    const handleManageSubscription = async () => {
+        setIsPortalLoading(true);
+        try {
+            const { data, error } = await supabase.functions.invoke('stripe-portal', {
+                body: { returnUrl: window.location.href }
+            });
+
+            if (error) throw error;
+            if (data?.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error('No portal URL returned');
+            }
+        } catch (err: any) {
+            console.error('Portal error:', err);
+            alert('Failed to open billing portal: ' + (err.message || 'Please ensure you have an active subscription.'));
+        } finally {
+            setIsPortalLoading(null);
+        }
+    };
 
     const isGoogleConnected = userIdentities?.some(id => id.provider === 'google');
     const isAppleConnected = userIdentities?.some(id => id.provider === 'apple');
@@ -207,9 +230,25 @@ export const AccountPage = ({ onOpenDownload }: { onOpenDownload?: () => void })
                         <div className="p-8 md:p-12">
                             <h2 className="text-xl font-black text-slate-900 mb-6">Billing History</h2>
 
-                            {/* Empty State */}
+                            {/* Empty State / Manage Button */}
                             <div className="text-center py-12">
-                                <div className="text-slate-400 text-sm font-medium">No billing history yet</div>
+                                <button
+                                    onClick={handleManageSubscription}
+                                    disabled={isPortalLoading}
+                                    className="px-6 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all disabled:opacity-50 flex items-center gap-2 mx-auto"
+                                >
+                                    {isPortalLoading ? (
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                    )}
+                                    Manage Subscription & Billing
+                                </button>
+                                <p className="text-xs text-slate-500 mt-4 font-medium">
+                                    Update your payment method, download invoices, or change your plan.
+                                </p>
                             </div>
                         </div>
                     </motion.div>

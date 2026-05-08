@@ -9,6 +9,7 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { db, type StudyGuide } from '../../services/database';
+import { SEO } from '../components/SEO';
 
 const CHAT_STARTERS: { label: string; prompt: string }[] = [
     {
@@ -62,6 +63,7 @@ export default function StudyGuideDetailPage() {
 
     return (
         <div className="p-8 max-w-4xl mx-auto min-h-screen pb-24">
+            <SEO title={guide?.title || 'Study Guide'} description={`Comprehensive study guide for ${guide?.title || 'your topic'}. Powered by Viszmo AI.`} />
             <FadeInUp>
                 <div className="mb-8">
                     <Link

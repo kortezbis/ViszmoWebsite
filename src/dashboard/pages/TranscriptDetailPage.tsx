@@ -10,6 +10,7 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { db, type LectureNote } from '../../services/database';
+import { SEO } from '../components/SEO';
 
 /** Same starter prompts as mobile `lecture-details` (transcript chat chips) — shared behavior via Study Chat + `transcript_chat` API. */
 const CHAT_STARTERS: { label: string; prompt: string }[] = [
@@ -67,6 +68,7 @@ export default function TranscriptDetailPage() {
 
     return (
         <div className="p-8 max-w-4xl mx-auto min-h-screen pb-24">
+            <SEO title={note?.title || 'Lecture Transcript'} description={`View transcript and summary for ${note?.title || 'this lecture'}.`} />
             <FadeInUp>
                 <div className="mb-8">
                     <Link

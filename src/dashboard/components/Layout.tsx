@@ -320,6 +320,7 @@ function Sidebar({
                 </div>
 
                 <button
+                    onClick={() => navigate('/pricing')}
                     className={`btn-primary w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-brand-primary/25 mt-2 ${isCollapsed ? 'px-0' : 'px-5'}`}
                     title={isCollapsed ? "Upgrade to Pro" : ""}
                 >

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { db } from '../../services/database';
 
 // ============================================
 // TYPES
@@ -169,35 +170,74 @@ function calculateNextReview(
 // ============================================
 
 export function StudyProgressProvider({ children }: { children: ReactNode }) {
-    // Load initial state from localStorage
-    const [cardProgress, setCardProgress] = useState<Record<string, CardProgress>>(() => {
-        try {
-            const saved = localStorage.getItem('studylayer_card_progress');
-            return saved ? JSON.parse(saved) : {};
-        } catch {
-            return {};
-        }
-    });
+    const [cardProgress, setCardProgress] = useState<Record<string, CardProgress>>({});
+    const [sessions, setSessions] = useState<StudySession[]>([]);
+    const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
 
-    const [sessions, setSessions] = useState<StudySession[]>(() => {
-        try {
-            const saved = localStorage.getItem('studylayer_sessions');
-            return saved ? JSON.parse(saved) : [];
-        } catch {
-            return [];
-        }
-    });
+    // Load initial state from DB on mount
+    useEffect(() => {
+        const syncFromDB = async () => {
+            try {
+                const [dbSessions, streakInfo, dbProgress] = await Promise.all([
+                    db.getStudySessions(),
+                    db.getStreakInfo(),
+                    db.getStudyProgress()
+                ]);
 
-    const [dailyStats, setDailyStats] = useState<DailyStats[]>(() => {
-        try {
-            const saved = localStorage.getItem('studylayer_daily_stats');
-            return saved ? JSON.parse(saved) : [];
-        } catch {
-            return [];
-        }
-    });
+                if (dbSessions.length > 0) {
+                    setSessions(dbSessions.map(s => ({
+                        id: s.id,
+                        deckId: s.deck_id,
+                        startTime: s.start_time,
+                        endTime: s.end_time,
+                        cardsStudied: s.cards_studied,
+                        correctCount: s.correct_count,
+                        somewhatCount: s.somewhat_count,
+                        wrongCount: s.wrong_count
+                    })));
+                }
 
-    // Persist to localStorage
+                if (Object.keys(dbProgress).length > 0) {
+                    setCardProgress(dbProgress);
+                }
+
+                // Note: dailyStats is still mostly useful for local rendering, 
+                // but we should compute it from sessions to be accurate with DB.
+                if (dbSessions.length > 0) {
+                    const statsMap: Record<string, DailyStats> = {};
+                    dbSessions.forEach(s => {
+                        const date = s.start_time.split('T')[0];
+                        if (!statsMap[date]) {
+                            statsMap[date] = {
+                                date,
+                                cardsStudied: 0,
+                                timeSpentMinutes: 0,
+                                correctCount: 0,
+                                somewhatCount: 0,
+                                wrongCount: 0
+                            };
+                        }
+                        statsMap[date].cardsStudied += s.cards_studied;
+                        statsMap[date].correctCount += s.correct_count;
+                        statsMap[date].somewhatCount += s.somewhat_count;
+                        statsMap[date].wrongCount += s.wrong_count;
+                        
+                        if (s.end_time) {
+                            const start = new Date(s.start_time).getTime();
+                            const end = new Date(s.end_time).getTime();
+                            statsMap[date].timeSpentMinutes += Math.round((end - start) / 60000);
+                        }
+                    });
+                    setDailyStats(Object.values(statsMap));
+                }
+            } catch (e) {
+                console.error('Failed to sync study progress from DB', e);
+            }
+        };
+        void syncFromDB();
+    }, []);
+
+    // Persist to localStorage as fallback
     useEffect(() => {
         localStorage.setItem('studylayer_card_progress', JSON.stringify(cardProgress));
     }, [cardProgress]);
@@ -215,7 +255,7 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
 
     // ========== CARD PROGRESS ==========
 
-    const updateCardProgress = (deckId: string, cardId: string, rating: CardRating) => {
+    const updateCardProgress = async (deckId: string, cardId: string, rating: CardRating) => {
         const key = getProgressKey(deckId, cardId);
         const current = cardProgress[key] || null;
         const { interval, easeFactor, repetitions, status } = calculateNextReview(current, rating);
@@ -242,7 +282,14 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
         setCardProgress(prev => ({ ...prev, [key]: updated }));
 
         // Update daily stats
-        updateDailyStats(rating);
+        void updateDailyStats(rating);
+        
+        // Sync to DB
+        try {
+            await db.saveStudyProgress(updated);
+        } catch (e) {
+            console.error('Failed to sync card progress to DB', e);
+        }
     };
 
     const getCardProgress = (deckId: string, cardId: string): CardProgress | null => {
@@ -371,12 +418,16 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
         return session.id;
     };
 
-    const endSession = (sessionId: string) => {
-        setSessions(prev => prev.map(s =>
-            s.id === sessionId
-                ? { ...s, endTime: new Date().toISOString() }
-                : s
-        ));
+    const endSession = async (sessionId: string) => {
+        setSessions(prev => {
+            const session = prev.find(s => s.id === sessionId);
+            if (session) {
+                const updated = { ...session, endTime: new Date().toISOString() };
+                void db.saveStudySession(updated);
+                return prev.map(s => s.id === sessionId ? updated : s);
+            }
+            return prev;
+        });
     };
 
     const recordCardResult = (sessionId: string, rating: CardRating) => {
@@ -402,13 +453,14 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
         return `${year}-${month}-${day}`;
     };
 
-    const updateDailyStats = (rating: CardRating) => {
+    const updateDailyStats = async (rating: CardRating) => {
         const today = getTodayKey();
 
         setDailyStats(prev => {
             const existing = prev.find(d => d.date === today);
+            let updatedStats: DailyStats[];
             if (existing) {
-                return prev.map(d => d.date === today ? {
+                updatedStats = prev.map(d => d.date === today ? {
                     ...d,
                     cardsStudied: d.cardsStudied + 1,
                     correctCount: d.correctCount + (rating === 'know' ? 1 : 0),
@@ -416,7 +468,7 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
                     wrongCount: d.wrongCount + (rating === 'still-learning' ? 1 : 0),
                 } : d);
             } else {
-                return [...prev, {
+                updatedStats = [...prev, {
                     date: today,
                     cardsStudied: 1,
                     timeSpentMinutes: 0, // Track separately if needed
@@ -425,6 +477,53 @@ export function StudyProgressProvider({ children }: { children: ReactNode }) {
                     wrongCount: rating === 'still-learning' ? 1 : 0,
                 }];
             }
+            
+            // Sync streak to DB whenever stats change
+            const sortedDates = updatedStats
+                .filter(d => d.cardsStudied > 0)
+                .map(d => d.date)
+                .sort((a, b) => b.localeCompare(a));
+            
+            // Compute streak
+            let streakCount = 0;
+            if (sortedDates.length > 0) {
+                const now = new Date();
+                const todayKey = today;
+                
+                const yesterdayDate = new Date();
+                yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+                const yKey = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth() + 1).padStart(2, '0')}-${String(yesterdayDate.getDate()).padStart(2, '0')}`;
+                
+                if (sortedDates[0] === todayKey || sortedDates[0] === yKey) {
+                    let checkDate = new Date(sortedDates[0] === todayKey ? now : yesterdayDate);
+                    for (let i = 0; i < sortedDates.length; i++) {
+                        const key = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+                        if (sortedDates.includes(key)) {
+                            streakCount++;
+                            checkDate.setDate(checkDate.getDate() - 1);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Push to DB
+            void db.getStreakInfo().then(info => {
+                const data = info.streak_data || {};
+                const daysStudied = data.daysStudied || [];
+                if (!daysStudied.includes(today)) {
+                    daysStudied.push(today);
+                }
+                void db.updateStreakInfo(streakCount, {
+                    ...data,
+                    daysStudied,
+                    streakCount,
+                    lastStudied: today
+                });
+            });
+
+            return updatedStats;
         });
     };
 

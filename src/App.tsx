@@ -107,6 +107,8 @@ const STICKER_POSITIONS_MOBILE = [
   { top: '85%', left: '5%', rotate: '-5deg', scale: 0.4 },
 ];
 
+import { SEO } from './dashboard/components/SEO';
+
 function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => void, onOpenAuth: (view: 'login' | 'signup') => void }) {
     const { isSignedIn } = useAuth();
     const navigate = useNavigate();
@@ -231,6 +233,11 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
         width: '100%'
       }}
     >
+      <SEO 
+        title="Viszmo | #1 AI Study Sidekick with Screen Overlay & Live Transcription" 
+        description="The ultimate AI study tool with screen overlay and live lecture transcription. Access exclusive AI study modes no one else has. Plus, new features and study tools updated weekly." 
+        noindex={false} 
+      />
       {/* LandingPage Content */}
 
 
@@ -314,11 +321,11 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
           {/* Get for Windows Button - Centered */}
           <div className="btn-wrapper">
-            <button className="btn" onClick={() => isSignedIn ? navigate('/dashboard') : onOpenAuth('signup')}>
+            <button className="btn" onClick={() => onOpenDownload()}>
               <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                 <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
               </svg>
-              <span className="btn-text">{isSignedIn ? 'Go to Dashboard' : 'Get Started Free'}</span>
+              <span className="btn-text">Download Now</span>
             </button>
           </div>
 
@@ -725,9 +732,9 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                 <div className="btn-wrapper">
                   <button
                     className="btn"
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => onOpenDownload()}
                   >
-                    <span className="btn-text">Get Started</span>
+                    <span className="btn-text">Get Viszmo Free</span>
                   </button>
                 </div>
 
@@ -790,12 +797,12 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
         <Route path="/features" element={<FeaturesPage onOpenDownload={onOpenDownload} />} />
         <Route path="/pricing" element={<PricingPage onOpenDownload={onOpenDownload} />} />
         <Route path="/how-it-works" element={<HowItWorksPage onOpenDownload={onOpenDownload} />} />
-        <Route path="/study-overlay" element={<StudyOverlayPage />} />
+        <Route path="/study-overlay" element={<StudyOverlayPage onOpenDownload={onOpenDownload} />} />
 
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/contact" element={<ContactUsPage />} />
-        <Route path="/help" element={<HelpCenterPage />} />
+        <Route path="/help" element={<HelpCenterPage onOpenDownload={onOpenDownload} />} />
         <Route path="/account" element={
           <>
             <SignedIn>

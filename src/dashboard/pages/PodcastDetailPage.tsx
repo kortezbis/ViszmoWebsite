@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Play, Pause, Loader2, Podcast } from 'lucide-react';
 import { db, type PodcastRow } from '../../services/database';
+import { SEO } from '../components/SEO';
 
 export default function PodcastDetailPage() {
     const { podcastId } = useParams<{ podcastId: string }>();
@@ -64,6 +65,7 @@ export default function PodcastDetailPage() {
 
     return (
         <div className="w-full h-full overflow-y-auto bg-background text-foreground">
+            <SEO title={podcast?.title || 'AI Podcast'} description={`Listen to an AI-generated podcast summary for ${podcast?.title || 'your notes'}.`} />
             <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <button onClick={() => navigate(-1)} className="p-2 hover:bg-surface-hover rounded-full transition-colors">

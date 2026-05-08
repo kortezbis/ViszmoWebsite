@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { SEO } from '../dashboard/components/SEO';
 
 export const SignupPage = () => {
     const navigate = useNavigate();
@@ -104,6 +105,11 @@ export const SignupPage = () => {
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 md:py-12 relative z-10 w-full">
+            <SEO 
+                title="Sign Up" 
+                description="Create a free Viszmo account to start using the most advanced AI study sidekick for students." 
+                noindex={false} 
+            />
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}

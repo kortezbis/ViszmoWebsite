@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { SEO } from '../dashboard/components/SEO';
 
 
 import { useNavigate, Link } from 'react-router-dom';
@@ -60,6 +61,11 @@ export const HowItWorksPage = ({ onOpenDownload }: { onOpenDownload?: () => void
 
     return (
         <div className="min-h-screen bg-[#ffffff] font-sans text-slate-900 selection:bg-[#0ea5e9]/10 flex flex-col">
+            <SEO 
+                title="How Viszmo Works | Live Transcription & Screen Overlay" 
+                description="See how Viszmo's screen overlay and live lecture transcription give you an edge. Unlock exclusive AI study modes no one else has, with new features and study tools added every single week." 
+                noindex={false} 
+            />
             <main className="flex-1 relative pt-32">
                 {/* Hero Header */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-20">
@@ -186,9 +192,9 @@ export const HowItWorksPage = ({ onOpenDownload }: { onOpenDownload?: () => void
                                 <div className="btn-wrapper">
                                     <button
                                         className="btn"
-                                        onClick={() => navigate('/dashboard')}
+                                        onClick={() => onOpenDownload?.()}
                                     >
-                                        <span className="btn-text">Get Started</span>
+                                        <span className="btn-text">Get Viszmo Free</span>
                                     </button>
                                 </div>
                                 <div className="explore-btn-wrap" onClick={() => navigate('/pricing')}>

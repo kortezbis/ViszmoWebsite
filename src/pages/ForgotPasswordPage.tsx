@@ -29,6 +29,11 @@ export const ForgotPasswordPage = () => {
 
     return (
         <div className="min-h-screen bg-[#ffffff] font-sans text-slate-900 selection:bg-[#0ea5e9]/10 flex flex-col">
+            <SEO 
+                title="Forgot Password" 
+                description="Reset your Viszmo account password to regain access to your AI study tools." 
+                noindex={false} 
+            />
             {/* Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
                 <div className="absolute inset-0 bg-[#ffffff]" />

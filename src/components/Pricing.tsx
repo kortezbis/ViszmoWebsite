@@ -2,9 +2,13 @@ import { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Check, X, ChevronDown } from 'lucide-react';
 import { ReferralModal } from './ReferralModal';
-import { SubscriptionModal } from './SubscriptionModal';
+
+import { useAuth } from '../lib/auth';
+import { supabase } from '../lib/supabase';
+import { useAuthModal } from '../contexts/AuthModalContext';
 
 type BillingCycle = 'monthly' | 'annual';
+
 
 const AnimatedPrice = ({ value }: { value: number }) => {
     const count = useMotionValue(value);
@@ -24,14 +28,56 @@ const AnimatedPrice = ({ value }: { value: number }) => {
 export const Pricing = () => {
     const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
     const [isReferralModalOpen, setIsReferralModalOpen] = useState(false);
-    const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+    const [isRedirecting, setIsRedirecting] = useState<string | null>(null);
+    const { isSignedIn, getToken } = useAuth();
+    const { openAuthModal } = useAuthModal();
+
+    const handleSubscribe = async (planId: string) => {
+        if (!isSignedIn) {
+            openAuthModal('signup');
+            return;
+        }
+
+        setIsRedirecting(planId);
+        console.log('Starting checkout for plan:', planId);
+        try {
+            const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+                body: { 
+                    planId,
+                    successUrl: `${window.location.origin}/dashboard?checkout=success`,
+                    cancelUrl: `${window.location.origin}/pricing?checkout=cancelled`
+                }
+            });
+
+            if (error) throw error;
+            if (data?.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error('No checkout URL returned');
+            }
+        } catch (err: any) {
+            console.error('Checkout error:', err);
+            
+            // Try to extract the specific error message from the response body if possible
+            let errorMessage = err.message || 'Unknown error';
+            
+            // If it's a FunctionsHttpError, the detail might be in the response
+            if (err.context?.error) {
+                errorMessage = err.context.error.message || JSON.stringify(err.context.error);
+            }
+
+            alert('Failed to start checkout: ' + errorMessage);
+        } finally {
+            setIsRedirecting(null);
+        }
+    };
 
     const subscriptionPlans = [
         {
             id: 'weekly',
             name: 'Weekly',
-            monthly: { price: 5.99, period: '/wk' },
-            annual: { price: 5.99, period: '/wk', total: 5.99, label: '7-day access' },
+            monthly: { price: 7, period: '/wk' },
+            annual: { price: 7, period: '/wk', total: 7, label: '7-day access' },
             features: [
                 'Best for intensive sessions',
                 'Unlimited AI messages',
@@ -46,7 +92,7 @@ export const Pricing = () => {
             id: 'plus',
             name: 'Plus',
             monthly: { price: 11, period: '/mo' },
-            annual: { price: 8.25, period: '/mo', total: 99, label: 'Billed $99/year' },
+            annual: { price: 8, period: '/mo', total: 96, label: 'Billed $96/year' },
             features: [
                 'Best for beginners',
                 '500 AI messages/day',
@@ -61,7 +107,7 @@ export const Pricing = () => {
             id: 'pro',
             name: 'Pro',
             monthly: { price: 19, period: '/mo' },
-            annual: { price: 14.25, period: '/mo', total: 171, label: 'Billed $171/year' },
+            annual: { price: 14, period: '/mo', total: 168, label: 'Billed $168/year' },
             features: [
                 'Best for long-term learning',
                 'Unlimited AI messages',
@@ -171,7 +217,7 @@ export const Pricing = () => {
                                         </div>
                                         {billingCycle === 'annual' && (plan as any).annual.label && (
                                             <p className="text-xs text-emerald-600 font-medium bg-emerald-50 inline-block px-2 py-1 rounded-md">
-                                                {(plan as any).annual.label} <span className="opacity-60 mx-1">•</span> Save 25%
+                                                {(plan as any).annual.label} {plan.id !== 'weekly' && <><span className="opacity-60 mx-1">•</span> Save 25%</>}
                                             </p>
                                         )}
                                         <p className={`mt-4 text-sm ${plan.id === 'pro' ? 'pro-shimmer font-bold' : 'text-slate-500 font-medium'}`}>
@@ -181,10 +227,21 @@ export const Pricing = () => {
 
                                     <div className="mb-6 btn-wrapper w-full">
                                         <button
-                                            onClick={() => setIsSubscriptionModalOpen(true)}
-                                            className="btn btn-black w-full"
+                                            onClick={() => {
+                                                const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
+                                                handleSubscribe(id);
+                                            }}
+                                            disabled={!!isRedirecting}
+                                            className="btn btn-black w-full justify-center"
                                         >
-                                            <span className="btn-text">{plan.cta}</span>
+                                            {isRedirecting === (plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    <span className="btn-text">Processing...</span>
+                                                </div>
+                                            ) : (
+                                                <span className="btn-text">{plan.cta}</span>
+                                            )}
                                         </button>
                                     </div>
 
@@ -247,10 +304,18 @@ export const Pricing = () => {
 
                                                             <div className="btn-wrapper w-full max-w-[180px]">
                                                                 <button
-                                                                    onClick={() => setIsSubscriptionModalOpen(true)}
+                                                                    onClick={() => {
+                                                                        const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
+                                                                        handleSubscribe(id);
+                                                                    }}
+                                                                    disabled={!!isRedirecting}
                                                                     className="btn btn-black w-full flex items-center justify-center gap-2 h-11 transition-all duration-300"
                                                                 >
-                                                                    <span className="btn-text text-[13px] font-bold tracking-wide">{plan.cta}</span>
+                                                                    {isRedirecting === (plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
+                                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                                    ) : (
+                                                                        <span className="btn-text text-[13px] font-bold tracking-wide">{plan.cta}</span>
+                                                                    )}
                                                                     {plan.hasDropdown && <ChevronDown className="w-4 h-4 opacity-70" />}
                                                                 </button>
                                                             </div>
@@ -353,8 +418,27 @@ export const Pricing = () => {
                                                         </div>
                                                     );
                                                 })}
+                                            <div className="mt-8">
+                                                <button
+                                                    onClick={() => {
+                                                        const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
+                                                        handleSubscribe(id);
+                                                    }}
+                                                    disabled={!!isRedirecting}
+                                                    className="btn btn-black w-full justify-center"
+                                                >
+                                                    {isRedirecting === (plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                            <span className="btn-text">Processing...</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="btn-text">{plan.cta}</span>
+                                                    )}
+                                                </button>
                                             </div>
                                         </div>
+                                    </div>
                                     );
                                 })}
                         </div>
@@ -362,7 +446,6 @@ export const Pricing = () => {
                 </div>
             </div>
             <ReferralModal isOpen={isReferralModalOpen} onClose={() => setIsReferralModalOpen(false)} />
-            <SubscriptionModal isOpen={isSubscriptionModalOpen} onClose={() => setIsSubscriptionModalOpen(false)} />
         </section>
     );
 };

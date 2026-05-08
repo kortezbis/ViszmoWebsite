@@ -209,15 +209,13 @@ export default function GeneratePodcastForm({ workspaceId, onClose }: GeneratePo
                 
                 <div className="grid grid-cols-5 gap-2">
                     {(['workspace', 'lecture', 'guide', 'deck', 'text'] as const).map(type => (
-                        (!workspaceId && (type === 'lecture' || type === 'guide' || type === 'deck')) ? null : (
-                            <button
-                                key={type}
-                                onClick={() => setSelectedSourceType(type)}
-                                className={`py-2.5 rounded-xl border text-[9px] font-black uppercase tracking-tight transition-all ${selectedSourceType === type ? 'bg-brand-primary text-white border-brand-primary shadow-lg shadow-brand-primary/20' : 'bg-surface border-border text-foreground-secondary hover:border-foreground-muted'}`}
-                            >
-                                {type === 'workspace' ? 'All' : type === 'lecture' ? 'Note' : type === 'guide' ? 'Guide' : type === 'deck' ? 'Deck' : 'Text'}
-                            </button>
-                        )
+                        <button
+                            key={type}
+                            onClick={() => setSelectedSourceType(type)}
+                            className={`py-2.5 rounded-xl border text-[9px] font-black uppercase tracking-tight transition-all ${selectedSourceType === type ? 'bg-brand-primary text-white border-brand-primary shadow-lg shadow-brand-primary/20' : 'bg-surface border-border text-foreground-secondary hover:border-foreground-muted'}`}
+                        >
+                            {type === 'workspace' ? (workspaceId ? 'Deck' : 'All') : type === 'lecture' ? 'Note' : type === 'guide' ? 'Guide' : type === 'deck' ? 'Deck' : 'Text'}
+                        </button>
                     ))}
                 </div>
 

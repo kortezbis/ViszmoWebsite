@@ -1,6 +1,8 @@
 import { Pricing } from '../components/Pricing';
 import { PricingFAQ } from '../components/PricingFAQ';
 import { motion } from 'framer-motion';
+import { SEO } from '../dashboard/components/SEO';
+
 export const PricingPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
     return (
         <motion.div
@@ -10,6 +12,11 @@ export const PricingPage = ({ onOpenDownload }: { onOpenDownload?: () => void })
             transition={{ duration: 0.3 }}
             className="flex-1 flex flex-col bg-white selection:bg-[#0ea5e9]/10"
         >
+            <SEO 
+                title="Pricing Plans - Simple & Affordable AI Study Tools" 
+                description="Choose the right Viszmo plan for your study needs. Affordable AI-powered study assistance for students, from basic features to unlimited lecture transcription." 
+                noindex={false} 
+            />
             <div className="flex-1 relative pt-24">
                 <div className="transition-all duration-700">
                     <Pricing />

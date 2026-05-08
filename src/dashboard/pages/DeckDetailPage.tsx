@@ -19,6 +19,7 @@ import { FadeInUp } from '../components/ui/MotionWrapper';
 import { useDecks, getDeckCardCount } from '../contexts/DecksContext';
 import { db, type FlashcardRow, type LectureNote } from '../../services/database';
 import { CreateModal } from '../components/CreateModal';
+import { SEO } from '../components/SEO';
 
 type TabId = 'Cards' | 'Lectures' | 'Study Guides' | 'Podcasts';
 
@@ -136,6 +137,7 @@ export default function DeckDetailPage() {
                 setGenerateMenuOpen(false);
             }}
         >
+            <SEO title={deck?.title || 'Deck Details'} description={`Study flashcards and materials for ${deck?.title || 'your deck'}.`} />
             <div className="sticky top-14 md:top-0 z-10 bg-surface">
                 <div className="max-w-4xl mx-auto px-6 pt-8 pb-4">
                     <div className="flex items-center justify-between gap-4">
@@ -231,9 +233,27 @@ export default function DeckDetailPage() {
                                             </button>
                                             <button 
                                                 className="w-full flex items-start gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-surface-hover transition-colors"
+                                                onClick={() => {
+                                                    setModalInitialStep('podcast');
+                                                    setIsCreateModalOpen(true);
+                                                    setGenerateMenuOpen(false);
+                                                }}
+                                            >
+                                                <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
+                                                    <Podcast size={16} />
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-bold text-foreground">Podcast</div>
+                                                    <div className="text-[10px] text-foreground-secondary">Convert to audio</div>
+                                                </div>
+                                            </button>
+                                            <button 
+                                                className="w-full flex items-start gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-surface-hover transition-colors"
                                                 onClick={() => navigate('/dashboard/transcripts')}
                                             >
-
+                                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+                                                    <Mic size={16} />
+                                                </div>
                                                 <div>
                                                     <span className="block font-bold text-foreground text-sm">Lecture</span>
                                                     <span className="block text-xs text-foreground-secondary mt-0.5 leading-snug">

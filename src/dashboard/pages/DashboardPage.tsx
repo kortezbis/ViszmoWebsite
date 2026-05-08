@@ -18,6 +18,8 @@ import { useAuth } from '../../lib/auth';
 import { db, type DeckRow } from '../../services/database';
 import { useTheme } from '../contexts/ThemeContext';
 import { useDecks } from '../contexts/DecksContext';
+import { CreateModal } from '../components/CreateModal';
+import { SEO } from '../components/SEO';
 
 export default function DashboardPage() {
     const navigate = useNavigate();
@@ -26,6 +28,8 @@ export default function DashboardPage() {
     const { decks, decksLoading } = useDecks();
     const [recentDecks, setRecentDecks] = useState<DeckRow[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [modalInitialStep, setModalInitialStep] = useState<any>(undefined);
 
     const first = userName?.split(/\s+/)[0] || userEmail?.split('@')[0] || 'User';
 
@@ -49,7 +53,10 @@ export default function DashboardPage() {
             description: 'Start recording and let Viszmo turn them into notes.',
             icon: Mic,
             color: 'red',
-            action: () => navigate('/dashboard/decks?tab=lectures')
+            action: () => {
+                setModalInitialStep('record');
+                setIsCreateModalOpen(true);
+            }
         },
         {
             title: 'Flashcard Set',
@@ -59,8 +66,8 @@ export default function DashboardPage() {
             action: () => navigate('/dashboard/decks')
         },
         {
-            title: 'My Deck',
-            description: 'Organize your sets',
+            title: 'Library',
+            description: '',
             icon: FileText,
             color: 'indigo',
             action: () => navigate('/dashboard/decks')
@@ -76,8 +83,9 @@ export default function DashboardPage() {
 
     return (
         <div className="w-full h-full overflow-y-auto bg-background">
+            <SEO title="Dashboard" description="Your Viszmo study dashboard. Quick access to flashcards, lectures, and AI study tools." />
             {/* Header (Mirroring dashvis skeleton) */}
-            <header className="h-16 flex items-center px-6 shrink-0 relative gap-2 bg-surface border-b border-border sticky top-0 z-10">
+            <header className="h-16 flex items-center px-6 shrink-0 relative gap-2 sticky top-0 z-10">
                 <div className="flex-1 hidden md:block"></div>
 
                 {/* Centered Search Bar */}
@@ -95,7 +103,7 @@ export default function DashboardPage() {
                 {/* Header Actions */}
                 <div className="flex-1 flex justify-end items-center gap-3 shrink-0 ml-4 md:ml-0">
                     <button
-                        onClick={() => navigate('/dashboard/decks')}
+                        onClick={(e) => { e.stopPropagation(); setIsCreateModalOpen(true); }}
                         className="h-11 px-6 rounded-full bg-brand-primary text-white flex items-center gap-2 hover:bg-brand-primary/90 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-primary/20 font-bold text-sm shrink-0"
                     >
                         <Plus size={18} />
@@ -134,24 +142,23 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar -mx-2 px-2">
                         {actionCards.map((card, idx) => (
-                            <div
+                            <button
                                 key={idx}
-                                className="min-w-[280px] flex-1 bg-surface border border-border rounded-3xl p-6 flex flex-col justify-between hover:border-brand-primary/50 transition-all snap-start group shadow-sm hover:shadow-xl hover:shadow-brand-primary/5"
+                                onClick={card.action}
+                                className="min-w-[280px] flex-1 bg-surface border border-border rounded-3xl p-6 flex flex-col justify-between hover:border-brand-primary/50 transition-all snap-start group shadow-sm hover:shadow-xl hover:shadow-brand-primary/5 text-left"
                             >
                                 <div>
-
-                                    <h3 className="text-xl font-bold text-foreground mb-2">{card.title}</h3>
+                                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-brand-primary transition-colors">{card.title}</h3>
                                     <p className="text-sm text-foreground-secondary leading-relaxed mb-8 font-medium">
                                         {card.description}
                                     </p>
                                 </div>
-                                <button
-                                    onClick={card.action}
-                                    className="self-start px-6 py-2.5 rounded-full bg-surface-hover border border-border text-sm font-bold text-foreground hover:bg-foreground hover:text-background transition-all active:scale-95"
+                                <div
+                                    className="self-start px-6 py-2.5 rounded-full bg-surface-hover border border-border text-sm font-bold text-foreground group-hover:bg-foreground group-hover:text-background transition-all active:scale-95"
                                 >
                                     Start
-                                </button>
-                            </div>
+                                </div>
+                            </button>
                         ))}
                     </div>
                 </div>
@@ -216,6 +223,15 @@ export default function DashboardPage() {
                     )}
                 </div>
             </div>
+
+            <CreateModal 
+                isOpen={isCreateModalOpen} 
+                onClose={() => {
+                    setIsCreateModalOpen(false);
+                    setModalInitialStep(undefined);
+                }}
+                initialStep={modalInitialStep}
+            />
 
             <style>{`
                 .hide-scrollbar::-webkit-scrollbar {

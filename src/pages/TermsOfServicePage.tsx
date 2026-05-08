@@ -1,7 +1,14 @@
 import { StaticPageLayout } from '../components/StaticPageLayout';
+import { SEO } from '../dashboard/components/SEO';
 
 export const TermsOfServicePage = () => {
     return (
+        <>
+            <SEO 
+                title="Terms of Service | Viszmo" 
+                description="Read Viszmo's Terms of Service to understand your rights and responsibilities when using our AI study tools and platform." 
+                noindex={false} 
+            />
         <StaticPageLayout
             title="Terms of Service"
             subtitle="Last updated: April 29, 2026"
@@ -93,5 +100,6 @@ export const TermsOfServicePage = () => {
                 </p>
             </section>
         </StaticPageLayout>
+        </>
     );
 };

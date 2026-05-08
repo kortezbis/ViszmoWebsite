@@ -1,7 +1,14 @@
 import { StaticPageLayout } from '../components/StaticPageLayout';
+import { SEO } from '../dashboard/components/SEO';
 
 export const ContactUsPage = () => {
     return (
+        <>
+            <SEO 
+                title="Contact Support | Viszmo" 
+                description="Need help? Contact Viszmo support for any questions about our AI study tools or your account." 
+                noindex={false} 
+            />
         <StaticPageLayout
             title="Contact Support"
             subtitle="We're here to help you succeed. Get in touch with our team."
@@ -74,5 +81,6 @@ export const ContactUsPage = () => {
                 </div>
             </div>
         </StaticPageLayout>
+        </>
     );
 };

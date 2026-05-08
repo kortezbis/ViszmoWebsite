@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
-import { SubscriptionModal } from '../components/SubscriptionModal';
 import { motion } from 'framer-motion';
+import { SEO } from '../dashboard/components/SEO';
 import {
     Mic, BookOpen, Laptop, CheckCircle2,
     MousePointer2, Keyboard, Eye, Layers, RefreshCw, Monitor,
@@ -52,9 +52,6 @@ const FeatureListItem = ({ icon: Icon, text }: { icon: any, text: string }) => (
 
 
 export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -63,6 +60,11 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
             transition={{ duration: 0.3 }}
             className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-[#0ea5e9]/10 overflow-x-hidden"
         >
+            <SEO 
+                title="Viszmo Features | Exclusive AI Study Modes & Screen Overlay" 
+                description="Discover Viszmo's screen overlay, live transcription, and exclusive AI study modes found nowhere else. We add new study modes and feature updates every week to accelerate your learning." 
+                noindex={false} 
+            />
 
             <main className="flex-1 relative">
 
@@ -265,8 +267,6 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
                     <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-b from-transparent to-[#d6dee8] -z-10 pointer-events-none" />
                 </div>
             </main >
-
-            <SubscriptionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </motion.div>
     );
 };

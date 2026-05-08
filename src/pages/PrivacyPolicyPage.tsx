@@ -1,7 +1,14 @@
 import { StaticPageLayout } from '../components/StaticPageLayout';
+import { SEO } from '../dashboard/components/SEO';
 
 export const PrivacyPolicyPage = () => {
     return (
+        <>
+            <SEO 
+                title="Privacy Policy | Viszmo" 
+                description="Learn how Viszmo collects, uses, and protects your personal information and data privacy." 
+                noindex={false} 
+            />
         <StaticPageLayout
             title="Privacy Policy"
             subtitle="Last updated: April 29, 2026"
@@ -86,5 +93,6 @@ export const PrivacyPolicyPage = () => {
                 </p>
             </section>
         </StaticPageLayout>
+        </>
     );
 };
