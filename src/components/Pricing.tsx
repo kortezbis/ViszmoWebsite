@@ -182,10 +182,10 @@ export const Pricing = () => {
                     </div>
                 </div>
 
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 max-w-6xl mx-auto">
+                <div className="mx-auto px-4">
+                    <div className={`grid grid-cols-1 ${billingCycle === 'annual' ? 'md:grid-cols-2 max-w-4xl' : 'md:grid-cols-3 max-w-6xl'} gap-6 mb-8 mx-auto`}>
                         {subscriptionPlans
-                            .filter(plan => plan.type === 'subscription')
+                            .filter(plan => plan.type === 'subscription' && !(billingCycle === 'annual' && plan.id === 'weekly'))
                             .map((plan, index) => (
                                 <motion.div
                                     key={plan.id}
