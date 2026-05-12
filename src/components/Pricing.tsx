@@ -221,7 +221,7 @@ export const Pricing = () => {
                                         )}
                                         <p className={`mt-4 text-sm ${plan.id === 'pro' ? 'pro-shimmer font-bold' : 'text-slate-500 font-medium'}`}>
                                             {plan.id === 'pro' 
-                                                ? 'Unlimited access to the Desktop Sidekick.' 
+                                                ? 'Everything, unlimited, no compromises.' 
                                                 : plan.id === 'plus' 
                                                     ? 'Full access to all study tools.' 
                                                     : 'All Pro features for 7 days.'}

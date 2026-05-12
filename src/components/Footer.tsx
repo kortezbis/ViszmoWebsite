@@ -56,7 +56,7 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
                             <h4 className="font-semibold text-slate-900">Platform</h4>
                             <ul className="flex flex-col gap-3 text-sm text-slate-500">
                                 <li><button onClick={onOpenMobileModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Mobile iOS</button></li>
-                                <li><button onClick={onOpenModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Now</button></li>
+                                <li><button onClick={onOpenModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Windows</button></li>
                                 <li>
                                     <span className="text-slate-400 cursor-not-allowed flex items-center gap-2">
                                         Download Mac Now <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Soon</span>
