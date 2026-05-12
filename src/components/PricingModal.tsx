@@ -27,7 +27,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
       price: '$4.99',
       interval: 'week',
       description: 'Perfect for short-term study sessions.',
-      features: ['Full Pro Access', 'Unlock Overlay', 'Unlimited AI Generations']
+      features: ['Full Access to Study Tools', 'Unlimited Sidekick Access', 'Unlimited AI Generations']
     },
     monthly: {
       id: 'price_monthly',
@@ -35,7 +35,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
       price: '$19.99',
       interval: 'month',
       description: 'Our most popular plan for consistent learners.',
-      features: ['Full Pro Access', 'Unlock Overlay', 'Unlimited AI Generations', 'Priority Support']
+      features: ['Full Access to Study Tools', 'Unlimited Sidekick Access', 'Unlimited AI Generations', 'Priority Support']
     },
     yearly: {
       id: 'price_yearly',
@@ -44,7 +44,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
       interval: 'year',
       savings: 'Save 50%',
       description: 'The best value for long-term academic success.',
-      features: ['Full Pro Access', 'Unlock Overlay', 'Unlimited AI Generations', 'Priority Support', 'Exclusive Beta Features']
+      features: ['Full Access to Study Tools', 'Unlimited Sidekick Access', 'Unlimited AI Generations', 'Priority Support', 'Exclusive Beta Features']
     }
   };
 

@@ -5,13 +5,14 @@ import { Footer } from './Footer';
 interface PublicLayoutProps {
     children: React.ReactNode;
     onOpenDownload: () => void;
+    onOpenMobileDownload: () => void;
     onOpenAuth: (view: 'login' | 'signup') => void;
 }
 
-export const PublicLayout = ({ children, onOpenDownload, onOpenAuth }: PublicLayoutProps) => {
+export const PublicLayout = ({ children, onOpenDownload, onOpenMobileDownload, onOpenAuth }: PublicLayoutProps) => {
     return (
         <div className="relative min-h-screen font-sans text-slate-900 bg-white flex flex-col">
-            <Navbar onOpenModal={onOpenDownload} onOpenAuth={onOpenAuth} />
+            <Navbar onOpenModal={onOpenDownload} onOpenMobileModal={onOpenMobileDownload} onOpenAuth={onOpenAuth} />
 
             {/* Global Background Mesh (Persistent) */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none -z-20">
@@ -32,7 +33,7 @@ export const PublicLayout = ({ children, onOpenDownload, onOpenAuth }: PublicLay
                 {children}
             </main>
 
-            <Footer onOpenModal={onOpenDownload} />
+            <Footer onOpenModal={onOpenDownload} onOpenMobileModal={onOpenMobileDownload} />
         </div>
     );
 };

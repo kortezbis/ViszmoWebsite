@@ -38,6 +38,7 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { ContactUsPage } from './pages/ContactUsPage';
 import { HelpCenterPage } from './pages/HelpCenterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { DesktopSuccessPage } from './pages/DesktopSuccessPage';
 
 
 // List of school logo filenames
@@ -261,7 +262,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
         {/* School Stickers on Background - Above background and overlay */}
         <div className="absolute inset-0 z-5 overflow-visible pointer-events-none" style={{ overflow: 'visible' }}>
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {activeStickers.map((sticker, idx) => (
               <PeelSticker
                 key={sticker.id}
@@ -319,9 +320,8 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
             Viszmo lives on your screen to provide instant AI assistance and perfect notes while you study—all seamlessly synced to an advanced <span className="font-bold text-white">Study Dashboard</span> for your flashcards, quizzes, and personalized guides.
           </p>
 
-          {/* Get for Windows Button - Centered */}
           <div className="btn-wrapper">
-            <button className="btn" onClick={() => onOpenDownload()}>
+            <button className="btn" onClick={onOpenDownload}>
               <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                 <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
               </svg>
@@ -730,11 +730,11 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
             >
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <div className="btn-wrapper">
-                  <button
-                    className="btn"
-                    onClick={() => onOpenDownload()}
-                  >
-                    <span className="btn-text">Get Viszmo Free</span>
+                  <button className="btn" onClick={onOpenDownload}>
+                    <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
+                      <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
+                    </svg>
+                    <span className="btn-text">Download Now</span>
                   </button>
                 </div>
 
@@ -747,7 +747,9 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
               </div>
 
               <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest uppercase">
-                WINDOWS 10 & 11 • SAFE
+                {navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.platform.toUpperCase().indexOf('IPHONE') >= 0 || navigator.platform.toUpperCase().indexOf('IPAD') >= 0 
+                  ? "MACOS 12+ • SAFE"
+                  : "WINDOWS 10 & 11 • SAFE"}
               </p>
             </motion.div>
           </div>
@@ -782,7 +784,7 @@ const AuthRedirect = ({ view }: { view: 'login' | 'signup' }) => {
   return null;
 };
 
-function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
+function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownload: () => void, onOpenMobileDownload: () => void }) {
   const location = useLocation();
   const { showSurvey, setShowSurvey } = useProfile();
   const { openAuthModal } = useAuthModal();
@@ -806,7 +808,7 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
         <Route path="/account" element={
           <>
             <SignedIn>
-              <AccountPage onOpenDownload={onOpenDownload} />
+              <AccountPage onOpenDownload={onOpenDownload} onOpenMobileModal={onOpenMobileDownload} />
             </SignedIn>
             <SignedOut>
               <RedirectToSignIn afterSignInUrl="/account" />
@@ -818,11 +820,12 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
         <Route path="/login/*" element={<AuthRedirect view="login" />} />
         <Route path="/signup/*" element={<AuthRedirect view="signup" />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/desktop-success" element={<DesktopSuccessPage />} />
 
         <Route path="/dashboard/*" element={
           <>
             <SignedIn>
-              <DashboardApp />
+              <DashboardApp onOpenDownload={onOpenDownload} onOpenMobileModal={onOpenMobileDownload} />
             </SignedIn>
             <SignedOut>
               <RedirectToSignIn afterSignInUrl="/dashboard" />
@@ -838,7 +841,7 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
   return (
     <>
       {isPublicPath ? (
-        <PublicLayout onOpenDownload={onOpenDownload} onOpenAuth={openAuthModal}>
+        <PublicLayout onOpenDownload={onOpenDownload} onOpenMobileDownload={onOpenMobileDownload} onOpenAuth={openAuthModal}>
           {routes}
         </PublicLayout>
       ) : (
@@ -853,13 +856,74 @@ function AnimatedRoutes({ onOpenDownload }: { onOpenDownload: () => void }) {
 
 export default function App() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
-  const { isOpen, view, closeAuthModal } = useAuthModal();
+  const { isOpen, view, closeAuthModal, openAuthModal } = useAuthModal();
+  const { isSignedIn } = useAuth();
+  const [pendingDownload, setPendingDownload] = useState(() => {
+    return localStorage.getItem('viszmo_pending_download') === 'true';
+  });
+  const { profile, loading, setShowSurvey } = useProfile();
+
+  useEffect(() => {
+    localStorage.setItem('viszmo_pending_download', pendingDownload.toString());
+  }, [pendingDownload]);
+
+  const initiateDownload = () => {
+    const isWindows = /Win/i.test(navigator.userAgent) || /Win/i.test(navigator.platform);
+    
+    if (isWindows) {
+      window.location.href = "https://github.com/Kortezbis/DeskApp-Vis/releases/latest/download/Viszmo-Setup.exe";
+    } else {
+      // For Mac or other platforms, direct to the releases page instead of showing the QR code modal
+      window.location.href = "https://github.com/Kortezbis/DeskApp-Vis/releases/latest";
+    }
+  };
+
+  const handleDownload = () => {
+    // 1. Check if signed in
+    if (!isSignedIn) {
+      setPendingDownload(true);
+      openAuthModal('signup');
+      return;
+    }
+
+    // 2. Wait for profile if loading
+    if (loading) {
+      setPendingDownload(true);
+      return;
+    }
+
+    // 3. Check if onboarding completed
+    if (!profile || !profile.onboarding_completed) {
+      setPendingDownload(true);
+      setShowSurvey(true);
+      return;
+    }
+
+    // 4. If everything is good, show download options
+    initiateDownload();
+  };
+
+  // Automatically trigger download if it was pending and user completed requirements
+  useEffect(() => {
+    if (pendingDownload && isSignedIn && !loading && profile?.onboarding_completed) {
+      setPendingDownload(false);
+      localStorage.removeItem('viszmo_pending_download');
+      initiateDownload();
+    }
+  }, [pendingDownload, isSignedIn, loading, profile]);
+
+  const handleOpenMobileModal = () => {
+    setShowDownloadModal(true);
+  };
+
+
 
   return (
     <BrowserRouter>
       <ScrollToTop />
       <AnimatedRoutes 
-        onOpenDownload={() => setShowDownloadModal(true)} 
+        onOpenDownload={handleDownload} 
+        onOpenMobileDownload={handleOpenMobileModal}
       />
       <DownloadAppModal isOpen={showDownloadModal} onClose={() => setShowDownloadModal(false)} />
       <AuthModal 

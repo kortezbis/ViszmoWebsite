@@ -7,10 +7,11 @@ import { useNavigate, Link } from 'react-router-dom';
 
 interface NavbarProps {
     onOpenModal?: () => void;
+    onOpenMobileModal?: () => void;
     onOpenAuth?: (view: 'login' | 'signup') => void;
 }
 
-export const Navbar = ({ onOpenModal = () => { }, onOpenAuth = () => { } }: NavbarProps) => {
+export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { }, onOpenAuth = () => { } }: NavbarProps) => {
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { isSignedIn } = useAuth();
@@ -58,7 +59,7 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenAuth = () => { } }: Navb
                                     className="absolute top-full left-1/2 mt-1 w-44 glass-element rounded-[1.5rem] overflow-hidden p-2 shadow-xl"
                                 >
                                     <div className="flex flex-col gap-1">
-                                        <button onClick={() => { onOpenModal(); setShowExploreMenu(false); }} className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700 text-left w-full">
+                                        <button onClick={() => { onOpenMobileModal(); setShowExploreMenu(false); }} className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700 text-left w-full">
                                             Mobile App
                                         </button>
                                         <Link to="/features" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
@@ -84,12 +85,7 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenAuth = () => { } }: Navb
 
                     {isSignedIn ? (
                         <div className="flex items-center gap-3">
-                            <Link
-                                to="/dashboard"
-                                className="text-sm font-bold text-[#0ea5e9] hover:opacity-80"
-                            >
-                                Dashboard
-                            </Link>
+
                             <UserButton
                                 afterSignOutUrl="/"
                                 appearance={{
@@ -113,11 +109,19 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenAuth = () => { } }: Navb
                     )}
 
                     <div className="btn-wrapper">
-                        <button className="btn btn-sm" onClick={() => navigate('/dashboard')}>
-                            <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
-                                <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
-                            </svg>
-                            <span className="btn-text">Dashboard</span>
+                        <button className="btn btn-sm" onClick={onOpenModal}>
+                            {navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.platform.toUpperCase().indexOf('IPHONE') >= 0 || navigator.platform.toUpperCase().indexOf('IPAD') >= 0 ? (
+                                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                            ) : (
+                                <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
+                                    <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
+                                </svg>
+                            )}
+                            <span className="btn-text">Download Now</span>
                         </button>
                     </div>
                 </div>
@@ -168,7 +172,7 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenAuth = () => { } }: Navb
                                 <div className="mt-2 mb-1 px-2">
                                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Explore</span>
                                 </div>
-                                <button onClick={() => { onOpenModal(); setIsMobileMenuOpen(false); }} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100 text-left w-full">Mobile App</button>
+                                <button onClick={() => { onOpenMobileModal(); setIsMobileMenuOpen(false); }} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100 text-left w-full">Mobile App</button>
                                 <Link to="/features" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">Features</Link>
                                 <Link to="/how-it-works" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">How It Works</Link>
                                 <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold text-slate-900 px-2 py-3 border-b border-slate-100">Pricing</Link>

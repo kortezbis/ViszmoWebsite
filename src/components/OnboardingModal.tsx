@@ -117,6 +117,8 @@ export const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) =>
         goal: '',
         intent: ''
     });
+    const [showOtherInput, setShowOtherInput] = useState(false);
+    const [otherValue, setOtherValue] = useState('');
 
     // Sync initial name from profile
     useEffect(() => {
@@ -129,6 +131,8 @@ export const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) =>
     useEffect(() => {
         if (isOpen) {
             setCurrentStep(0);
+            setShowOtherInput(false);
+            setOtherValue('');
         }
     }, [isOpen]);
 
@@ -188,14 +192,31 @@ export const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) =>
     };
 
     const handleBack = () => {
+        if (showOtherInput) {
+            setShowOtherInput(false);
+            return;
+        }
         if (currentStep > 0) {
             setCurrentStep(currentStep - 1);
         }
     };
 
     const handleSelect = (option: string) => {
-        setData({ ...data, [stepInfo.id]: option });
-        setTimeout(handleNext, 300);
+        if (option === 'Other') {
+            setShowOtherInput(true);
+            setOtherValue('');
+        } else {
+            setData({ ...data, [stepInfo.id]: option });
+            setTimeout(handleNext, 300);
+        }
+    };
+
+    const handleOtherSubmit = () => {
+        if (!otherValue.trim()) return;
+        setData({ ...data, [stepInfo.id]: otherValue });
+        setShowOtherInput(false);
+        setOtherValue('');
+        handleNext();
     };
 
     const canContinue = data[stepInfo.id as keyof SurveyData] !== '';
@@ -295,7 +316,26 @@ export const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) =>
                                     </div>
 
                                     <div className={`flex-1 overflow-y-auto px-1 custom-scrollbar pb-6 ${stepInfo.layout === 'grid' ? 'grid grid-cols-2 md:grid-cols-4 gap-4' : 'grid grid-cols-1 md:grid-cols-2 gap-4'}`}>
-                                        {stepInfo.type === 'input' ? (
+                                        {showOtherInput ? (
+                                            <div className="col-span-full flex flex-col items-center justify-center pt-8">
+                                                <input
+                                                    type="text"
+                                                    value={otherValue}
+                                                    onChange={(e) => setOtherValue(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && otherValue.trim() && handleOtherSubmit()}
+                                                    autoFocus
+                                                    className="w-full h-24 bg-slate-50 border-2 border-transparent rounded-[28px] px-8 text-4xl font-bold text-slate-900 focus:bg-white focus:border-[#0ea5e9] focus:outline-none transition-all placeholder:text-slate-200 text-center shadow-inner"
+                                                    placeholder="Please specify..."
+                                                />
+                                                <button
+                                                    onClick={handleOtherSubmit}
+                                                    disabled={!otherValue.trim()}
+                                                    className="mt-8 bg-[#0ea5e9] text-white px-10 py-4 rounded-2xl font-bold text-base hover:bg-[#0284c7] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-sky-200/50 disabled:opacity-40"
+                                                >
+                                                    Continue
+                                                </button>
+                                            </div>
+                                        ) : stepInfo.type === 'input' ? (
                                             <div className="col-span-full flex flex-col items-center justify-center pt-8">
                                                 <input
                                                     type="text"

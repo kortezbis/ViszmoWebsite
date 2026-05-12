@@ -79,9 +79,9 @@ export const Pricing = () => {
             monthly: { price: 7, period: '/wk' },
             annual: { price: 7, period: '/wk', total: 7, label: '7-day access' },
             features: [
-                'Best for intensive sessions',
+                'Full Access to Study Tools',
+                'Unlimited Desktop Sidekick',
                 'Unlimited AI messages',
-                'Unlimited meeting notes',
                 'Priority support',
             ],
             cta: 'Subscribe',
@@ -94,9 +94,9 @@ export const Pricing = () => {
             monthly: { price: 11, period: '/mo' },
             annual: { price: 8, period: '/mo', total: 96, label: 'Billed $96/year' },
             features: [
-                'Best for beginners',
+                'Full Access to Study Tools',
+                'Limited Desktop Sidekick',
                 '500 AI messages/day',
-                '30 meeting notes/mo',
                 'Standard support',
             ],
             cta: 'Subscribe',
@@ -109,10 +109,9 @@ export const Pricing = () => {
             monthly: { price: 19, period: '/mo' },
             annual: { price: 14, period: '/mo', total: 168, label: 'Billed $168/year' },
             features: [
-                'Best for long-term learning',
+                'Full Access to Study Tools',
+                'Unlimited Desktop Sidekick',
                 'Unlimited AI messages',
-                'Unlimited meeting notes',
-                'Recurring subscription',
                 'Priority support',
             ],
             cta: 'Subscribe',
@@ -135,11 +134,11 @@ export const Pricing = () => {
     };
 
     const comparisonFeatures: FeatureMap[] = [
+        { name: 'Full Access to Study Tools', weekly: true, plus: true, pro: true },
+        { name: 'Desktop Sidekick Overlay', weekly: 'Unlimited Access', plus: 'Limited Access', pro: 'Unlimited Access' },
         { name: 'AI messages per day', weekly: 'Unlimited', plus: '500', pro: 'Unlimited' },
         { name: 'Meeting notetaking', weekly: 'Unlimited', plus: '30/mo', pro: 'Unlimited' },
-        { name: 'Subscription', weekly: '7-day Access', plus: 'Standard Access', pro: 'Unlimited Access' },
-        { name: 'Custom Keybinds', weekly: true, plus: true, pro: true },
-        { name: 'Deep Study Focus', weekly: true, plus: true, pro: true }
+        { name: 'Custom Keybinds', weekly: true, plus: true, pro: true }
     ];
 
     return (
@@ -221,7 +220,11 @@ export const Pricing = () => {
                                             </p>
                                         )}
                                         <p className={`mt-4 text-sm ${plan.id === 'pro' ? 'pro-shimmer font-bold' : 'text-slate-500 font-medium'}`}>
-                                            {plan.id === 'pro' ? 'Everything, unlimited, no compromises.' : 'All essential features.'}
+                                            {plan.id === 'pro' 
+                                                ? 'Unlimited access to the Desktop Sidekick.' 
+                                                : plan.id === 'plus' 
+                                                    ? 'Full access to all study tools.' 
+                                                    : 'All Pro features for 7 days.'}
                                         </p>
                                     </div>
 

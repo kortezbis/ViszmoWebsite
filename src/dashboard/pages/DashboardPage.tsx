@@ -21,7 +21,7 @@ import { useDecks } from '../contexts/DecksContext';
 import { CreateModal } from '../components/CreateModal';
 import { SEO } from '../components/SEO';
 
-export default function DashboardPage() {
+export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileModal = () => {} }: { onOpenDownload?: () => void, onOpenMobileModal?: () => void }) {
     const navigate = useNavigate();
     const { userName, userEmail } = useAuth();
     const { resolvedTheme, toggleTheme } = useTheme();
@@ -73,11 +73,18 @@ export default function DashboardPage() {
             action: () => navigate('/dashboard/decks')
         },
         {
-            title: 'Podcast',
-            description: 'Upload a file to generate a podcast.',
+            title: 'Download Now',
+            description: 'Download the Viszmo app for your desktop to study anywhere.',
+            icon: Sparkles,
+            color: 'cyan',
+            action: onOpenDownload
+        },
+        {
+            title: 'Download Mobile iOS',
+            description: 'Get the Viszmo mobile app to study on the go.',
             icon: Podcast,
             color: 'purple',
-            action: () => navigate('/dashboard/decks?tab=podcasts')
+            action: onOpenMobileModal
         }
     ];
 
@@ -156,7 +163,7 @@ export default function DashboardPage() {
                                 <div
                                     className="self-start px-6 py-2.5 rounded-full bg-surface-hover border border-border text-sm font-bold text-foreground group-hover:bg-foreground group-hover:text-background transition-all active:scale-95"
                                 >
-                                    Start
+                                    {card.title.includes('Download') ? card.title : 'Start'}
                                 </div>
                             </button>
                         ))}

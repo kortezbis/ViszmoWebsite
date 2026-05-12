@@ -194,7 +194,7 @@ export const HowItWorksPage = ({ onOpenDownload }: { onOpenDownload?: () => void
                                         className="btn"
                                         onClick={() => onOpenDownload?.()}
                                     >
-                                        <span className="btn-text">Get Viszmo Free</span>
+                                        <span className="btn-text">Download Now</span>
                                     </button>
                                 </div>
                                 <div className="explore-btn-wrap" onClick={() => navigate('/pricing')}>

@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 
 interface FooterProps {
     onOpenModal?: () => void;
+    onOpenMobileModal?: () => void;
 }
 
-export const Footer = ({ onOpenModal = () => { } }: FooterProps) => {
+export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } }: FooterProps) => {
     const currentYear = 2026; // As requested by user
 
     return (
@@ -54,11 +55,11 @@ export const Footer = ({ onOpenModal = () => { } }: FooterProps) => {
                         <div className="flex flex-col gap-4">
                             <h4 className="font-semibold text-slate-900">Platform</h4>
                             <ul className="flex flex-col gap-3 text-sm text-slate-500">
-                                <li><button onClick={onOpenModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Mobile App</button></li>
-                                <li><span className="text-slate-400 cursor-not-allowed">Download Windows</span></li>
+                                <li><button onClick={onOpenMobileModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Mobile iOS</button></li>
+                                <li><button onClick={onOpenModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Now</button></li>
                                 <li>
                                     <span className="text-slate-400 cursor-not-allowed flex items-center gap-2">
-                                        Download Mac <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Soon</span>
+                                        Download Mac Now <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Soon</span>
                                     </span>
                                 </li>
                             </ul>

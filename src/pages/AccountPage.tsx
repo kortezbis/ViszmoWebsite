@@ -9,7 +9,7 @@ import { Navbar } from '../components/Navbar';
 import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 
-export const AccountPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
+export const AccountPage = ({ onOpenDownload, onOpenMobileModal }: { onOpenDownload?: () => void, onOpenMobileModal?: () => void }) => {
     const { userEmail, userName, userIdentities, getToken } = useAuth();
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isConnecting, setIsConnecting] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export const AccountPage = ({ onOpenDownload }: { onOpenDownload?: () => void })
 
     return (
         <div className="min-h-screen bg-[#ffffff] font-sans text-slate-900 selection:bg-[#0ea5e9]/10 flex flex-col">
-            <Navbar onOpenModal={onOpenDownload} />
+            <Navbar onOpenModal={onOpenDownload} onOpenMobileModal={onOpenMobileModal} />
 
             <main className="flex-1 relative pt-32 pb-24">
                 {/* Background (Shared) */}

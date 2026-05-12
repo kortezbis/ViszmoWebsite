@@ -106,7 +106,7 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
             <feSpecularLighting result="spec" in="blur" specularExponent="100" specularConstant="0.1" lightingColor="white">
               <fePointLight ref={pointLightRef} x="100" y="100" z="300" />
             </feSpecularLighting>
-            <feComposite in="spec" in2="SourceGraphic" operator="screen" result="lit" />
+            <feBlend mode="screen" in="spec" in2="SourceGraphic" result="lit" />
             <feComposite in="lit" in2="SourceAlpha" operator="in" />
           </filter>
 
@@ -115,7 +115,7 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
             <feSpecularLighting result="spec" in="blur" specularExponent="100" specularConstant="0.7" lightingColor="white">
               <fePointLight ref={pointLightFlippedRef} x="100" y="100" z="300" />
             </feSpecularLighting>
-            <feComposite in="spec" in2="SourceGraphic" operator="screen" result="lit" />
+            <feBlend mode="screen" in="spec" in2="SourceGraphic" result="lit" />
             <feComposite in="lit" in2="SourceAlpha" operator="in" />
           </filter>
 

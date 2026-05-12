@@ -404,7 +404,7 @@ export const StudyOverlayPage = ({ onOpenDownload }: { onOpenDownload?: () => vo
                     <div className="flex flex-col items-center gap-8">
                         <div className="btn-wrapper scale-110">
                             <button className="btn" onClick={() => onOpenDownload?.()}>
-                                <span className="btn-text">Get Viszmo Free</span>
+                                <span className="btn-text">Download Now</span>
                             </button>
                         </div>
                         <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest uppercase">

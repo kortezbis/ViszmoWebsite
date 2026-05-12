@@ -31,7 +31,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
  * Classic Viszmo dashboard: Layout + React Router. Mounted at /dashboard/*
  * Dashboard layout and routing for the primary application experience.
  */
-export default function DashboardApp() {
+export default function DashboardApp({ onOpenDownload, onOpenMobileModal }: { onOpenDownload: () => void, onOpenMobileModal: () => void }) {
     const location = useLocation();
     return (
         <ErrorBoundary>
@@ -52,7 +52,7 @@ export default function DashboardApp() {
                                                 className="flex-1 w-full"
                                             >
                                                 <Routes location={location}>
-                                                    <Route index element={<DashboardPage />} />
+                                                    <Route index element={<DashboardPage onOpenDownload={onOpenDownload} onOpenMobileModal={onOpenMobileModal} />} />
                                                     <Route path="flashcards" element={<GamePage initialModeName="Flashcards" />} />
                                                     <Route path="learn" element={<GamePage initialModeName="Learn" />} />
                                                     <Route path="quiz" element={<GamePage initialModeName="Rapid Fire" />} />
