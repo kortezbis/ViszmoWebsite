@@ -447,40 +447,40 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
               {/* Study Mode Pills */}
               <div className="w-full min-h-[224px] mb-6 flex flex-wrap gap-2 p-4 sm:p-6 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-[1.02]">
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                  <img src="/dashimages/flashcard.png.png" alt="Flashcards" className="w-5 h-5 object-contain" />
+                  <img src="/dashimages/flashcard.png.png" alt="Flashcards" width="20" height="20" loading="lazy" className="w-5 h-5 object-contain" />
                   <span className="text-sm font-bold text-slate-700">Flashcards</span>
                 </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                  <img src="/dashimages/puzzle.png.png" alt="Matching" className="w-5 h-5 object-contain" />
+                  <img src="/dashimages/puzzle.png.png" alt="Matching" width="20" height="20" loading="lazy" className="w-5 h-5 object-contain" />
                   <span className="text-sm font-bold text-slate-700">Matching</span>
                 </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                  <img src="/dashimages/hotdeal.png.png" alt="Rapid-Fire" className="w-5 h-5 object-contain" />
+                  <img src="/dashimages/hotdeal.png.png" alt="Rapid-Fire" width="20" height="20" loading="lazy" className="w-5 h-5 object-contain" />
                   <span className="text-sm font-bold text-slate-700">Rapid-Fire</span>
                 </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                  <img src="/dashimages/speech.png.png" alt="Speaking" className="w-5 h-5 object-contain" />
+                  <img src="/dashimages/speech.png.png" alt="Speaking" width="20" height="20" loading="lazy" className="w-5 h-5 object-contain" />
                   <span className="text-sm font-bold text-slate-700">Speaking</span>
                 </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                  <img src="/dashimages/writing.png.png" alt="Written" className="w-5 h-5 object-contain" />
+                  <img src="/dashimages/writing.png.png" alt="Written" width="20" height="20" loading="lazy" className="w-5 h-5 object-contain" />
                   <span className="text-sm font-bold text-slate-700">Written</span>
                 </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                  <img src="/dashimages/test.png.png" alt="Practice Tests" className="w-5 h-5 object-contain" />
+                  <img src="/dashimages/test.png.png" alt="Practice Tests" width="20" height="20" loading="lazy" className="w-5 h-5 object-contain" />
                   <span className="text-sm font-bold text-slate-700">Practice Tests</span>
                 </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-cyan-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                  <img src="/dashimages/guide.png.png" alt="Learn" className="w-5 h-5 object-contain" />
+                  <img src="/dashimages/guide.png.png" alt="Learn" width="20" height="20" loading="lazy" className="w-5 h-5 object-contain" />
                   <span className="text-sm font-bold text-slate-700">Learn Mastery</span>
                 </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-pink-100/50 rounded-full liquid-glass-pill transition-all duration-300 group-hover:scale-105">
-                  <img src="/dashimages/card-games.png.png" alt="Spaced Repetition" className="w-5 h-5 object-contain" />
+                  <img src="/dashimages/card-games.png.png" alt="Spaced Repetition" width="20" height="20" loading="lazy" className="w-5 h-5 object-contain" />
                   <span className="text-sm font-bold text-slate-700">Spaced Repetition</span>
                 </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100/50 rounded-full liquid-glass-pill border border-dashed border-slate-300 transition-all duration-300 group-hover:scale-105">
                   <div className="w-5 h-5 flex items-center justify-center bg-slate-200/50 rounded-full overflow-hidden">
-                    <img src="/dashimages/plus.png.png" alt="More" className="w-2 h-2 object-contain" />
+                    <img src="/dashimages/plus.png.png" alt="More" width="8" height="8" loading="lazy" className="w-2 h-2 object-contain" />
                   </div>
                   <span className="text-sm font-bold text-slate-500">and much more...</span>
                 </div>
@@ -530,11 +530,11 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
                 {/* File Type Icons */}
                 <div className="flex items-center gap-4 mt-2">
-                  <img src="/dashimages/pdf-document.png.png" alt="PDF" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
-                  <img src="/dashimages/doc.png.png" alt="DOCX" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
-                  <img src="/dashimages/txt.png.png" alt="TXT" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
-                  <img src="/dashimages/mp3.png.png" alt="Audio" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
-                  <img src="/dashimages/youtube.png.png" alt="Video" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                  <img src="/dashimages/pdf-document.png.png" alt="PDF" width="40" height="40" loading="lazy" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                  <img src="/dashimages/doc.png.png" alt="DOCX" width="40" height="40" loading="lazy" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                  <img src="/dashimages/txt.png.png" alt="TXT" width="40" height="40" loading="lazy" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                  <img src="/dashimages/mp3.png.png" alt="Audio" width="40" height="40" loading="lazy" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
+                  <img src="/dashimages/youtube.png.png" alt="Video" width="40" height="40" loading="lazy" className="w-10 h-10 object-contain hover:scale-110 transition-transform duration-200" />
                 </div>
               </div>
 

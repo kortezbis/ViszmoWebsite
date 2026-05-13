@@ -13,9 +13,12 @@ export const Logo = ({ className = '', size = 32, showText = false, variant = 'i
       <img
         src={logoSrc}
         alt="Viszmo"
+        width={variant === 'full' ? 120 : size}
+        height={size}
+        loading="eager"
         style={{
           height: `${size}px`,
-          width: 'auto', // Allow width to scale naturally
+          width: 'auto',
           display: 'block'
         }}
         className="flex-shrink-0"

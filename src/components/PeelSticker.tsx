@@ -87,6 +87,9 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
             alt={alt}
             className="sticker-image"
             draggable={false}
+            width="200"
+            height="200"
+            loading="lazy"
             style={{
               filter: `url(#outerStroke-${uniqueId}) drop-shadow(0 4px 6px rgba(0,0,0,0.2))`,
               willChange: 'filter'
@@ -101,6 +104,9 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
               alt={alt}
               className="shadow-image"
               draggable={false}
+              width="200"
+              height="200"
+              loading="lazy"
               style={{ filter: `url(#expandAndFill-${uniqueId}) blur(4px)`, opacity: 0.3 }}
             />
           </div>
@@ -112,6 +118,9 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
             alt={alt}
             className="flap-image"
             draggable={false}
+            width="200"
+            height="200"
+            loading="lazy"
             style={{ filter: `url(#expandAndFill-${uniqueId})` }}
           />
         </div>

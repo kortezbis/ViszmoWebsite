@@ -121,7 +121,6 @@ export const Testimonials = () => {
             </div>
 
             <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap');
         @keyframes scroll-left {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }

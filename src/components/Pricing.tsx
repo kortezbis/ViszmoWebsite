@@ -155,6 +155,9 @@ export const Pricing = () => {
                         <img
                             src="/teamlogos/pricinglogo.png"
                             alt="Viszmo"
+                            width="256"
+                            height="256"
+                            loading="lazy"
                             className="h-10 sm:h-14 md:h-20 lg:h-24 w-auto object-contain drop-shadow-lg"
                         />
                         <span>for <span className="text-[#0ea5e9]">free.</span></span>
