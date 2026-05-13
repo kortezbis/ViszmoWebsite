@@ -595,6 +595,22 @@ html {
 }
 
 /* Custom Plan Hover Effects */
+.btn-weekly:hover {
+    background: radial-gradient(115% 115% at 10% 20%, #f43f5e 0%, #be123c 100%) !important;
+    box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4), 0 15px 30px rgba(244, 63, 94, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+.btn-plus:hover {
+    background: radial-gradient(115% 115% at 10% 20%, #0ea5e9 0%, #0369a1 100%) !important;
+    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4), 0 15px 30px rgba(14, 165, 233, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+.btn-pro:hover {
+    background: radial-gradient(115% 115% at 10% 20%, #8b5cf6 0%, #6d28d9 100%) !important;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4), 0 15px 30px rgba(139, 92, 246, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
 .btn-ace:hover {
     box-shadow:
         inset -3px -3px 4px rgba(0, 0, 0, 0.6),

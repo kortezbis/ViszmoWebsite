@@ -234,7 +234,7 @@ export const Pricing = () => {
                                                 handleSubscribe(id);
                                             }}
                                             disabled={!!isRedirecting}
-                                            className="btn btn-black w-full justify-center"
+                                            className={`btn btn-black w-full justify-center btn-${plan.id}`}
                                         >
                                             {isRedirecting === (plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
                                                 <div className="flex items-center gap-2">
@@ -311,7 +311,7 @@ export const Pricing = () => {
                                                                         handleSubscribe(id);
                                                                     }}
                                                                     disabled={!!isRedirecting}
-                                                                    className="btn btn-black w-full flex items-center justify-center gap-2 h-11 transition-all duration-300"
+                                                                    className={`btn btn-black w-full flex items-center justify-center gap-2 h-11 transition-all duration-300 btn-${plan.id}`}
                                                                 >
                                                                     {isRedirecting === (plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
                                                                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
