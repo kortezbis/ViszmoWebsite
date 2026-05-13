@@ -132,10 +132,10 @@ export const Pricing = () => {
     };
 
     const comparisonFeatures: FeatureMap[] = [
-        { name: 'Full Access to Study Tools', free: true, plus: true, pro: true },
+        { name: 'Core Study Tools', free: true, plus: true, pro: true },
         { name: 'Desktop Sidekick Overlay', free: 'Limited Access', plus: false, pro: 'Unlimited Access' },
-        { name: 'Responses messages per day', free: 'Limited', plus: 'Unlimited', pro: 'Unlimited' },
-        { name: 'Meeting notetaking', free: '10/mo', plus: '30/mo', pro: 'Unlimited' },
+        { name: 'Unlimited responses messages', free: false, plus: true, pro: true },
+        { name: 'Lecture notetaking', free: '5/mo', plus: '30/mo', pro: 'Unlimited' },
         { name: 'Custom Keybinds', free: false, plus: true, pro: true }
     ];
 
