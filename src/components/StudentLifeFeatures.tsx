@@ -21,33 +21,7 @@ export const InteractiveComparisonSlider = () => {
         setSliderPos(percentage);
     };
 
-    // Auto-animation logic
-    useEffect(() => {
-        const animate = () => {
-            if (!isDragging && !isHovered) {
-                setSliderPos(prev => {
-                    const speed = 0.3; // Adjustment speed
-                    let next = prev + (speed * directionRef.current);
-
-                    if (next >= 85) {
-                        directionRef.current = -1;
-                        next = 85;
-                    } else if (next <= 15) {
-                        directionRef.current = 1;
-                        next = 15;
-                    }
-                    return next;
-                });
-            }
-            animationRef.current = requestAnimationFrame(animate);
-        };
-
-        animationRef.current = requestAnimationFrame(animate);
-
-        return () => {
-            if (animationRef.current) cancelAnimationFrame(animationRef.current);
-        };
-    }, [isDragging, isHovered]);
+    // Auto-animation removed to prevent continuous 60fps React state re-renders
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => handleMove(e.clientX);
     const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => handleMove(e.touches[0].clientX);
@@ -196,28 +170,7 @@ export const StudentLifeFeatures = () => {
                         </div>
                     </motion.div>
 
-                    {/* FULL WIDTH: Study Dashboard */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="md:col-span-3 group relative rounded-[2rem] md:rounded-[3rem] overflow-hidden p-8 md:p-14 flex flex-col items-center justify-center text-center hover:shadow-xl transition-all duration-500 min-h-[600px]"
-                        style={{
-                            background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF4F9 100%)',
-                            border: '1px solid #E2E8F0',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05)'
-                        }}
-                    >
-                        <div className="max-w-2xl">
-                            <h3 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 uppercase tracking-tight">
-                                Centralized <span className="text-[#0ea5e9]">Knowledge Hub</span>
-                            </h3>
-                            <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed">
-                                Your flashcards, quizzes, and comprehensive study guides—automatically organized from your lectures and readings in one powerful dashboard.
-                            </p>
-                        </div>
-                    </motion.div>
+
 
 
                 </div>

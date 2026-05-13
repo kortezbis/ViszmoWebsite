@@ -562,10 +562,15 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
             {/* Card 3: Live Lecture Listener */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial="initial"
+              whileInView="inView"
+              whileHover="hover"
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              variants={{
+                initial: { opacity: 0, y: 20 },
+                inView: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.2 } },
+                hover: {} // Triggers children
+              }}
               className="group bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-200/60 hover:border-slate-300/80 hover:shadow-xl transition-all duration-300"
             >
               {/* Audio Visualization */}
@@ -587,8 +592,14 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                     <motion.div
                       key={i}
                       className="w-1 bg-blue-400 rounded-full"
-                      animate={{ height: [`${h * 100}%`, `${(h * 0.4 + 0.1) * 100}%`, `${h * 100}%`] }}
-                      transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.1 }}
+                      variants={{
+                        initial: { height: `${h * 100}%` },
+                        inView: { height: `${h * 100}%` },
+                        hover: {
+                          height: [`${h * 100}%`, `${(h * 0.4 + 0.1) * 100}%`, `${h * 100}%`],
+                          transition: { duration: 0.8, repeat: Infinity, delay: i * 0.1 }
+                        }
+                      }}
                     />
                   ))}
                 </div>
@@ -615,10 +626,15 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
             {/* Card 4: AI Podcast Creator */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial="initial"
+              whileInView="inView"
+              whileHover="hover"
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              variants={{
+                initial: { opacity: 0, y: 20 },
+                inView: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.3 } },
+                hover: {} // Triggers children
+              }}
               className="group bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border border-slate-200/60 hover:border-slate-300/80 hover:shadow-xl transition-all duration-300"
             >
               {/* Podcast Visualization */}
@@ -628,8 +644,14 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                     <motion.div
                       key={i}
                       className="w-2 bg-rose-500 rounded-full"
-                      animate={{ height: [`${height * 100}%`, `${(height * 0.5 + 0.2) * 100}%`, `${height * 100}%`] }}
-                      transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.1, ease: "easeInOut" }}
+                      variants={{
+                        initial: { height: `${height * 100}%` },
+                        inView: { height: `${height * 100}%` },
+                        hover: {
+                          height: [`${height * 100}%`, `${(height * 0.5 + 0.2) * 100}%`, `${height * 100}%`],
+                          transition: { duration: 1.2, repeat: Infinity, delay: i * 0.1, ease: "easeInOut" }
+                        }
+                      }}
                     />
                   ))}
                 </div>
