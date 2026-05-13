@@ -67,33 +67,41 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
       }}
       className="trigger-peel"
     >
-      {/* Optimized SVG Defs */}
+      {/* High Fidelity SVG Defs */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
         <defs>
           <filter id={`pointLight-${uniqueId}`}>
-            <feSpecularLighting result="spec" in="SourceGraphic" specularExponent="60" specularConstant="0.2" lightingColor="white">
-              <fePointLight x="50" y="50" z="200" />
+            <feGaussianBlur stdDeviation="1" result="blur" />
+            <feSpecularLighting result="spec" in="blur" specularExponent="100" specularConstant="0.1" lightingColor="white">
+              <fePointLight x="100" y="100" z="300" />
             </feSpecularLighting>
-            <feComposite in="spec" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
+            <feBlend mode="screen" in="spec" in2="SourceGraphic" result="lit" />
+            <feComposite in="lit" in2="SourceAlpha" operator="in" />
           </filter>
 
           <filter id={`pointLightFlipped-${uniqueId}`}>
-            <feSpecularLighting result="spec" in="SourceGraphic" specularExponent="60" specularConstant="0.2" lightingColor="white">
-              <fePointLight x="50" y="50" z="200" />
+            <feGaussianBlur stdDeviation="1" result="blur" />
+            <feSpecularLighting result="spec" in="blur" specularExponent="100" specularConstant="0.7" lightingColor="white">
+              <fePointLight x="100" y="100" z="300" />
             </feSpecularLighting>
-            <feComposite in="spec" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
+            <feBlend mode="screen" in="spec" in2="SourceGraphic" result="lit" />
+            <feComposite in="lit" in2="SourceAlpha" operator="in" />
+          </filter>
+
+          <filter id={`dropShadow-${uniqueId}`}>
+            <feDropShadow dx="2" dy="4" stdDeviation="3" floodColor="black" floodOpacity="0.6" />
           </filter>
 
           <filter id={`outerStroke-${uniqueId}`}>
-            <feMorphology operator="dilate" radius="6" in="SourceAlpha" result="expanded" />
-            <feFlood floodColor="white" result="white" />
-            <feComposite operator="in" in="white" in2="expanded" result="stroke" />
-            <feComposite operator="over" in="SourceGraphic" in2="stroke" />
+            <feMorphology operator="dilate" radius="10" in="SourceAlpha" result="expanded" />
+            <feColorMatrix in="expanded" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0" result="whiteExpanded" />
+            <feComposite operator="xor" in="whiteExpanded" in2="SourceAlpha" result="outerStroke" />
+            <feComposite operator="over" in="SourceGraphic" in2="outerStroke" />
           </filter>
 
           <filter id={`expandAndFill-${uniqueId}`}>
-            <feMorphology operator="dilate" radius="6" in="SourceAlpha" result="expanded" />
-            <feFlood floodColor="#d1d5db" result="flood" />
+            <feMorphology operator="dilate" radius="10" in="SourceAlpha" result="expanded" />
+            <feFlood floodColor="rgb(179, 179, 179)" result="flood" />
             <feComposite operator="in" in="flood" in2="expanded" />
           </filter>
         </defs>
@@ -108,8 +116,7 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
               className="sticker-image"
               draggable={false}
               style={{
-                filter: `url(#outerStroke-${uniqueId}) drop-shadow(0 4px 6px rgba(0,0,0,0.2))`,
-                willChange: 'filter'
+                filter: `url(#outerStroke-${uniqueId}) url(#dropShadow-${uniqueId})`,
               }}
             />
           </div>
@@ -122,7 +129,7 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
               alt={alt}
               className="shadow-image"
               draggable={false}
-              style={{ filter: `url(#expandAndFill-${uniqueId}) blur(4px)`, opacity: 0.3 }}
+              style={{ filter: `url(#expandAndFill-${uniqueId})` }}
             />
           </div>
         </div>
