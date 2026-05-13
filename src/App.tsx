@@ -138,6 +138,12 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
   useEffect(() => {
     if (loadedSchoolLogos.length === 0) return;
 
+    // Completely disable sticker logic on mobile for performance
+    if (window.innerWidth < 1024) {
+      setActiveStickers([]);
+      return;
+    }
+
     let availableSchools = [...loadedSchoolLogos];
 
     const shuffle = (array: string[]) => {
@@ -255,14 +261,11 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
         {/* Subtle overlay for better text readability - Only on top portion for text */}
         <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white/20 via-white/10 to-transparent pointer-events-none" />
 
-        {/* School Stickers on Background - Above background and overlay */}
-        <div className="absolute inset-0 z-5 overflow-visible pointer-events-none" style={{ overflow: 'visible' }}>
-          <AnimatePresence>
-            {activeStickers.map((sticker, idx) => {
-              const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
-              if (isMobile) return null;
-              
-              return (
+        {/* School Stickers on Background - Only on Desktop for performance */}
+        {window.innerWidth >= 1024 && (
+          <div className="absolute inset-0 z-5 overflow-visible pointer-events-none" style={{ overflow: 'visible' }}>
+            <AnimatePresence>
+              {activeStickers.map((sticker, idx) => (
                 <PeelSticker
                   key={sticker.id}
                   logoUrl={sticker.logo}
@@ -277,10 +280,10 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                     overflow: 'visible'
                   }}
                 />
-              );
-            })}
-          </AnimatePresence>
-        </div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
