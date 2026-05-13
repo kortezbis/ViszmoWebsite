@@ -1,7 +1,7 @@
 /* Viszmo Dashboard - Scoped Design System */
 /* All styles are confined to #viszmo-dashboard-root to prevent collision with the landing page */
 
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import './styles/stars.css';
 
 @font-face {
