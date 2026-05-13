@@ -199,7 +199,7 @@ export const Pricing = () => {
                                     )}
                                     <div className="mb-6">
                                         <div className="mb-4">
-                                            <div className={`group inline-block ${plan.id === 'pro' ? 'bg-[#8b5cf6]' : 'bg-[#0ea5e9]'} shadow-violet-500/20 -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105`}>
+                                            <div className={`group inline-block ${plan.id === 'pro' ? 'bg-[#8b5cf6] shadow-violet-500/20' : plan.id === 'weekly' ? 'bg-slate-500 shadow-slate-500/20' : 'bg-[#0ea5e9] shadow-sky-500/20'} -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105`}>
                                                 <h3 className="text-lg font-black text-white uppercase tracking-wider transform skew-x-12 transition-all duration-300 group-hover:skew-x-0 whitespace-nowrap">
                                                     {plan.id === 'weekly' ? 'Weekly' : plan.name}
                                                 </h3>
@@ -283,7 +283,7 @@ export const Pricing = () => {
                                         {comparisonPlans
                                             .map((plan) => {
                                                 const fullPlan = subscriptionPlans.find(p => p.id === plan.id);
-                                                const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6] shadow-violet-500/20' : 'bg-[#0ea5e9] shadow-sky-500/20';
+                                                const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6] shadow-violet-500/20' : plan.id === 'weekly' ? 'bg-slate-500 shadow-slate-500/20' : 'bg-[#0ea5e9] shadow-sky-500/20';
 
                                                 return (
                                                     <th key={plan.id} className="pb-8 px-4 text-left align-top">
@@ -375,7 +375,7 @@ export const Pricing = () => {
                             {comparisonPlans
                                 .map((plan) => {
                                     const fullPlan = subscriptionPlans.find(p => p.id === plan.id);
-                                    const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6]' : 'bg-[#0ea5e9]';
+                                    const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6]' : plan.id === 'weekly' ? 'bg-slate-500' : 'bg-[#0ea5e9]';
 
                                     return (
                                         <div key={plan.id} className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100 shadow-sm">
