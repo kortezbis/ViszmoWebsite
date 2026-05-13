@@ -1,3 +1,4 @@
+import React, { lazy, Suspense } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,34 +12,27 @@ import { Testimonials } from './components/Testimonials';
 import { Footer } from './components/Footer';
 import { PeelSticker } from './components/PeelSticker';
 import { Navbar } from './components/Navbar';
-import { LoginPage } from './pages/LoginPage';
-import { SignupPage } from './pages/SignupPage';
 import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
 import { DownloadAppModal } from './components/DownloadAppModal';
 import { useProfile } from './contexts/ProfileContext';
 import { AuthModalProvider, useAuthModal } from './contexts/AuthModalContext';
-import DashboardApp from './dashboard/DashboardApp';
-// VisDashboard2App import removed
 
-import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
-import { BrowserRouter, Routes, Route, useLocation, Outlet } from 'react-router-dom';
-import { PublicLayout } from './components/PublicLayout';
-
-// HowItWorksPage import removed as file is missing
-import { HowItWorksPage } from './pages/HowItWorksPage';
-import { PricingPage } from './pages/PricingPage';
-import { FeaturesPage } from './pages/FeaturesPage';
-import { StudyOverlayPage } from './pages/StudyOverlayPage';
-
-
-import { AccountPage } from './pages/AccountPage';
-import { TermsOfServicePage } from './pages/TermsOfServicePage';
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
-import { ContactUsPage } from './pages/ContactUsPage';
-import { HelpCenterPage } from './pages/HelpCenterPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { DesktopSuccessPage } from './pages/DesktopSuccessPage';
+// Lazy load pages
+const DashboardApp = lazy(() => import('./dashboard/DashboardApp'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
+const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
+const StudyOverlayPage = lazy(() => import('./pages/StudyOverlayPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const ContactUsPage = lazy(() => import('./pages/ContactUsPage'));
+const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const DesktopSuccessPage = lazy(() => import('./pages/DesktopSuccessPage'));
 
 
 // List of school logo filenames
@@ -400,24 +394,32 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                 <span
                   className="relative inline-block text-white px-4 py-1 transform -skew-x-6 mx-2 shadow-lg overflow-hidden"
                   style={{
-                    background: 'linear-gradient(90deg, #0ea5e9, #0aa883, #8b5cf6, #0ea5e9, #0aa883)',
-                    backgroundSize: '200% 100%',
-                    animation: 'gradient-flow 8s ease-in-out infinite'
+                    background: '#0ea5e9'
                   }}
                 >
+                  {/* Composited background animation */}
+                  <div 
+                    className="absolute inset-0 z-0"
+                    style={{
+                      background: 'linear-gradient(90deg, #0ea5e9, #0aa883, #8b5cf6, #0ea5e9)',
+                      backgroundSize: '200% 100%',
+                      width: '200%',
+                      animation: 'gradient-slide 8s linear infinite'
+                    }}
+                  />
                   <span className="block transform skew-x-6 relative z-10">and retain longer</span>
                 </span>
               </h2>
               <style>{`
-                  @keyframes gradient-flow {
-                    0%, 100% {
-                      background-position: 0% 50%;
+                  @keyframes gradient-slide {
+                    0% {
+                      transform: translateX(0);
                     }
-                    50% {
-                      background-position: 100% 50%;
+                    100% {
+                      transform: translateX(-50%);
                     }
                   }
-                `}</style>
+              `}</style>
             </motion.div>
 
             {/* Right: Description */}
@@ -868,11 +870,15 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
   return (
     <>
       {isPublicPath ? (
-        <PublicLayout onOpenDownload={onOpenDownload} onOpenMobileDownload={onOpenMobileDownload} onOpenAuth={openAuthModal}>
-          {routes}
-        </PublicLayout>
+        <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#0ea5e9]/20 border-t-[#0ea5e9] rounded-full animate-spin"></div></div>}>
+          <PublicLayout onOpenDownload={onOpenDownload} onOpenMobileDownload={onOpenMobileDownload} onOpenAuth={openAuthModal}>
+            {routes}
+          </PublicLayout>
+        </Suspense>
       ) : (
-        routes
+        <Suspense fallback={<div className="min-h-screen bg-slate-900 flex items-center justify-center"><div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div></div>}>
+          {routes}
+        </Suspense>
       )}
       
 
