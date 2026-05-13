@@ -82,7 +82,6 @@ export const Pricing = () => {
                 'Core Study Tools',
                 'Limited Desktop Sidekick',
                 'Limited responses messages',
-                'Community support',
             ],
             cta: 'Get Started',
             popular: false,
