@@ -21,30 +21,54 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const AUTH_STORAGE_KEY = 'viszmo_auth_user';
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [session, setSession] = useState<Session | null>(null);
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState<User | null>(() => {
+        try {
+            const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+            return stored ? JSON.parse(stored) : null;
+        } catch (e) {
+            return null;
+        }
+    });
+    const [isLoading, setIsLoading] = useState(!user);
 
     useEffect(() => {
         // Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
-            setUser(session?.user ?? null);
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
             setIsLoading(false);
+            
+            if (currentUser) {
+                localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser));
+            } else {
+                localStorage.removeItem(AUTH_STORAGE_KEY);
+            }
         });
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
-            setUser(session?.user ?? null);
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
             setIsLoading(false);
+
+            if (currentUser) {
+                localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser));
+            } else {
+                localStorage.removeItem(AUTH_STORAGE_KEY);
+            }
         });
 
         return () => subscription.unsubscribe();
     }, []);
 
     const signOut = async () => {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
         await supabase.auth.signOut();
     };
 
@@ -57,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         user,
         isLoading,
-        isSignedIn: !!session,
+        isSignedIn: !!session || (!!user && isLoading), // Optimistic sign-in if we have a cached user
         userId: user?.id ?? null,
         userEmail: user?.email ?? null,
         userName: user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? null,

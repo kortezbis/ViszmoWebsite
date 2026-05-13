@@ -64,6 +64,31 @@ function mapRowToCard(row: FlashcardRow): Card {
     };
 }
 
+function mapRowToDeck(row: any): Deck {
+    return {
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        cards: [],
+        cardCount: row.cardCount || 0,
+        workspaceId: row.workspaceId,
+        color: 'bg-brand-primary',
+        createdAt: new Date(row.createdAt).toISOString(),
+        updatedAt: new Date(row.updatedAt).toISOString(),
+    };
+}
+
+function mapRowToWorkspace(row: any): Workspace {
+    return {
+        id: row.id,
+        name: row.name,
+        color: row.color,
+        parentId: row.parentId,
+        createdAt: new Date(row.createdAt).toISOString(),
+        stats: row.stats,
+    };
+}
+
 interface DecksContextType {
     decks: Deck[];
     workspaces: Workspace[];
@@ -87,6 +112,7 @@ interface DecksContextType {
     setActiveDeck: (id: string | null) => void;
 
     addCard: (card: Omit<Card, 'id' | 'createdAt'>) => Promise<void>;
+    addCards: (cards: Omit<Card, 'id' | 'createdAt'>[]) => Promise<void>;
     updateCard: (cardId: string, updates: Partial<Card>) => void;
     deleteCard: (cardId: string) => Promise<void>;
     setCards: (cards: Card[]) => void;
@@ -141,7 +167,10 @@ export function DecksProvider({ children }: { children: ReactNode }) {
             setWorkspaces([]);
             return;
         }
-        setDecksLoading(true);
+        // Only set loading if we don't have data yet to prevent flickering
+        if (decks.length === 0 && workspaces.length === 0) {
+            setDecksLoading(true);
+        }
         setDecksError(null);
         try {
             const [deckRows, workspaceRows] = await Promise.all([
@@ -207,13 +236,17 @@ export function DecksProvider({ children }: { children: ReactNode }) {
         initialCards?: Omit<Card, 'id' | 'createdAt'>[],
         workspaceId?: string,
     ): Promise<string> => {
-        const created = await db.createDeck(title || 'Untitled Deck', workspaceId);
+        const createdRow = await db.createDeck(title || 'Untitled Deck', workspaceId);
         if (description) {
-            await db.updateDeck(created.id, { description });
+            await db.updateDeck(createdRow.id, { description });
+            createdRow.description = description;
         }
+        
+        const newDeck = mapRowToDeck(createdRow);
+        
         if (initialCards && initialCards.length > 0) {
             await db.addFlashcards(
-                created.id,
+                createdRow.id,
                 initialCards.map((c) => ({
                     front: c.front,
                     back: c.back,
@@ -221,10 +254,15 @@ export function DecksProvider({ children }: { children: ReactNode }) {
                     backImage: c.backImage,
                 })),
             );
+            // Fetch the cards we just created to keep local state in sync
+            const cardRows = await db.getFlashcardsByDeckId(createdRow.id);
+            newDeck.cards = cardRows.map(mapRowToCard);
+            newDeck.cardCount = cardRows.length;
         }
-        await refreshDecks();
-        setActiveDeckId(created.id);
-        return created.id;
+
+        setDecks(prev => [newDeck, ...prev]);
+        setActiveDeckId(createdRow.id);
+        return createdRow.id;
     };
 
     const updateDeck = async (id: string, updates: Partial<Omit<Deck, 'id' | 'createdAt'>>) => {
@@ -285,10 +323,12 @@ export function DecksProvider({ children }: { children: ReactNode }) {
             cards = rows.map(mapRowToCard);
         }
 
-        const created = await db.createDeck(`${original.title} (Copy)`, original.workspaceId);
+        const createdRow = await db.createDeck(`${original.title} (Copy)`, original.workspaceId);
+        const newDeck = mapRowToDeck(createdRow);
+
         if (cards.length > 0) {
             await db.addFlashcards(
-                created.id,
+                createdRow.id,
                 cards.map((c) => ({
                     front: c.front,
                     back: c.back,
@@ -296,9 +336,13 @@ export function DecksProvider({ children }: { children: ReactNode }) {
                     backImage: c.backImage,
                 })),
             );
+            const cardRows = await db.getFlashcardsByDeckId(createdRow.id);
+            newDeck.cards = cardRows.map(mapRowToCard);
+            newDeck.cardCount = cardRows.length;
         }
-        await refreshDecks();
-        return created.id;
+
+        setDecks(prev => [newDeck, ...prev]);
+        return createdRow.id;
     };
 
     const setActiveDeck = (id: string | null) => {
@@ -328,21 +372,45 @@ export function DecksProvider({ children }: { children: ReactNode }) {
     };
 
     const addCard = async (card: Omit<Card, 'id' | 'createdAt'>) => {
-        if (!activeDeck) return;
-        const row = await db.createCard({
-            deckId: activeDeck.id,
+        if (!activeDeckId) return;
+        const created = await db.addFlashcard(activeDeckId, {
             front: card.front,
             back: card.back,
             frontImage: card.image,
             backImage: card.backImage,
         });
-        const newCard = mapRowToCard(row);
-        patchDeck(activeDeck.id, (d) => ({
-            ...d,
-            cards: [...d.cards, newCard],
-            cardCount: (d.cardCount ?? d.cards.length) + 1,
-            updatedAt: new Date().toISOString(),
-        }));
+
+        const newCard = mapRowToCard(created);
+        setDecks((prev) =>
+            prev.map((d) =>
+                d.id === activeDeckId ? { ...d, cards: [...d.cards, newCard], cardCount: (d.cardCount || 0) + 1 } : d,
+            ),
+        );
+    };
+
+    const addCards = async (cards: Omit<Card, 'id' | 'createdAt'>[]) => {
+        if (!activeDeckId || cards.length === 0) return;
+        
+        const createdRows = await db.addFlashcards(
+            activeDeckId,
+            cards.map((c) => ({
+                front: c.front,
+                back: c.back,
+                frontImage: c.image,
+                backImage: c.backImage,
+            })),
+        );
+
+        const newCards = createdRows.map(mapRowToCard);
+        setDecks((prev) =>
+            prev.map((d) =>
+                d.id === activeDeckId ? { 
+                    ...d, 
+                    cards: [...d.cards, ...newCards], 
+                    cardCount: (d.cardCount || 0) + newCards.length 
+                } : d,
+            ),
+        );
     };
 
     const updateCard = (cardId: string, updates: Partial<Card>) => {
@@ -389,24 +457,27 @@ export function DecksProvider({ children }: { children: ReactNode }) {
     };
 
     const createWorkspace = async (name: string, color: string, parentId: string | null = null): Promise<string> => {
-        const created = await db.createWorkspace(name, color, parentId);
-        await refreshDecks();
-        return created.id;
+        const createdRow = await db.createWorkspace(name, color, parentId);
+        const newWs = mapRowToWorkspace(createdRow);
+        setWorkspaces(prev => [newWs, ...prev]);
+        return createdRow.id;
     };
 
     const updateWorkspace = async (id: string, updates: Partial<Omit<Workspace, 'id' | 'createdAt'>>) => {
         await db.updateWorkspace(id, updates);
-        await refreshDecks();
+        setWorkspaces(prev => prev.map(ws => ws.id === id ? { ...ws, ...updates } : ws));
     };
 
     const deleteWorkspace = async (id: string) => {
         await db.deleteWorkspace(id);
-        await refreshDecks();
+        setWorkspaces(prev => prev.filter(ws => ws.id !== id));
+        // Update decks that were in this workspace
+        setDecks(prev => prev.map(d => d.workspaceId === id ? { ...d, workspaceId: undefined } : d));
     };
 
     const moveDeckToWorkspace = async (deckId: string, workspaceId: string | null) => {
         await db.updateDeck(deckId, { workspaceId });
-        await refreshDecks();
+        setDecks(prev => prev.map(d => d.id === deckId ? { ...d, workspaceId: workspaceId ?? undefined } : d));
     };
 
     const getDecksInWorkspace = (workspaceId: string | null): Deck[] => {
@@ -426,11 +497,13 @@ export function DecksProvider({ children }: { children: ReactNode }) {
     };
 
     const importDeck = async (deckData: Partial<Deck>): Promise<string> => {
-        const created = await db.createDeck(deckData.title || 'Imported Deck');
+        const createdRow = await db.createDeck(deckData.title || 'Imported Deck');
         const cards = deckData.cards || [];
+        const newDeck = mapRowToDeck(createdRow);
+
         if (cards.length > 0) {
             await db.addFlashcards(
-                created.id,
+                createdRow.id,
                 cards.map((c) => ({
                     front: c.front,
                     back: c.back,
@@ -438,9 +511,13 @@ export function DecksProvider({ children }: { children: ReactNode }) {
                     backImage: c.backImage,
                 })),
             );
+            const cardRows = await db.getFlashcardsByDeckId(createdRow.id);
+            newDeck.cards = cardRows.map(mapRowToCard);
+            newDeck.cardCount = cardRows.length;
         }
-        await refreshDecks();
-        return created.id;
+        
+        setDecks(prev => [newDeck, ...prev]);
+        return createdRow.id;
     };
 
     const exportDeck = (id: string): string | null => {

@@ -68,9 +68,6 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { },
                                         <Link to="/how-it-works" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
                                             How It Works
                                         </Link>
-                                        <Link to="/dashboard" className="px-3 py-2 hover:bg-white/40 rounded-xl transition-colors text-slate-700">
-                                            Dashboard
-                                        </Link>
                                     </div>
                                 </motion.div>
                             )}

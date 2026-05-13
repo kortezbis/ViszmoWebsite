@@ -23,10 +23,26 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+        if (!theme && supportDarkMode) theme = 'dark';
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.backgroundColor = '#111112';
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.backgroundColor = '#ffffff';
+        }
+      } catch (e) {}
+    })();
+  </script>
   <title>Viszmo - Your Study Sidekick</title>
 </head>
 
-<body style="background-color: #050505; margin: 0; padding: 0;">
+<body style="margin: 0; padding: 0;">
   <div id="root" style="min-height: 100vh;"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

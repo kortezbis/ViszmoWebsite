@@ -91,8 +91,8 @@ export const Pricing = () => {
         {
             id: 'plus',
             name: 'Plus',
-            monthly: { price: 11, period: '/mo' },
-            annual: { price: 8, period: '/mo', total: 96, label: 'Billed $96/year' },
+            monthly: { price: 12, period: '/mo' },
+            annual: { price: 9, period: '/mo', total: 108, label: 'Billed $108/year' },
             features: [
                 'Full Access to Study Tools',
                 'Limited Desktop Sidekick',

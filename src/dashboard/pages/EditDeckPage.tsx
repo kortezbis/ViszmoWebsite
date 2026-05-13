@@ -219,9 +219,9 @@ export default function EditDeckPage() {
                 .join('\n');
             const newCards = await generateCardsFromPrompt(prompt, context || undefined);
             if (!newCards.length) throw new Error('AI returned no cards. Try rephrasing your prompt.');
-            for (const card of newCards) {
-                await addCard({ front: card.front, back: card.back, starred: false });
-            }
+            
+            await addCards(newCards.map(c => ({ front: c.front, back: c.back, starred: false })));
+            
             setMagicPrompt('');
             setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
         } catch (e: unknown) {

@@ -91,6 +91,32 @@ function formatLectureDateLong(ts: number): string {
 class DatabaseService {
     private cachedUser: any = null;
     private lastAuthCheck = 0;
+    private cache: Record<string, { data: any; timestamp: number }> = {};
+    private CACHE_TTL = 30000; // 30 seconds cache for read operations
+
+    private getCached<T>(key: string): T | null {
+        const item = this.cache[key];
+        if (item && Date.now() - item.timestamp < this.CACHE_TTL) {
+            return item.data as T;
+        }
+        return null;
+    }
+
+    private setCache(key: string, data: any) {
+        this.cache[key] = { data, timestamp: Date.now() };
+    }
+
+    public clearCache(pattern?: string) {
+        if (!pattern) {
+            this.cache = {};
+            return;
+        }
+        Object.keys(this.cache).forEach(key => {
+            if (key.includes(pattern)) {
+                delete this.cache[key];
+            }
+        });
+    }
 
     async ensureSessionReady(timeout = 3500) {
         // Cache auth for 30 seconds to avoid constant remote calls
@@ -112,6 +138,9 @@ class DatabaseService {
     /** All decks for the user (flat). Nested workspace/subfolder UI can filter by `workspace_id` later. */
     async getDecks(): Promise<DeckRow[]> {
         const user = await this.ensureSessionReady();
+        const cacheKey = `decks_${user.id}`;
+        const cached = this.getCached<DeckRow[]>(cacheKey);
+        if (cached) return cached;
 
         const { data, error } = await supabase
             .from('decks')
@@ -125,7 +154,7 @@ class DatabaseService {
             return [];
         }
 
-        return (data || []).map((row: Record<string, unknown>) => ({
+        const decks = (data || []).map((row: Record<string, unknown>) => ({
             id: row.id as string,
             userId: row.profile_id as string,
             workspaceId: (row.workspace_id as string | null) ?? undefined,
@@ -135,6 +164,9 @@ class DatabaseService {
             createdAt: new Date(row.created_at as string).getTime(),
             updatedAt: new Date(row.updated_at as string).getTime(),
         }));
+
+        this.setCache(cacheKey, decks);
+        return decks;
     }
 
     async getDeckById(id: string): Promise<DeckRow | undefined> {
@@ -178,6 +210,9 @@ class DatabaseService {
             throw error;
         }
 
+        this.clearCache('decks');
+        this.clearCache('workspaces');
+
         return {
             id: data.id,
             userId: data.profile_id,
@@ -206,6 +241,8 @@ class DatabaseService {
             console.error('[DB] updateDeck:', error.message);
             throw error;
         }
+        this.clearCache('decks');
+        this.clearCache('workspaces');
     }
 
     async deleteDeck(deckId: string): Promise<void> {
@@ -222,6 +259,8 @@ class DatabaseService {
             console.error('[DB] soft deleteDeck:', error.message);
             throw error;
         }
+        this.clearCache('decks');
+        this.clearCache('workspaces');
     }
 
     async restoreDeck(deckId: string): Promise<void> {
@@ -238,6 +277,8 @@ class DatabaseService {
             console.error('[DB] restoreDeck:', error.message);
             throw error;
         }
+        this.clearCache('decks');
+        this.clearCache('workspaces');
     }
 
     async permanentlyDeleteDeck(deckId: string): Promise<void> {
@@ -249,6 +290,8 @@ class DatabaseService {
             console.error('[DB] permanentlyDeleteDeck:', error.message);
             throw error;
         }
+        this.clearCache('decks');
+        this.clearCache('workspaces');
     }
 
 
@@ -331,6 +374,7 @@ class DatabaseService {
             console.error('[DB] addFlashcards:', error.message);
             throw error;
         }
+        this.clearCache('decks');
     }
 
     async updateFlashcard(
@@ -359,6 +403,7 @@ class DatabaseService {
             console.error('[DB] updateFlashcard:', error.message);
             throw error;
         }
+        this.clearCache('decks');
     }
 
     async deleteFlashcard(cardId: string): Promise<void> {
@@ -368,6 +413,7 @@ class DatabaseService {
             console.error('[DB] deleteFlashcard:', error.message);
             throw error;
         }
+        this.clearCache('decks');
     }
 
     async createCard(params: {
@@ -394,6 +440,7 @@ class DatabaseService {
             console.error('[DB] createCard:', error.message);
             throw error;
         }
+        this.clearCache('decks');
 
         return {
             id: data.id,
@@ -603,6 +650,10 @@ class DatabaseService {
 
     async getWorkspaces(): Promise<WorkspaceRow[]> {
         const user = await this.ensureSessionReady();
+        const cacheKey = `workspaces_${user.id}`;
+        const cached = this.getCached<WorkspaceRow[]>(cacheKey);
+        if (cached) return cached;
+
         const { data, error } = await supabase
             .from('workspaces')
             .select('*')
@@ -684,6 +735,7 @@ class DatabaseService {
             };
         });
 
+        this.setCache(cacheKey, workspaces);
         return workspaces;
     }
 
@@ -720,9 +772,55 @@ class DatabaseService {
         return { cardCount: count ?? 0, mastery: 0, subdeckCount };
     }
 
+    async getLectureNotes(): Promise<LectureNote[]> {
+        const user = await this.ensureSessionReady();
+        const cacheKey = `notes_${user.id}`;
+        const cached = this.getCached<LectureNote[]>(cacheKey);
+        if (cached) return cached;
+
+        const { data, error } = await supabase
+            .from('transcripts')
+            .select('id, profile_id, title, duration, created_at, metadata')
+            .eq('profile_id', user.id)
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('[DB] getLectureNotes:', error.message);
+            return [];
+        }
+
+        const notes = (data || []).map((row: any) => {
+            const meta = row.metadata as { workspaceId?: string; flashcardDeckId?: string } | null;
+            const created = new Date(row.created_at as string).getTime();
+            return {
+                id: row.id,
+                userId: row.profile_id,
+                workspaceId: meta?.workspaceId,
+                flashcardDeckId: meta?.flashcardDeckId,
+                title: row.title || 'Untitled Lecture',
+                content: '',
+                summary: undefined,
+                keyTakeaways: [],
+                glossary: [],
+                date: formatLectureDateLong(created),
+                duration: row.duration || '0:00',
+                createdAt: created,
+                updatedAt: created,
+            } as LectureNote;
+        });
+
+        this.setCache(cacheKey, notes);
+        return notes;
+    }
+
     /** Mirrors iOS getNotesByWorkspace — queries metadata JSON field directly, not "fetch all → filter". */
     async getNotesByWorkspace(wsId: string): Promise<LectureNote[]> {
         await this.ensureSessionReady();
+        const cacheKey = `notes_ws_${wsId}`;
+        const cached = this.getCached<LectureNote[]>(cacheKey);
+        if (cached) return cached;
+
         const { data, error } = await supabase
             .from('transcripts')
             .select('id, profile_id, title, duration, created_at, metadata')
@@ -734,7 +832,7 @@ class DatabaseService {
             return [];
         }
 
-        return (data || []).map((row: any) => {
+        const notes = (data || []).map((row: any) => {
             const meta = row.metadata as { workspaceId?: string; flashcardDeckId?: string } | null;
             const created = new Date(row.created_at as string).getTime();
             return {
@@ -753,11 +851,18 @@ class DatabaseService {
                 updatedAt: created,
             } as LectureNote;
         });
+
+        this.setCache(cacheKey, notes);
+        return notes;
     }
 
     /** Mirrors iOS getStudyGuidesByWorkspace — queries workspace_id column directly. */
     async getStudyGuidesByWorkspace(wsId: string): Promise<StudyGuide[]> {
         await this.ensureSessionReady();
+        const cacheKey = `guides_ws_${wsId}`;
+        const cached = this.getCached<StudyGuide[]>(cacheKey);
+        if (cached) return cached;
+
         const { data, error } = await supabase
             .from('study_guides')
             .select('id, profile_id, title, topic, created_at')
@@ -770,7 +875,7 @@ class DatabaseService {
             return [];
         }
 
-        return (data || []).map((row: any) => ({
+        const guides = (data || []).map((row: any) => ({
             id: row.id,
             userId: row.profile_id,
             workspaceId: wsId,
@@ -779,10 +884,17 @@ class DatabaseService {
             content: '', // Omitted for workspace list performance
             createdAt: new Date(row.created_at as string).getTime(),
         } as StudyGuide));
+
+        this.setCache(cacheKey, guides);
+        return guides;
     }
 
     async getStudyGuides(): Promise<StudyGuide[]> {
         const user = await this.ensureSessionReady();
+        const cacheKey = `guides_${user.id}`;
+        const cached = this.getCached<StudyGuide[]>(cacheKey);
+        if (cached) return cached;
+
         const { data, error } = await supabase
             .from('study_guides')
             .select('id, profile_id, workspace_id, title, topic, created_at')
@@ -795,7 +907,7 @@ class DatabaseService {
             return [];
         }
 
-        return (data || []).map((row: Record<string, unknown>) => ({
+        const guides = (data || []).map((row: Record<string, unknown>) => ({
             id: row.id as string,
             userId: row.profile_id as string,
             workspaceId: (row.workspace_id as string | null) ?? undefined,
@@ -804,6 +916,9 @@ class DatabaseService {
             content: '', // Omitted for list performance
             createdAt: new Date(row.created_at as string).getTime(),
         }));
+
+        this.setCache(cacheKey, guides);
+        return guides;
     }
 
     async getStudyGuideById(id: string): Promise<StudyGuide | undefined> {
@@ -851,6 +966,8 @@ class DatabaseService {
             throw error || new Error('Create failed');
         }
 
+        this.clearCache('workspaces');
+
         return {
             id: data.id,
             profileId: data.profile_id,
@@ -874,6 +991,7 @@ class DatabaseService {
             console.error('[DB] updateWorkspace:', error.message);
             throw error;
         }
+        this.clearCache('workspaces');
     }
 
     async deleteWorkspace(wsId: string): Promise<void> {
@@ -890,6 +1008,7 @@ class DatabaseService {
             console.error('[DB] soft deleteWorkspace:', error.message);
             throw error;
         }
+        this.clearCache('workspaces');
     }
 
     async restoreWorkspace(wsId: string): Promise<void> {
@@ -906,6 +1025,7 @@ class DatabaseService {
             console.error('[DB] restoreWorkspace:', error.message);
             throw error;
         }
+        this.clearCache('workspaces');
     }
 
     async permanentlyDeleteWorkspace(wsId: string): Promise<void> {
@@ -915,6 +1035,7 @@ class DatabaseService {
             console.error('[DB] permanentlyDeleteWorkspace:', error.message);
             throw error;
         }
+        this.clearCache('workspaces');
     }
 
     async getDeletedItems(): Promise<{ 
@@ -1072,6 +1193,7 @@ class DatabaseService {
             console.error('[DB] createTranscript:', error.message);
             throw error;
         }
+        this.clearCache(`notes_${user.id}`);
         return data.id;
     }
 
@@ -1082,6 +1204,7 @@ class DatabaseService {
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);
         if (error) throw error;
+        this.clearCache('notes_');
     }
 
     async restoreLectureNote(id: string): Promise<void> {
@@ -1091,12 +1214,14 @@ class DatabaseService {
             .update({ deleted_at: null })
             .eq('id', id);
         if (error) throw error;
+        this.clearCache('notes_');
     }
 
     async permanentlyDeleteLectureNote(id: string): Promise<void> {
         await this.ensureSessionReady();
         const { error } = await supabase.from('transcripts').delete().eq('id', id);
         if (error) throw error;
+        this.clearCache('notes_');
     }
 
     async deleteStudyGuide(id: string): Promise<void> {
@@ -1106,6 +1231,7 @@ class DatabaseService {
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);
         if (error) throw error;
+        this.clearCache('guides_');
     }
 
     async restoreStudyGuide(id: string): Promise<void> {
@@ -1115,12 +1241,14 @@ class DatabaseService {
             .update({ deleted_at: null })
             .eq('id', id);
         if (error) throw error;
+        this.clearCache('guides_');
     }
 
     async permanentlyDeleteStudyGuide(id: string): Promise<void> {
         await this.ensureSessionReady();
         const { error } = await supabase.from('study_guides').delete().eq('id', id);
         if (error) throw error;
+        this.clearCache('guides_');
     }
 
     async restorePracticeTest(id: string): Promise<void> {
@@ -1140,6 +1268,10 @@ class DatabaseService {
 
     async getPodcasts(): Promise<PodcastRow[]> {
         const user = await this.ensureSessionReady();
+        const cacheKey = `podcasts_${user.id}`;
+        const cached = this.getCached<PodcastRow[]>(cacheKey);
+        if (cached) return cached;
+
         const { data, error } = await supabase
             .from('podcasts')
             .select('*')
@@ -1147,8 +1279,12 @@ class DatabaseService {
             .is('deleted_at', null)
             .order('created_at', { ascending: false });
         
-        if (error) throw error;
-        return (data || []).map(r => ({
+        if (error) {
+            console.error('[DB] getPodcasts:', error.message);
+            return [];
+        }
+
+        const podcasts = (data || []).map(r => ({
             id: r.id,
             userId: r.profile_id,
             workspaceId: r.workspace_id,
@@ -1159,10 +1295,17 @@ class DatabaseService {
             createdAt: new Date(r.created_at).getTime(),
             updatedAt: new Date(r.updated_at).getTime()
         }));
+
+        this.setCache(cacheKey, podcasts);
+        return podcasts;
     }
 
     async getPodcastsByWorkspace(wsId: string): Promise<PodcastRow[]> {
         await this.ensureSessionReady();
+        const cacheKey = `podcasts_ws_${wsId}`;
+        const cached = this.getCached<PodcastRow[]>(cacheKey);
+        if (cached) return cached;
+
         const { data, error } = await supabase
             .from('podcasts')
             .select('*')
@@ -1175,7 +1318,7 @@ class DatabaseService {
             return [];
         }
 
-        return (data || []).map(r => ({
+        const podcasts = (data || []).map(r => ({
             id: r.id,
             userId: r.profile_id,
             workspaceId: r.workspace_id,
@@ -1186,6 +1329,9 @@ class DatabaseService {
             createdAt: new Date(r.created_at).getTime(),
             updatedAt: new Date(r.updated_at).getTime()
         }));
+
+        this.setCache(cacheKey, podcasts);
+        return podcasts;
     }
 
     async softDeletePodcast(id: string): Promise<void> {
@@ -1195,6 +1341,7 @@ class DatabaseService {
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);
         if (error) throw error;
+        this.clearCache('podcasts');
     }
 
     async restorePodcast(id: string): Promise<void> {
@@ -1204,12 +1351,14 @@ class DatabaseService {
             .update({ deleted_at: null })
             .eq('id', id);
         if (error) throw error;
+        this.clearCache('podcasts');
     }
 
     async permanentlyDeletePodcast(id: string): Promise<void> {
         await this.ensureSessionReady();
         const { error } = await supabase.from('podcasts').delete().eq('id', id);
         if (error) throw error;
+        this.clearCache('podcasts');
     }
 
     async getWorkspaceContent(wsId?: string): Promise<string> {

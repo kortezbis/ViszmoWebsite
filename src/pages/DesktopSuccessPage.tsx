@@ -6,7 +6,12 @@ export const DesktopSuccessPage: React.FC = () => {
   const user = auth?.user;
   const signOut = auth?.signOut;
 
+  const triggeredRef = React.useRef(false);
+
   useEffect(() => {
+    if (triggeredRef.current) return;
+    triggeredRef.current = true;
+
     const triggerRedirect = () => {
       const url = window.location.href;
       // Handle both hash and query param styles of Supabase redirects
@@ -15,10 +20,7 @@ export const DesktopSuccessPage: React.FC = () => {
       window.location.href = deepLink;
     };
 
-    // Initial attempt
-    triggerRedirect();
-
-    // Fallback attempt after 1.5 seconds if the browser blocked the first one
+    // Delay slightly to ensure browser stability and avoid double-triggering
     const timer = setTimeout(triggerRedirect, 1500);
     return () => clearTimeout(timer);
   }, []);

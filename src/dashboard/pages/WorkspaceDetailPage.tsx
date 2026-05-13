@@ -63,9 +63,13 @@ export default function WorkspaceDetailPage() {
 
     const [workspaceCards, setWorkspaceCards] = useState<FlashcardRow[]>([]);
     const [loadingCards, setLoadingCards] = useState(false);
+    const [hasLoadedCards, setHasLoadedCards] = useState(false);
     const [workspaceLectures, setWorkspaceLectures] = useState<LectureNote[]>([]);
+    const [hasLoadedLectures, setHasLoadedLectures] = useState(false);
     const [workspaceGuides, setWorkspaceGuides] = useState<StudyGuide[]>([]);
+    const [hasLoadedGuides, setHasLoadedGuides] = useState(false);
     const [workspacePodcasts, setWorkspacePodcasts] = useState<PodcastRow[]>([]);
+    const [hasLoadedPodcasts, setHasLoadedPodcasts] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -109,7 +113,10 @@ export default function WorkspaceDetailPage() {
 
     const load = useCallback(async (opts?: { isRefresh?: boolean }) => {
         if (!workspaceId) return;
-        if (!opts?.isRefresh) setLoading(true);
+        // Only show skeleton on first load or when workspace changes
+        if (workspaceLectures.length === 0 && workspaceGuides.length === 0) {
+            setLoading(true);
+        }
         setError(null);
         try {
             // Context handles workspaces and decks. 
@@ -123,6 +130,9 @@ export default function WorkspaceDetailPage() {
             setWorkspaceLectures(l);
             setWorkspaceGuides(g);
             setWorkspacePodcasts(p);
+            setHasLoadedLectures(true);
+            setHasLoadedGuides(true);
+            setHasLoadedPodcasts(true);
         } catch (e: any) {
             console.error('[WorkspaceDetail] Load failed:', e);
             setError('Failed to load library data');
@@ -137,12 +147,13 @@ export default function WorkspaceDetailPage() {
 
     // Lazy load cards when tab is selected
     useEffect(() => {
-        if (activeTab === 'Cards' && workspaceId && workspaceCards.length === 0) {
+        if (activeTab === 'Cards' && workspaceId && !hasLoadedCards && !loadingCards) {
             const loadCards = async () => {
                 setLoadingCards(true);
                 try {
                     const c = await db.getFlashcardsByWorkspace(workspaceId);
                     setWorkspaceCards(c);
+                    setHasLoadedCards(true);
                 } catch (e) {
                     console.error('[WorkspaceDetail] Cards load failed:', e);
                 } finally {
@@ -151,7 +162,7 @@ export default function WorkspaceDetailPage() {
             };
             void loadCards();
         }
-    }, [activeTab, workspaceId, workspaceCards.length]);
+    }, [activeTab, workspaceId, hasLoadedCards, loadingCards]);
 
     // Calculate total cards for "Study All"
     const totalCardsCount = useMemo(() => {
@@ -216,7 +227,7 @@ export default function WorkspaceDetailPage() {
                 await db.updateWorkspace(workspaceId, { name: modalName.trim() });
             } else if (modalType === 'subdeck') {
                 // Use parent workspace color for sub-decks as requested
-                await db.createWorkspace(modalName.trim(), workspace.color || '#3B82F6', undefined, workspaceId);
+                await db.createWorkspace(modalName.trim(), workspace?.color || '#3B82F6', undefined, workspaceId);
             } else if (modalType === 'deck') {
                 await db.createDeck(modalName.trim(), workspaceId);
             }
@@ -1130,8 +1141,7 @@ export default function WorkspaceDetailPage() {
                             </button>
 
                             {/* Main Deck Option */}
-                            <div className="mt-2 flex flex-col gap-2">
-                                <h4 className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1 ml-1">Main Deck</h4>
+                            <div className="flex flex-col gap-2">
                                 <button
                                     type="button"
                                     disabled={workspaceDecks.reduce((acc, d) => acc + (d.cardCount ?? 0), 0) === 0}
@@ -1153,7 +1163,6 @@ export default function WorkspaceDetailPage() {
                             {/* List Sub Decks */}
                             {subWorkspaces.length > 0 && (
                                 <div className="mt-2 flex flex-col gap-2">
-                                    <h4 className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-1 ml-1">Sub Decks ({subWorkspaces.length})</h4>
                                     {subWorkspaces.map((sw) => (
                                         <button
                                             key={sw.id}
@@ -1166,12 +1175,11 @@ export default function WorkspaceDetailPage() {
                                             className="group flex flex-col justify-center gap-1 bg-surface border border-border rounded-2xl p-4 text-left hover:border-brand-primary/50 transition-all w-full disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: sw.color }} />
+                                                <div className="flex items-center mb-1">
                                                     <h3 className="font-bold text-foreground truncate group-hover:text-brand-primary transition-colors">{sw.name}</h3>
                                                 </div>
                                                 <p className="text-sm text-foreground-secondary truncate">
-                                                    {sw.stats.cardCount} cards • Subdeck
+                                                    {(sw.stats?.cardCount || 0)} cards • Subdeck
                                                 </p>
                                             </div>
                                         </button>

@@ -8,8 +8,8 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
 
 const PLANS = {
   weekly: { priceId: "price_1TUjayIaAtXoqGKDiGxGl17D", productId: "prod_UTgypEDlzeU4zM", planName: "weekly" },
-  plus_monthly: { priceId: "price_1TULbPIaAtXoqGKDOhVGUQ9B", productId: "prod_UTIBccZDue2ciX", planName: "plus" },
-  plus_yearly: { priceId: "price_1TUjr3IaAtXoqGKDvBZjFvc6", productId: "prod_UThFfHZiHu85SE", planName: "plus" },
+  plus_monthly: { priceId: "price_1TWgUyIaAtXoqGKDEslXicZ3", productId: "prod_UVhuvUcLPV4Jdb", planName: "plus" },
+  plus_yearly: { priceId: "price_1TUjr3IaAtXoqGKDvBZjFvc6", productId: "prod_UVhuvUcLPV4Jdb", planName: "plus" },
   pro_monthly: { priceId: "price_1TULdTIaAtXoqGKDeux08PiV", productId: "prod_UTIDNLwKoKql16", planName: "pro" },
   pro_yearly: { priceId: "price_1TUjrzIaAtXoqGKDwOddlN6G", productId: "prod_UThG8UtbykYX4V", planName: "pro" },
 };

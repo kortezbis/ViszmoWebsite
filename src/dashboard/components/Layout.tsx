@@ -210,7 +210,7 @@ function Sidebar({
             </nav>
 
             {/* Footer Section */}
-            <div className={`p-4 border-t border-border flex flex-col gap-1 ${isCollapsed ? 'items-center' : ''}`}>
+            <div className={`p-4 flex flex-col gap-1 ${isCollapsed ? 'items-center' : ''}`}>
 
 
 
@@ -243,7 +243,7 @@ function Sidebar({
 
                                 <button
                                     onClick={() => {
-                                        window.location.href = '/';
+                                        navigate('/');
                                         setIsUserMenuOpen(false);
                                     }}
                                     className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl"
@@ -261,10 +261,7 @@ function Sidebar({
                                     <Users className="w-4 h-4 text-zinc-500" />
                                     Refer Friends
                                 </button>
-                                <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl">
-                                    <Settings className="w-4 h-4 text-zinc-500" />
-                                    Settings
-                                </button>
+
 
                                 {/* App Settings Toggles */}
                                 <div className="space-y-0.5">
