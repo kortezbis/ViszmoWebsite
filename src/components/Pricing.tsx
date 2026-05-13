@@ -79,8 +79,9 @@ export const Pricing = () => {
             monthly: { price: 0, period: '' },
             annual: { price: 0, period: '', total: 0, label: 'Free forever' },
             features: [
-                'Full Access to Study Tools',
+                'Core Study Tools',
                 'Limited Desktop Sidekick',
+                'Limited responses messages',
                 'Community support',
             ],
             cta: 'Get Started',
