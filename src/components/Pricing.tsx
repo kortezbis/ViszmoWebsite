@@ -160,7 +160,7 @@ export const Pricing = () => {
                             loading="lazy"
                             className="h-10 sm:h-14 md:h-20 lg:h-24 w-auto object-contain drop-shadow-lg"
                         />
-                        <span>for <span className="text-[#0ea5e9]">free.</span></span>
+                        <span>for <span className="text-[#0284c7]">free.</span></span>
                     </h2>
                     <p className="text-base sm:text-lg text-slate-500 max-w-2xl mx-auto px-2">
                         Whether you're using Viszmo for homework, deep learning, or just curious, it's free to use.
@@ -275,7 +275,7 @@ export const Pricing = () => {
                             transition={{ duration: 0.5 }}
                             className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight"
                         >
-                            Detailed <span className="text-[#0ea5e9]">Comparison.</span>
+                            Detailed <span className="text-[#0284c7]">Comparison.</span>
                         </motion.h2>
                         <p className="text-base sm:text-lg text-slate-500 font-medium leading-relaxed px-2">
                             Everything you need to know about our study plans.

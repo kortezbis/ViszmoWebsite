@@ -24,7 +24,7 @@ export const HowItWorks = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 md:mb-24 text-center">
           <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 text-slate-900 tracking-tight">
-            Perfect notes in <span className="text-[#0ea5e9]">3 steps</span>
+            Perfect notes in <span className="text-[#0284c7]">3 steps</span>
           </h2>
           <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto">
             The easiest way to capture every detail without writing a single word.
