@@ -11,8 +11,6 @@ interface PeelStickerProps {
 
 export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStickerProps) => {
   const stickerContainerRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
-
   const uniqueId = `sticker-${index}`;
 
   const variants: Variants = {
@@ -58,8 +56,6 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
       animate="animate"
       exit="exit"
       whileHover="hover"
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
       style={{
         position: 'absolute',
         pointerEvents: 'auto',
@@ -67,41 +63,18 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
       }}
       className="trigger-peel"
     >
-      {/* High Fidelity SVG Defs */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
         <defs>
-          <filter id={`pointLight-${uniqueId}`}>
-            <feGaussianBlur stdDeviation="1" result="blur" />
-            <feSpecularLighting result="spec" in="blur" specularExponent="100" specularConstant="0.1" lightingColor="white">
-              <fePointLight x="100" y="100" z="300" />
-            </feSpecularLighting>
-            <feBlend mode="screen" in="spec" in2="SourceGraphic" result="lit" />
-            <feComposite in="lit" in2="SourceAlpha" operator="in" />
-          </filter>
-
-          <filter id={`pointLightFlipped-${uniqueId}`}>
-            <feGaussianBlur stdDeviation="1" result="blur" />
-            <feSpecularLighting result="spec" in="blur" specularExponent="100" specularConstant="0.7" lightingColor="white">
-              <fePointLight x="100" y="100" z="300" />
-            </feSpecularLighting>
-            <feBlend mode="screen" in="spec" in2="SourceGraphic" result="lit" />
-            <feComposite in="lit" in2="SourceAlpha" operator="in" />
-          </filter>
-
-          <filter id={`dropShadow-${uniqueId}`}>
-            <feDropShadow dx="2" dy="4" stdDeviation="3" floodColor="black" floodOpacity="0.6" />
-          </filter>
-
           <filter id={`outerStroke-${uniqueId}`}>
-            <feMorphology operator="dilate" radius="10" in="SourceAlpha" result="expanded" />
-            <feColorMatrix in="expanded" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0" result="whiteExpanded" />
-            <feComposite operator="xor" in="whiteExpanded" in2="SourceAlpha" result="outerStroke" />
-            <feComposite operator="over" in="SourceGraphic" in2="outerStroke" />
+            <feMorphology operator="dilate" radius="6" in="SourceAlpha" result="expanded" />
+            <feFlood floodColor="white" result="white" />
+            <feComposite operator="in" in="white" in2="expanded" result="stroke" />
+            <feComposite operator="over" in="SourceGraphic" in2="stroke" />
           </filter>
 
           <filter id={`expandAndFill-${uniqueId}`}>
-            <feMorphology operator="dilate" radius="10" in="SourceAlpha" result="expanded" />
-            <feFlood floodColor="rgb(179, 179, 179)" result="flood" />
+            <feMorphology operator="dilate" radius="6" in="SourceAlpha" result="expanded" />
+            <feFlood floodColor="#d1d5db" result="flood" />
             <feComposite operator="in" in="flood" in2="expanded" />
           </filter>
         </defs>
@@ -109,17 +82,16 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
 
       <div className="sticker-container" ref={stickerContainerRef}>
         <div className="sticker-main">
-          <div className="sticker-lighting" style={{ filter: `url(#pointLight-${uniqueId})` }}>
-            <img
-              src={logoUrl}
-              alt={alt}
-              className="sticker-image"
-              draggable={false}
-              style={{
-                filter: `url(#outerStroke-${uniqueId}) url(#dropShadow-${uniqueId})`,
-              }}
-            />
-          </div>
+          <img
+            src={logoUrl}
+            alt={alt}
+            className="sticker-image"
+            draggable={false}
+            style={{
+              filter: `url(#outerStroke-${uniqueId}) drop-shadow(0 4px 6px rgba(0,0,0,0.2))`,
+              willChange: 'filter'
+            }}
+          />
         </div>
 
         <div className="shadow">
@@ -129,21 +101,19 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
               alt={alt}
               className="shadow-image"
               draggable={false}
-              style={{ filter: `url(#expandAndFill-${uniqueId})` }}
+              style={{ filter: `url(#expandAndFill-${uniqueId}) blur(4px)`, opacity: 0.3 }}
             />
           </div>
         </div>
 
         <div className="flap">
-          <div className="flap-lighting" style={{ filter: `url(#pointLightFlipped-${uniqueId})` }}>
-            <img
-              src={logoUrl}
-              alt={alt}
-              className="flap-image"
-              draggable={false}
-              style={{ filter: `url(#expandAndFill-${uniqueId})` }}
-            />
-          </div>
+          <img
+            src={logoUrl}
+            alt={alt}
+            className="flap-image"
+            draggable={false}
+            style={{ filter: `url(#expandAndFill-${uniqueId})` }}
+          />
         </div>
       </div>
     </motion.div>
