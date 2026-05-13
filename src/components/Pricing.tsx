@@ -95,7 +95,7 @@ export const Pricing = () => {
             annual: { price: 9, period: '/mo', total: 108, label: 'Billed $108/year' },
             features: [
                 'Full Access to Study Tools',
-                'Limited Desktop Sidekick',
+                'Unlimited Desktop Sidekick',
                 'Unlimited responses messages',
                 'Standard support',
             ],
@@ -135,7 +135,7 @@ export const Pricing = () => {
 
     const comparisonFeatures: FeatureMap[] = [
         { name: 'Full Access to Study Tools', weekly: true, plus: true, pro: true },
-        { name: 'Desktop Sidekick Overlay', weekly: 'Unlimited Access', plus: 'Limited Access', pro: 'Unlimited Access' },
+        { name: 'Desktop Sidekick Overlay', weekly: 'Unlimited Access', plus: 'Unlimited Access', pro: 'Unlimited Access' },
         { name: 'Responses messages per day', weekly: 'Unlimited', plus: 'Unlimited', pro: 'Unlimited' },
         { name: 'Meeting notetaking', weekly: 'Unlimited', plus: '30/mo', pro: 'Unlimited' },
         { name: 'Custom Keybinds', weekly: true, plus: true, pro: true }
