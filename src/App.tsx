@@ -353,7 +353,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
 
 
-        </div>
+        </motion.div>
 
         {/* Hero Mockup - now outside the narrow text container for full width */}
         <motion.div
