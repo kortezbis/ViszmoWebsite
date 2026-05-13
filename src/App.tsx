@@ -290,6 +290,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
         <div
           className="max-w-5xl mx-auto flex flex-col items-center relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-1000"
+          style={{ transform: 'translateZ(0)', willChange: 'transform, opacity' }}
         >
           {/* Stats Badge for "Breakdown" */}
           <div className="mb-8 scale-95 md:scale-100">
@@ -361,6 +362,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
         {/* Hero Mockup - now outside the narrow text container for full width */}
         <div
           className="mt-12 md:mt-16 relative w-full max-w-[90rem] mx-auto px-4 sm:px-6 md:px-8 z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 fill-mode-both"
+          style={{ transform: 'translateZ(0)', willChange: 'transform, opacity' }}
         >
           {/* Glow effect behind the mockup */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[1200px] bg-indigo-500/10 blur-[120px] -z-10 rounded-full" />
