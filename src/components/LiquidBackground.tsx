@@ -18,7 +18,7 @@ export const LiquidBackground = () => {
 
       {/* 2. Top Center - Primary Glow (Purple/Indigo) */}
       <motion.div
-        animate={{
+        animate={typeof window !== 'undefined' && window.innerWidth < 1024 ? { opacity: 0.4 } : {
           scale: [1, 1.15, 1],
           opacity: [0.3, 0.5, 0.3],
         }}
@@ -32,7 +32,7 @@ export const LiquidBackground = () => {
 
       {/* 3. Top Left - Secondary Glow (Cyan/Blue) */}
       <motion.div
-        animate={{
+        animate={typeof window !== 'undefined' && window.innerWidth < 1024 ? { opacity: 0.3 } : {
           x: [0, 50, 0],
           y: [0, 30, 0],
           opacity: [0.2, 0.4, 0.2],
@@ -48,7 +48,7 @@ export const LiquidBackground = () => {
 
       {/* 4. Top Right - Accent Glow (Violet/Pink) */}
       <motion.div
-        animate={{
+        animate={typeof window !== 'undefined' && window.innerWidth < 1024 ? { opacity: 0.3 } : {
           x: [0, -40, 0],
           y: [0, 40, 0],
           opacity: [0.2, 0.4, 0.2],

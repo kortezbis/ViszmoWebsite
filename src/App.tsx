@@ -116,7 +116,14 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
 
   const [loadedSchoolLogos, setLoadedSchoolLogos] = useState<string[]>([]);
-  const [activeStickers, setActiveStickers] = useState<{ logo: string; position: any; id: string }[]>([]);
+  const [activeStickers, setActiveStickers] = useState<{ logo: string; position: any; id: string }[]>(() => {
+    // Initial batch to prevent CLS
+    return SCHOOL_LOGOS.slice(0, STICKER_POSITIONS.length).map((logo, idx) => ({
+      logo: `/Schools/${logo}`,
+      position: STICKER_POSITIONS[idx],
+      id: `initial-${logo}-${idx}`
+    }));
+  });
   const heroSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -246,15 +253,13 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
       {/* Cluely-Inspired Hero Section */}
       <section ref={heroSectionRef} className="pt-32 md:pt-48 pb-12 md:pb-24 px-4 text-center relative z-10 overflow-hidden min-h-[auto] lg:min-h-screen flex flex-col items-center">
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: 'url(/hero-background.jpg.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
+        <img
+          src="/hero-background.jpg.png"
+          alt=""
+          className="absolute inset-0 z-0 w-full h-full object-cover"
+          fetchpriority="high"
+          loading="eager"
+          decoding="async"
         />
 
         {/* Subtle overlay for better text readability - Only on top portion for text */}
