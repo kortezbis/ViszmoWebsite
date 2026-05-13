@@ -5,9 +5,9 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
 import { PublicLayout } from './components/PublicLayout';
 import { HeroMockup } from './components/HeroMockup';
-const HowItWorks = lazy(() => import('./components/HowItWorks').then(module => ({ default: module.HowItWorks })));
-const StudentLifeFeatures = lazy(() => import('./components/StudentLifeFeatures').then(module => ({ default: module.StudentLifeFeatures })));
-const Testimonials = lazy(() => import('./components/Testimonials').then(module => ({ default: module.Testimonials })));
+import { HowItWorks } from './components/HowItWorks';
+import { StudentLifeFeatures } from './components/StudentLifeFeatures';
+import { Testimonials } from './components/Testimonials';
 
 // SubscriptionModal removed
 import { Footer } from './components/Footer';
