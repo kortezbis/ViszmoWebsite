@@ -5,9 +5,9 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
 import { PublicLayout } from './components/PublicLayout';
 import { HeroMockup } from './components/HeroMockup';
-import { HowItWorks } from './components/HowItWorks';
-import { StudentLifeFeatures } from './components/StudentLifeFeatures';
-import { Testimonials } from './components/Testimonials';
+const HowItWorks = lazy(() => import('./components/HowItWorks').then(module => ({ default: module.HowItWorks })));
+const StudentLifeFeatures = lazy(() => import('./components/StudentLifeFeatures').then(module => ({ default: module.StudentLifeFeatures })));
+const Testimonials = lazy(() => import('./components/Testimonials').then(module => ({ default: module.Testimonials })));
 
 // SubscriptionModal removed
 import { Footer } from './components/Footer';
@@ -115,24 +115,30 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
   const heroSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    // Load school logos
-    const schoolPaths = SCHOOL_LOGOS.map(logo => `/Schools/${logo}`);
+    const loadLogos = () => {
+      // Load school logos
+      const schoolPaths = SCHOOL_LOGOS.map(logo => `/Schools/${logo}`);
 
-    const preloadImages = (paths: string[]) => {
-      return Promise.all(paths.map((src) => {
-        return new Promise<string>((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve(src);
-          img.onerror = () => resolve('');
-          img.src = src;
-        });
-      }));
+      const preloadImages = (paths: string[]) => {
+        return Promise.all(paths.map((src) => {
+          return new Promise<string>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(src);
+            img.onerror = () => resolve('');
+            img.src = src;
+          });
+        }));
+      };
+
+      preloadImages(schoolPaths).then((results) => {
+        const valid = results.filter((src) => src !== '');
+        setLoadedSchoolLogos(valid);
+      });
     };
 
-    preloadImages(schoolPaths).then((results) => {
-      const valid = results.filter((src) => src !== '');
-      setLoadedSchoolLogos(valid);
-    });
+    // Delay loading logos until after the main content is painted to improve LCP
+    const timer = setTimeout(loadLogos, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -282,11 +288,8 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
           </AnimatePresence>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="max-w-5xl mx-auto flex flex-col items-center relative z-10"
+        <div
+          className="max-w-5xl mx-auto flex flex-col items-center relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-1000"
         >
           {/* Stats Badge for "Breakdown" */}
           <div className="mb-8 scale-95 md:scale-100">
@@ -353,19 +356,16 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
 
 
-        </motion.div>
+        </div>
 
         {/* Hero Mockup - now outside the narrow text container for full width */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-          className="mt-12 md:mt-16 relative w-full max-w-[90rem] mx-auto px-4 sm:px-6 md:px-8 z-10"
+        <div
+          className="mt-12 md:mt-16 relative w-full max-w-[90rem] mx-auto px-4 sm:px-6 md:px-8 z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 fill-mode-both"
         >
           {/* Glow effect behind the mockup */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[1200px] bg-indigo-500/10 blur-[120px] -z-10 rounded-full" />
           <HeroMockup />
-        </motion.div>
+        </div>
       </section>
 
 
