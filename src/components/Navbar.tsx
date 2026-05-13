@@ -29,7 +29,7 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { },
                         <Logo size={28} variant="full" />
                     </div>
                 </Link>
-                <div className="hidden md:flex items-center gap-7 text-sm font-medium text-[#0ea5e9] relative z-10 justify-self-center">
+                <div className="hidden md:flex items-center gap-7 text-sm font-medium text-[#0284c7] relative z-10 justify-self-center">
                     <button
                         className="hover:opacity-80 transition-opacity flex items-center gap-1.5"
                         onClick={() => navigate('/dashboard')}
@@ -99,7 +99,7 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { },
                     ) : (
                         <button
                             onClick={() => onOpenAuth('login')}
-                            className="text-sm font-bold text-[#0ea5e9] hover:opacity-80 transition-opacity"
+                            className="text-sm font-bold text-[#0284c7] hover:opacity-80 transition-opacity"
                         >
                             Sign in
                         </button>
@@ -183,7 +183,7 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { },
                                                 onOpenAuth('login');
                                                 setIsMobileMenuOpen(false);
                                             }}
-                                            className="w-full py-4 text-sm font-bold text-[#0ea5e9] bg-blue-50/50 rounded-2xl border border-blue-100/50"
+                                            className="w-full py-4 text-sm font-bold text-[#0284c7] bg-blue-50/50 rounded-2xl border border-blue-100/50"
                                         >
                                             Sign in
                                         </button>
