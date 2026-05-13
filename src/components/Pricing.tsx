@@ -105,12 +105,14 @@ export const Pricing = () => {
         },
         {
             id: 'pro',
-            name: 'Pro Plus',
+            name: 'Pro',
             monthly: { price: 19, period: '/mo' },
             annual: { price: 14, period: '/mo', total: 168, label: 'Billed $168/year' },
             features: [
-                'Everything in Plus, plus...',
-                'Completely hidden to meeting screen sharing software',
+                'Includes all Plus features',
+                'Unlimited Desktop Sidekick',
+                'Undetectable during screen share',
+                'Priority support',
             ],
             cta: 'Subscribe',
             popular: true,
