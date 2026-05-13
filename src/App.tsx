@@ -262,7 +262,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
         <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white/20 via-white/10 to-transparent pointer-events-none" />
 
         {/* School Stickers on Background - Above background and overlay */}
-        <div className="absolute inset-0 z-5 overflow-visible pointer-events-none" style={{ overflow: 'visible' }}>
+        <div className="absolute inset-0 z-5 overflow-visible pointer-events-none" style={{ overflow: 'visible', transform: 'translateZ(0)', willChange: 'transform' }}>
           <AnimatePresence>
             {activeStickers.map((sticker, idx) => {
               const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
