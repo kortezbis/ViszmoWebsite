@@ -11,36 +11,7 @@ interface PeelStickerProps {
 
 export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStickerProps) => {
   const stickerContainerRef = useRef<HTMLDivElement>(null);
-  const pointLightRef = useRef<SVGFEPointLightElement>(null);
-  const pointLightFlippedRef = useRef<SVGFEPointLightElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    const stickerContainer = stickerContainerRef.current;
-    if (!stickerContainer) return;
-
-    const updateLightPosition = (e: MouseEvent) => {
-      // Only track if the sticker is visible or hovered for performance
-      if (!isHovered && Math.random() > 0.1) return; 
-
-      const rect = stickerContainer.getBoundingClientRect();
-      const relativeX = e.clientX - rect.left;
-      const relativeY = e.clientY - rect.top;
-
-      if (pointLightRef.current) {
-        pointLightRef.current.setAttribute('x', String(relativeX));
-        pointLightRef.current.setAttribute('y', String(relativeY));
-      }
-      if (pointLightFlippedRef.current) {
-        pointLightFlippedRef.current.setAttribute('x', String(relativeX));
-        pointLightFlippedRef.current.setAttribute('y', String(rect.height - relativeY));
-      }
-    };
-
-    // Optimization: only track mouse if it's actually near the stickers
-    window.addEventListener('mousemove', updateLightPosition, { passive: true });
-    return () => window.removeEventListener('mousemove', updateLightPosition);
-  }, [isHovered]);
 
   const uniqueId = `sticker-${index}`;
 
@@ -89,43 +60,39 @@ export const PeelSticker = ({ logoUrl, alt, index, style, delay = 0 }: PeelStick
       whileHover="hover"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      drag
-      dragMomentum={false}
-      whileDrag={{ scale: 1.1, zIndex: 100, cursor: 'grabbing' }}
       style={{
         position: 'absolute',
-        cursor: 'grab',
         pointerEvents: 'auto',
         ...style
       }}
       className="trigger-peel"
     >
-      {/* Optimized SVG Defs - Only keep essentials */}
+      {/* Optimized SVG Defs */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
         <defs>
           <filter id={`pointLight-${uniqueId}`}>
-            <feSpecularLighting result="spec" in="SourceGraphic" specularExponent="40" specularConstant="0.4" lightingColor="white">
-              <fePointLight ref={pointLightRef} x="100" y="100" z="200" />
+            <feSpecularLighting result="spec" in="SourceGraphic" specularExponent="60" specularConstant="0.2" lightingColor="white">
+              <fePointLight x="50" y="50" z="200" />
             </feSpecularLighting>
             <feComposite in="spec" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
           </filter>
 
           <filter id={`pointLightFlipped-${uniqueId}`}>
-            <feSpecularLighting result="spec" in="SourceGraphic" specularExponent="40" specularConstant="0.4" lightingColor="white">
-              <fePointLight ref={pointLightFlippedRef} x="100" y="100" z="200" />
+            <feSpecularLighting result="spec" in="SourceGraphic" specularExponent="60" specularConstant="0.2" lightingColor="white">
+              <fePointLight x="50" y="50" z="200" />
             </feSpecularLighting>
             <feComposite in="spec" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
           </filter>
 
           <filter id={`outerStroke-${uniqueId}`}>
-            <feMorphology operator="dilate" radius="4" in="SourceAlpha" result="expanded" />
+            <feMorphology operator="dilate" radius="6" in="SourceAlpha" result="expanded" />
             <feFlood floodColor="white" result="white" />
             <feComposite operator="in" in="white" in2="expanded" result="stroke" />
             <feComposite operator="over" in="SourceGraphic" in2="stroke" />
           </filter>
 
           <filter id={`expandAndFill-${uniqueId}`}>
-            <feMorphology operator="dilate" radius="4" in="SourceAlpha" result="expanded" />
+            <feMorphology operator="dilate" radius="6" in="SourceAlpha" result="expanded" />
             <feFlood floodColor="#d1d5db" result="flood" />
             <feComposite operator="in" in="flood" in2="expanded" />
           </filter>
