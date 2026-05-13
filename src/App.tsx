@@ -263,22 +263,27 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
         {/* School Stickers on Background - Above background and overlay */}
         <div className="absolute inset-0 z-5 overflow-visible pointer-events-none" style={{ overflow: 'visible' }}>
           <AnimatePresence>
-            {activeStickers.map((sticker, idx) => (
-              <PeelSticker
-                key={sticker.id}
-                logoUrl={sticker.logo}
-                alt="School Logo"
-                index={idx}
-                delay={0.5 + idx * 0.15}
-                style={{
-                  ...sticker.position,
-                  width: '260px',
-                  height: '260px',
-                  transform: `scale(${sticker.position.scale || 1})`,
-                  overflow: 'visible'
-                }}
-              />
-            ))}
+            {activeStickers.map((sticker, idx) => {
+              const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+              if (isMobile) return null;
+              
+              return (
+                <PeelSticker
+                  key={sticker.id}
+                  logoUrl={sticker.logo}
+                  alt="School Logo"
+                  index={idx}
+                  delay={0.5 + idx * 0.15}
+                  style={{
+                    ...sticker.position,
+                    width: '260px',
+                    height: '260px',
+                    transform: `scale(${sticker.position.scale || 1})`,
+                    overflow: 'visible'
+                  }}
+                />
+              );
+            })}
           </AnimatePresence>
         </div>
 
