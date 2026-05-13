@@ -21,19 +21,19 @@ import { AuthModalProvider, useAuthModal } from './contexts/AuthModalContext';
 
 // Lazy load pages
 const DashboardApp = lazy(() => import('./dashboard/DashboardApp'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const SignupPage = lazy(() => import('./pages/SignupPage'));
-const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'));
-const PricingPage = lazy(() => import('./pages/PricingPage'));
-const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
-const StudyOverlayPage = lazy(() => import('./pages/StudyOverlayPage'));
-const AccountPage = lazy(() => import('./pages/AccountPage'));
-const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
-const ContactUsPage = lazy(() => import('./pages/ContactUsPage'));
-const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage'));
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
-const DesktopSuccessPage = lazy(() => import('./pages/DesktopSuccessPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
+const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage').then(m => ({ default: m.HowItWorksPage })));
+const PricingPage = lazy(() => import('./pages/PricingPage').then(m => ({ default: m.PricingPage })));
+const FeaturesPage = lazy(() => import('./pages/FeaturesPage').then(m => ({ default: m.FeaturesPage })));
+const StudyOverlayPage = lazy(() => import('./pages/StudyOverlayPage').then(m => ({ default: m.StudyOverlayPage })));
+const AccountPage = lazy(() => import('./pages/AccountPage').then(m => ({ default: m.AccountPage })));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(m => ({ default: m.TermsOfServicePage })));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
+const ContactUsPage = lazy(() => import('./pages/ContactUsPage').then(m => ({ default: m.ContactUsPage })));
+const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage').then(m => ({ default: m.HelpCenterPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const DesktopSuccessPage = lazy(() => import('./pages/DesktopSuccessPage').then(m => ({ default: m.DesktopSuccessPage })));
 
 
 // List of school logo filenames
