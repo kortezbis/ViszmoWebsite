@@ -116,14 +116,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
 
   const [loadedSchoolLogos, setLoadedSchoolLogos] = useState<string[]>([]);
-  const [activeStickers, setActiveStickers] = useState<{ logo: string; position: any; id: string }[]>(() => {
-    // Initial batch to prevent CLS
-    return SCHOOL_LOGOS.slice(0, STICKER_POSITIONS.length).map((logo, idx) => ({
-      logo: `/Schools/${logo}`,
-      position: STICKER_POSITIONS[idx],
-      id: `initial-${logo}-${idx}`
-    }));
-  });
+  const [activeStickers, setActiveStickers] = useState<{ logo: string; position: any; id: string }[]>([]);
   const heroSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -253,13 +246,15 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
       {/* Cluely-Inspired Hero Section */}
       <section ref={heroSectionRef} className="pt-32 md:pt-48 pb-12 md:pb-24 px-4 text-center relative z-10 overflow-hidden min-h-[auto] lg:min-h-screen flex flex-col items-center">
-        <img
-          src="/hero-background.jpg.png"
-          alt=""
-          className="absolute inset-0 z-0 w-full h-full object-cover"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: 'url(/hero-background.jpg.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
         />
 
         {/* Subtle overlay for better text readability - Only on top portion for text */}
@@ -352,7 +347,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                   { label: 'GRE', score: '338' },
                 ].map((item, index) => (
                   <div key={index} className="px-3 sm:px-4 flex flex-col items-center first:pl-2 last:pr-2">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-tight mb-0.5">{item.label}</span>
+                    <span className="text-[9px] font-bold text-slate-600 uppercase tracking-wider leading-tight mb-0.5">{item.label}</span>
                     <span className="text-sm sm:text-base font-black text-slate-900 leading-none">{item.score}</span>
                   </div>
                 ))}

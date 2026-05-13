@@ -19,7 +19,7 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
                         <Link to="/" className="flex items-center gap-3">
                             <Logo size={32} variant="full" className="brightness-0 opacity-90" />
                         </Link>
-                        <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
+                        <p className="text-slate-700 text-sm leading-relaxed max-w-sm">
                             Your live study sidekick. Viszmo adapts to how you learn, providing instant assistance and perfect notes without breaking your flow.
                         </p>
 
@@ -53,13 +53,13 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
                     <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-8">
                         {/* Column 1 */}
                         <div className="flex flex-col gap-4">
-                            <h4 className="font-semibold text-slate-900">Platform</h4>
-                            <ul className="flex flex-col gap-3 text-sm text-slate-500">
+                            <h3 className="font-semibold text-slate-900">Platform</h3>
+                            <ul className="flex flex-col gap-3 text-sm text-slate-700">
                                 <li><button onClick={onOpenMobileModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Mobile iOS</button></li>
                                 <li><button onClick={onOpenModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Windows</button></li>
                                 <li>
-                                    <span className="text-slate-400 cursor-not-allowed flex items-center gap-2">
-                                        Download Mac Now <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">Soon</span>
+                                    <span className="text-slate-700 cursor-not-allowed flex items-center gap-2">
+                                        Download Mac<span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300">Soon</span>
                                     </span>
                                 </li>
                             </ul>
@@ -67,8 +67,8 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
 
                         {/* Column 2 */}
                         <div className="flex flex-col gap-4">
-                            <h4 className="font-semibold text-slate-900">Resources</h4>
-                            <ul className="flex flex-col gap-3 text-sm text-slate-500">
+                            <h3 className="font-semibold text-slate-900">Resources</h3>
+                            <ul className="flex flex-col gap-3 text-sm text-slate-700">
                                 <li><Link to="/help" className="hover:text-[#0ea5e9] transition-colors">Help Center</Link></li>
                                 <li><Link to="/pricing" className="hover:text-[#0ea5e9] transition-colors">Pricing</Link></li>
                                 <li><Link to="/features" className="hover:text-[#0ea5e9] transition-colors">Features</Link></li>
@@ -79,8 +79,8 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
 
                         {/* Column 3 */}
                         <div className="flex flex-col gap-4">
-                            <h4 className="font-semibold text-slate-900">Alternatives</h4>
-                            <ul className="flex flex-col gap-3 text-sm text-slate-500">
+                            <h3 className="font-semibold text-slate-900">Alternatives</h3>
+                            <ul className="flex flex-col gap-3 text-sm text-slate-700">
                                 <li><a href="#" className="hover:text-[#0ea5e9] transition-colors">Chegg Alt</a></li>
                                 <li><a href="#" className="hover:text-[#0ea5e9] transition-colors">Quizlet Alt</a></li>
                                 <li><a href="#" className="hover:text-[#0ea5e9] transition-colors">CourseHero Alt</a></li>
@@ -90,8 +90,8 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
 
                         {/* Column 4 */}
                         <div className="flex flex-col gap-4">
-                            <h4 className="font-semibold text-slate-900">Legal</h4>
-                            <ul className="flex flex-col gap-3 text-sm text-slate-500">
+                            <h3 className="font-semibold text-slate-900">Legal</h3>
+                            <ul className="flex flex-col gap-3 text-sm text-slate-700">
                                 <li><Link to="/privacy" className="hover:text-[#0ea5e9] transition-colors">Privacy Policy</Link></li>
                                 <li><Link to="/terms" className="hover:text-[#0ea5e9] transition-colors">Terms of Service</Link></li>
                                 <li><Link to="/contact" className="hover:text-[#0ea5e9] transition-colors">Contact Support</Link></li>
@@ -103,14 +103,14 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
 
                 {/* Bottom Bar */}
                 <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <p className="text-slate-500 text-sm">
+                    <p className="text-slate-800 text-sm">
                         © {currentYear} Viszmo AI. All rights reserved.
                     </p>
 
                     <div className="flex items-center gap-6">
                         <span className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span className="text-xs font-medium text-slate-500">Systems Operational</span>
+                            <span className="text-xs font-medium text-slate-800">Systems Operational</span>
                         </span>
                     </div>
                 </div>
