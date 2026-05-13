@@ -134,7 +134,7 @@ export const Pricing = () => {
     const comparisonFeatures: FeatureMap[] = [
         { name: 'AI messages per day', free: 'Limited AI responses', plus: 'Unlimited', pro: 'Unlimited' },
         { name: 'Lecture notetaking', free: 'Limited lecture notetaking', plus: 'Unlimited', pro: 'Unlimited' },
-        { name: 'Custom Prompting', free: 'Up to 3 files', plus: 'Unlimited files and customization', pro: 'Unlimited files and customization' },
+        { name: 'Desktop Sidekick Overlay', free: 'Limited Access', plus: false, pro: 'Unlimited Access' },
         { name: 'Custom Keybinds', free: false, plus: true, pro: true },
         { name: 'Undetectability to Screen Share', free: false, plus: false, pro: true }
     ];
@@ -219,10 +219,10 @@ export const Pricing = () => {
                                         )}
                                         <p className={`mt-4 text-sm ${plan.id === 'pro' ? 'pro-shimmer font-bold' : 'text-slate-500 font-medium'}`}>
                                             {plan.id === 'pro' 
-                                                ? 'Undetectable during screen share.' 
+                                                ? 'Everything, unlimited, no compromises.' 
                                                 : plan.id === 'plus' 
-                                                    ? 'Unlimited access.' 
-                                                    : 'All essential features.'}
+                                                    ? 'Unlimited responses and core study features.' 
+                                                    : 'Everything you need to get started.'}
                                         </p>
                                     </div>
 
