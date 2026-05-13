@@ -81,7 +81,7 @@ export const Pricing = () => {
             features: [
                 'Full Access to Study Tools',
                 'Unlimited Desktop Sidekick',
-                'Unlimited AI messages',
+                'Unlimited response messages',
                 'Priority support',
             ],
             cta: 'Subscribe',
@@ -96,7 +96,7 @@ export const Pricing = () => {
             features: [
                 'Full Access to Study Tools',
                 'Limited Desktop Sidekick',
-                '500 AI messages/day',
+                'Unlimited response messages',
                 'Standard support',
             ],
             cta: 'Subscribe',
@@ -111,7 +111,7 @@ export const Pricing = () => {
             features: [
                 'Full Access to Study Tools',
                 'Unlimited Desktop Sidekick',
-                'Unlimited AI messages',
+                'Unlimited response messages',
                 'Priority support',
             ],
             cta: 'Subscribe',
@@ -136,7 +136,7 @@ export const Pricing = () => {
     const comparisonFeatures: FeatureMap[] = [
         { name: 'Full Access to Study Tools', weekly: true, plus: true, pro: true },
         { name: 'Desktop Sidekick Overlay', weekly: 'Unlimited Access', plus: 'Limited Access', pro: 'Unlimited Access' },
-        { name: 'AI messages per day', weekly: 'Unlimited', plus: '500', pro: 'Unlimited' },
+        { name: 'Response messages per day', weekly: 'Unlimited', plus: 'Unlimited', pro: 'Unlimited' },
         { name: 'Meeting notetaking', weekly: 'Unlimited', plus: '30/mo', pro: 'Unlimited' },
         { name: 'Custom Keybinds', weekly: true, plus: true, pro: true }
     ];
