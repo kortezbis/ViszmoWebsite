@@ -75,13 +75,14 @@ export const Pricing = () => {
     const subscriptionPlans = [
         {
             id: 'free',
-            name: 'Free',
+            name: 'Starter',
             monthly: { price: 0, period: '' },
             annual: { price: 0, period: '', total: 0, label: 'Free forever' },
             features: [
-                'Core Study Tools',
-                'Limited Desktop Sidekick',
-                'Limited responses messages',
+                'Limited AI responses',
+                'Limited lecture notetaking',
+                'Customize instructions & upload files',
+                'Ask AI about all your past lectures',
             ],
             cta: 'Get Started',
             popular: false,
@@ -93,9 +94,10 @@ export const Pricing = () => {
             monthly: { price: 12, period: '/mo' },
             annual: { price: 9, period: '/mo', total: 108, label: 'Billed $108/year' },
             features: [
-                'Full Access to Study Tools',
-                'Unlimited responses messages',
-                'Standard support',
+                'Unlimited AI responses',
+                'Unlimited lecture notetaking',
+                'Unlimited access to latest AI models',
+                'Priority support',
             ],
             cta: 'Subscribe',
             popular: false,
@@ -107,10 +109,8 @@ export const Pricing = () => {
             monthly: { price: 19, period: '/mo' },
             annual: { price: 14, period: '/mo', total: 168, label: 'Billed $168/year' },
             features: [
-                'Full Access to Study Tools',
-                'Unlimited Desktop Sidekick',
-                'Unlimited responses messages',
-                'Priority support',
+                'Everything in Plus, plus...',
+                'Completely hidden to meeting screen sharing software',
             ],
             cta: 'Subscribe',
             popular: true,
@@ -132,11 +132,11 @@ export const Pricing = () => {
     };
 
     const comparisonFeatures: FeatureMap[] = [
-        { name: 'Core Study Tools', free: true, plus: true, pro: true },
-        { name: 'Desktop Sidekick Overlay', free: 'Limited Access', plus: false, pro: 'Unlimited Access' },
-        { name: 'Unlimited responses messages', free: false, plus: true, pro: true },
-        { name: 'Lecture notetaking', free: '5/mo', plus: '30/mo', pro: 'Unlimited' },
-        { name: 'Custom Keybinds', free: false, plus: true, pro: true }
+        { name: 'AI messages per day', free: 'Limited AI responses', plus: 'Unlimited', pro: 'Unlimited' },
+        { name: 'Lecture notetaking', free: 'Limited lecture notetaking', plus: 'Unlimited', pro: 'Unlimited' },
+        { name: 'Custom Prompting', free: 'Up to 3 files', plus: 'Unlimited files and customization', pro: 'Unlimited files and customization' },
+        { name: 'Custom Keybinds', free: false, plus: true, pro: true },
+        { name: 'Undetectability to Screen Share', free: false, plus: false, pro: true }
     ];
 
     return (
@@ -200,7 +200,7 @@ export const Pricing = () => {
                                         <div className="mb-4">
                                             <div className={`group inline-block ${plan.id === 'pro' ? 'bg-[#8b5cf6]' : plan.id === 'free' ? 'bg-[#f43f5e]' : 'bg-[#0ea5e9]'} shadow-violet-500/20 -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105`}>
                                                 <h3 className="text-lg font-black text-white uppercase tracking-wider transform skew-x-12 transition-all duration-300 group-hover:skew-x-0 whitespace-nowrap">
-                                                    {plan.id === 'weekly' ? 'Weekly' : plan.name}
+                                                    {plan.name}
                                                 </h3>
                                             </div>
                                         </div>
@@ -219,10 +219,10 @@ export const Pricing = () => {
                                         )}
                                         <p className={`mt-4 text-sm ${plan.id === 'pro' ? 'pro-shimmer font-bold' : 'text-slate-500 font-medium'}`}>
                                             {plan.id === 'pro' 
-                                                ? 'Everything, unlimited, no compromises.' 
+                                                ? 'Undetectable during screen share.' 
                                                 : plan.id === 'plus' 
-                                                    ? 'Unlimited responses and core study features.' 
-                                                    : 'Everything you need to get started.'}
+                                                    ? 'Unlimited access.' 
+                                                    : 'All essential features.'}
                                         </p>
                                     </div>
 
