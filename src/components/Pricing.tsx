@@ -105,7 +105,7 @@ export const Pricing = () => {
         },
         {
             id: 'pro',
-            name: 'Pro',
+            name: 'Pro Plus',
             monthly: { price: 19, period: '/mo' },
             annual: { price: 14, period: '/mo', total: 168, label: 'Billed $168/year' },
             features: [
