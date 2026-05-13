@@ -1,8 +1,9 @@
 import React, { lazy, Suspense } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-import { useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
+import { PublicLayout } from './components/PublicLayout';
 import { HeroMockup } from './components/HeroMockup';
 import { HowItWorks } from './components/HowItWorks';
 import { StudentLifeFeatures } from './components/StudentLifeFeatures';
