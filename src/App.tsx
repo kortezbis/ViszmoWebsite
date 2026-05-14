@@ -48,6 +48,7 @@ import { CollegeStudyAppPage } from './pages/CollegeStudyAppPage';
 import { ViszmoVsKnowtPage } from './pages/ViszmoVsKnowtPage';
 import { ViszmoVsGizmoPage } from './pages/ViszmoVsGizmoPage';
 import { ViszmoVsAnkiPage } from './pages/ViszmoVsAnkiPage';
+import { StudyWhileWatchingVideosPage } from './pages/StudyWhileWatchingVideosPage';
 
 
 // List of school logo filenames
@@ -826,7 +827,7 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
   const { showSurvey, setShowSurvey } = useProfile();
   const { openAuthModal } = useAuthModal();
 
-  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup', '/viszmo-vs-quizlet', '/real-time-ai-tutor', '/study-app-for-elementary-students', '/study-app-for-middle-and-high-school-students', '/study-app-for-college-students', '/viszmo-vs-knowt', '/viszmo-vs-gizmo', '/viszmo-vs-anki'];
+  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup', '/viszmo-vs-quizlet', '/real-time-ai-tutor', '/study-app-for-elementary-students', '/study-app-for-middle-and-high-school-students', '/study-app-for-college-students', '/viszmo-vs-knowt', '/viszmo-vs-gizmo', '/viszmo-vs-anki', '/study-while-watching-videos'];
   const isPublicPath = publicPaths.includes(location.pathname) || location.pathname.startsWith('/login') || location.pathname.startsWith('/signup');
 
   const routes = (
@@ -845,6 +846,7 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
         <Route path="/viszmo-vs-knowt" element={<ViszmoVsKnowtPage onOpenDownload={onOpenDownload} />} />
         <Route path="/viszmo-vs-gizmo" element={<ViszmoVsGizmoPage onOpenDownload={onOpenDownload} />} />
         <Route path="/viszmo-vs-anki" element={<ViszmoVsAnkiPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/study-while-watching-videos" element={<StudyWhileWatchingVideosPage onOpenDownload={onOpenDownload} />} />
 
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
