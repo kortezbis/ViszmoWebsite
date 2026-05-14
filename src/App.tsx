@@ -761,7 +761,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                     <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
                       <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
                     </svg>
-                    <span className="btn-text">Download Now</span>
+                    <span className="btn-text">Get Viszmo Free</span>
                   </button>
                 </div>
 

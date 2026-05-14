@@ -76,8 +76,8 @@ export const Pricing = () => {
         {
             id: 'weekly',
             name: 'Weekly',
-            monthly: { price: 7, period: '/week' },
-            annual: { price: 7, period: '/week', total: 7, label: 'Billed weekly' },
+            monthly: { price: 7.00, period: '/week' },
+            annual: { price: 7.00, period: '/week', total: 7.00, label: 'Billed weekly' },
             features: [
                 'Unlimited AI responses',
                 'Unlimited lecture notetaking',
@@ -94,7 +94,7 @@ export const Pricing = () => {
             monthly: { price: 19, period: '/mo' },
             annual: { price: 14, period: '/mo', total: 168, label: 'Billed $168/year' },
             features: [
-                'Full access to all features',
+                'Includes all Weekly features',
                 'Unlimited Desktop Sidekick',
                 'Undetectable during screen share',
                 'Priority support',
@@ -119,8 +119,7 @@ export const Pricing = () => {
     const comparisonFeatures: FeatureMap[] = [
         { name: 'AI messages per day', weekly: 'Unlimited', pro: 'Unlimited' },
         { name: 'Lecture notetaking', weekly: 'Unlimited', pro: 'Unlimited' },
-        { name: 'Desktop Sidekick Overlay', weekly: false, pro: 'Unlimited Access' },
-        { name: 'Custom Keybinds', weekly: true, pro: true },
+        { name: 'Desktop Sidekick', weekly: false, pro: true },
         { name: 'Undetectability to Screen Share', weekly: false, pro: true }
     ];
 
@@ -134,7 +133,7 @@ export const Pricing = () => {
                     className="text-center mb-6"
                 >
                     <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 flex items-center justify-center gap-1 flex-wrap text-center">
-                        <span>Level up with</span>
+                        <span>Start</span>
                         <img
                             src="/teamlogos/pricinglogo.png"
                             alt="Viszmo"
@@ -143,9 +142,10 @@ export const Pricing = () => {
                             loading="lazy"
                             className="h-10 sm:h-14 md:h-20 lg:h-24 w-auto object-contain drop-shadow-lg"
                         />
+                        <span>for <span className="text-[#0ea5e9]">free.</span></span>
                     </h2>
                     <p className="text-base sm:text-lg text-slate-500 max-w-2xl mx-auto px-2">
-                        Choose the plan that fits your study pace.
+                        Whether you're using Viszmo for homework, deep learning, or just curious, it's free to use.
                     </p>
                 </motion.div>
 
@@ -184,7 +184,7 @@ export const Pricing = () => {
                                     )}
                                     <div className="mb-6">
                                         <div className="mb-4">
-                                            <div className={`group inline-block ${plan.id === 'pro' ? 'bg-[#8b5cf6]' : 'bg-[#0ea5e9]'} shadow-violet-500/20 -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105`}>
+                                            <div className={`group inline-block ${plan.id === 'pro' ? 'bg-[#8b5cf6]' : 'bg-[#f43f5e]'} shadow-violet-500/20 -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105`}>
                                                 <h3 className="text-lg font-black text-white uppercase tracking-wider transform skew-x-12 transition-all duration-300 group-hover:skew-x-0 whitespace-nowrap">
                                                     {plan.name}
                                                 </h3>
@@ -213,6 +213,10 @@ export const Pricing = () => {
                                     <div className="mb-6 btn-wrapper w-full">
                                         <button
                                             onClick={() => {
+                                                if (plan.id === 'free') {
+                                                    isSignedIn ? navigate('/dashboard') : navigate('/signup');
+                                                    return;
+                                                }
                                                 const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                 handleSubscribe(id);
                                             }}
@@ -266,7 +270,7 @@ export const Pricing = () => {
                                         {comparisonPlans
                                             .map((plan) => {
                                                 const fullPlan = subscriptionPlans.find(p => p.id === plan.id);
-                                                const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6] shadow-violet-500/20' : 'bg-[#0ea5e9] shadow-sky-500/20';
+                                                const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6] shadow-violet-500/20' : 'bg-[#f43f5e] shadow-rose-500/20';
 
                                                 return (
                                                     <th key={plan.id} className="pb-8 px-4 text-left align-top">
@@ -292,6 +296,10 @@ export const Pricing = () => {
                                                             <div className="btn-wrapper w-full max-w-[180px]">
                                                                 <button
                                                                     onClick={() => {
+                                                                        if (plan.id === 'free') {
+                                                                            isSignedIn ? navigate('/dashboard') : navigate('/signup');
+                                                                            return;
+                                                                        }
                                                                         const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                                         handleSubscribe(id);
                                                                     }}
@@ -342,7 +350,7 @@ export const Pricing = () => {
                                                                     <span>Unlimited Access</span>
                                                                 </div>
                                                             ) : typeof val === 'boolean' ? (
-                                                                val ? <Check className="w-5 h-5 text-[#0ea5e9]" /> : <X className="w-5 h-5 text-slate-300" />
+                                                                val ? <Check className="w-5 h-5 text-[#0ea5e9]" /> : <X className="w-5 h-5 text-red-500" />
                                                             ) : (
                                                                 val
                                                             )}
@@ -360,7 +368,7 @@ export const Pricing = () => {
                             {comparisonPlans
                                 .map((plan) => {
                                     const fullPlan = subscriptionPlans.find(p => p.id === plan.id);
-                                    const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6]' : 'bg-[#0ea5e9]';
+                                    const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6]' : 'bg-[#f43f5e]';
 
                                     return (
                                         <div key={plan.id} className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100 shadow-sm">
@@ -372,8 +380,10 @@ export const Pricing = () => {
                                                 </div>
                                                 {fullPlan && (
                                                     <span className="text-slate-500 text-sm font-medium">
-                                                        $<AnimatedPrice value={(fullPlan as any)[billingCycle].price} />{' '}
-                                                        {(fullPlan as any)[billingCycle].period}
+                                                        {fullPlan.id === 'free' ? 'Free' : <>
+                                                            $<AnimatedPrice value={(fullPlan as any)[billingCycle].price} />{' '}
+                                                            {(fullPlan as any)[billingCycle].period}
+                                                        </>}
                                                     </span>
                                                 )}
                                             </div>
@@ -397,7 +407,7 @@ export const Pricing = () => {
                                                                         <span>Unlimited Access</span>
                                                                     </div>
                                                                 ) : typeof val === 'boolean' ? (
-                                                                    val ? <Check className="w-4 h-4 text-[#0ea5e9]" /> : <X className="w-4 h-4 text-slate-300" />
+                                                                    val ? <Check className="w-4 h-4 text-[#0ea5e9]" /> : <X className="w-4 h-4 text-red-500" />
                                                                 ) : (
                                                                     val
                                                                 )}
@@ -408,6 +418,10 @@ export const Pricing = () => {
                                             <div className="mt-8">
                                                 <button
                                                     onClick={() => {
+                                                        if (plan.id === 'free') {
+                                                            isSignedIn ? navigate('/dashboard') : navigate('/signup');
+                                                            return;
+                                                        }
                                                         const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                         handleSubscribe(id);
                                                     }}
