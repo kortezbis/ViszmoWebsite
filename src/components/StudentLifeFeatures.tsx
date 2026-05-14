@@ -82,7 +82,7 @@ export const InteractiveComparisonSlider = () => {
                         <div className="h-3 md:h-4 bg-slate-100 rounded-full w-5/6"></div>
                         <div className="h-3 md:h-4 bg-slate-100 rounded-full w-4/6"></div>
                         <div className="mt-4 md:mt-8 p-4 md:p-6 rounded-2xl bg-[#0ea5e9]/5 border border-[#0ea5e9]/10">
-                            <h4 className="text-[#0284c7] text-xs md:text-sm font-bold mb-1 md:mb-2">Viszmo AI Assistant</h4>
+                            <h4 className="text-[#0ea5e9] text-xs md:text-sm font-bold mb-1 md:mb-2">Viszmo AI Assistant</h4>
                             <p className="text-slate-600 text-xs md:text-sm leading-relaxed">According to the lecture notes, the primary cause of...</p>
                         </div>
                     </div>
@@ -162,7 +162,7 @@ export const StudentLifeFeatures = () => {
                     >
                         <div className="max-w-2xl">
                             <h3 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 uppercase tracking-tight">
-                                Visual Study <span className="text-[#0284c7]">Sidekick</span>
+                                Visual Study <span className="text-[#0ea5e9]">Sidekick</span>
                             </h3>
                             <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed">
                                 Analyze complex diagrams, text, or equations instantly without ever leaving your browser or textbook. Simply point and learn with real-time AI insights.

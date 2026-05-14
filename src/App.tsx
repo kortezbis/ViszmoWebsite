@@ -1,9 +1,7 @@
-import React, { lazy, Suspense } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
-import { PublicLayout } from './components/PublicLayout';
+
+import { useNavigate } from 'react-router-dom';
 import { HeroMockup } from './components/HeroMockup';
 import { HowItWorks } from './components/HowItWorks';
 import { StudentLifeFeatures } from './components/StudentLifeFeatures';
@@ -13,27 +11,34 @@ import { Testimonials } from './components/Testimonials';
 import { Footer } from './components/Footer';
 import { PeelSticker } from './components/PeelSticker';
 import { Navbar } from './components/Navbar';
+import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
 import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
 import { DownloadAppModal } from './components/DownloadAppModal';
 import { useProfile } from './contexts/ProfileContext';
 import { AuthModalProvider, useAuthModal } from './contexts/AuthModalContext';
+import DashboardApp from './dashboard/DashboardApp';
+// VisDashboard2App import removed
 
-// Lazy load pages
-const DashboardApp = lazy(() => import('./dashboard/DashboardApp'));
-const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
-const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage').then(m => ({ default: m.HowItWorksPage })));
-const PricingPage = lazy(() => import('./pages/PricingPage').then(m => ({ default: m.PricingPage })));
-const FeaturesPage = lazy(() => import('./pages/FeaturesPage').then(m => ({ default: m.FeaturesPage })));
-const StudyOverlayPage = lazy(() => import('./pages/StudyOverlayPage').then(m => ({ default: m.StudyOverlayPage })));
-const AccountPage = lazy(() => import('./pages/AccountPage').then(m => ({ default: m.AccountPage })));
-const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(m => ({ default: m.TermsOfServicePage })));
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
-const ContactUsPage = lazy(() => import('./pages/ContactUsPage').then(m => ({ default: m.ContactUsPage })));
-const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage').then(m => ({ default: m.HelpCenterPage })));
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
-const DesktopSuccessPage = lazy(() => import('./pages/DesktopSuccessPage').then(m => ({ default: m.DesktopSuccessPage })));
+import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
+import { BrowserRouter, Routes, Route, useLocation, Outlet } from 'react-router-dom';
+import { PublicLayout } from './components/PublicLayout';
+
+// HowItWorksPage import removed as file is missing
+import { HowItWorksPage } from './pages/HowItWorksPage';
+import { PricingPage } from './pages/PricingPage';
+import { FeaturesPage } from './pages/FeaturesPage';
+import { StudyOverlayPage } from './pages/StudyOverlayPage';
+
+
+import { AccountPage } from './pages/AccountPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { ContactUsPage } from './pages/ContactUsPage';
+import { HelpCenterPage } from './pages/HelpCenterPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { DesktopSuccessPage } from './pages/DesktopSuccessPage';
 
 
 // List of school logo filenames
@@ -52,9 +57,9 @@ const SCHOOL_LOGOS = [
   'Indiana.png',
   'Kent State.png',
   'LSU.png',
-  'North.jpg',
+  'North.png',
   'NYU.png',
-  'Ohio State.jpg',
+  'Ohio State.png',
   'Oregon.png',
   'Penn State.png',
   'Stanford Icon.png',
@@ -137,12 +142,6 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
 
   useEffect(() => {
     if (loadedSchoolLogos.length === 0) return;
-
-    // Completely disable sticker logic on mobile for performance
-    if (window.innerWidth < 1024) {
-      setActiveStickers([]);
-      return;
-    }
 
     let availableSchools = [...loadedSchoolLogos];
 
@@ -261,11 +260,14 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
         {/* Subtle overlay for better text readability - Only on top portion for text */}
         <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white/20 via-white/10 to-transparent pointer-events-none" />
 
-        {/* School Stickers on Background - Only on Desktop for performance */}
-        {window.innerWidth >= 1024 && (
-          <div className="absolute inset-0 z-5 overflow-visible pointer-events-none" style={{ overflow: 'visible' }}>
-            <AnimatePresence>
-              {activeStickers.map((sticker, idx) => (
+        {/* School Stickers on Background - Above background and overlay */}
+        <div className="absolute inset-0 z-5 overflow-visible pointer-events-none" style={{ overflow: 'visible' }}>
+          <AnimatePresence>
+            {activeStickers.map((sticker, idx) => {
+              const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+              if (isMobile) return null;
+              
+              return (
                 <PeelSticker
                   key={sticker.id}
                   logoUrl={sticker.logo}
@@ -280,10 +282,10 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                     overflow: 'visible'
                   }}
                 />
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+              );
+            })}
+          </AnimatePresence>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -311,7 +313,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
               <span className="invisible-pill-shadow"></span>
               <span className="invisible-pill-content">
                 <span className="invisible-pill-shiny"></span>
-                <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#0ea5e9] via-[#3b82f6] to-[#0ea5e9] bg-[length:200%_auto] animate-shimmer font-bold">Sidekick</span>
+                <span className="relative z-10 text-[#0ea5e9] font-bold">Sidekick</span>
               </span>
             </span>
           </h1>
@@ -398,32 +400,24 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
                 <span
                   className="relative inline-block text-white px-4 py-1 transform -skew-x-6 mx-2 shadow-lg overflow-hidden"
                   style={{
-                    background: '#0ea5e9'
+                    background: 'linear-gradient(90deg, #0ea5e9, #0aa883, #8b5cf6, #0ea5e9, #0aa883)',
+                    backgroundSize: '200% 100%',
+                    animation: 'gradient-flow 8s ease-in-out infinite'
                   }}
                 >
-                  {/* Composited background animation */}
-                  <div 
-                    className="absolute inset-0 z-0"
-                    style={{
-                      background: 'linear-gradient(90deg, #0ea5e9, #0aa883, #8b5cf6, #0ea5e9)',
-                      backgroundSize: '200% 100%',
-                      width: '200%',
-                      animation: 'gradient-slide 8s linear infinite'
-                    }}
-                  />
                   <span className="block transform skew-x-6 relative z-10">and retain longer</span>
                 </span>
               </h2>
               <style>{`
-                  @keyframes gradient-slide {
-                    0% {
-                      transform: translateX(0);
+                  @keyframes gradient-flow {
+                    0%, 100% {
+                      background-position: 0% 50%;
                     }
-                    100% {
-                      transform: translateX(-50%);
+                    50% {
+                      background-position: 100% 50%;
                     }
                   }
-              `}</style>
+                `}</style>
             </motion.div>
 
             {/* Right: Description */}
@@ -874,15 +868,11 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
   return (
     <>
       {isPublicPath ? (
-        <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#0ea5e9]/20 border-t-[#0ea5e9] rounded-full animate-spin"></div></div>}>
-          <PublicLayout onOpenDownload={onOpenDownload} onOpenMobileDownload={onOpenMobileDownload} onOpenAuth={openAuthModal}>
-            {routes}
-          </PublicLayout>
-        </Suspense>
-      ) : (
-        <Suspense fallback={<div className="min-h-screen bg-slate-900 flex items-center justify-center"><div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div></div>}>
+        <PublicLayout onOpenDownload={onOpenDownload} onOpenMobileDownload={onOpenMobileDownload} onOpenAuth={openAuthModal}>
           {routes}
-        </Suspense>
+        </PublicLayout>
+      ) : (
+        routes
       )}
       
 
