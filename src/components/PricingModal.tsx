@@ -24,7 +24,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
     weekly: {
       id: 'price_weekly',
       name: 'Weekly',
-      price: '$4.99',
+      price: '$7.00',
       interval: 'week',
       description: 'Perfect for short-term study sessions.',
       features: ['Full Access to Study Tools', 'Unlimited Sidekick Access', 'Unlimited AI Generations']

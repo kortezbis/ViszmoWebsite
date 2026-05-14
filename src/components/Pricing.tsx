@@ -74,25 +74,10 @@ export const Pricing = () => {
 
     const subscriptionPlans = [
         {
-            id: 'free',
-            name: 'Starter',
-            monthly: { price: 0, period: '' },
-            annual: { price: 0, period: '', total: 0, label: 'Free forever' },
-            features: [
-                'Limited AI responses',
-                'Limited lecture notetaking',
-                'Customize instructions & upload files',
-                'Ask AI about all your past lectures',
-            ],
-            cta: 'Get Started',
-            popular: false,
-            type: 'subscription' as const
-        },
-        {
-            id: 'plus',
-            name: 'Plus',
-            monthly: { price: 12, period: '/mo' },
-            annual: { price: 9, period: '/mo', total: 108, label: 'Billed $108/year' },
+            id: 'weekly',
+            name: 'Weekly',
+            monthly: { price: 7, period: '/week' },
+            annual: { price: 7, period: '/week', total: 7, label: 'Billed weekly' },
             features: [
                 'Unlimited AI responses',
                 'Unlimited lecture notetaking',
@@ -109,7 +94,7 @@ export const Pricing = () => {
             monthly: { price: 19, period: '/mo' },
             annual: { price: 14, period: '/mo', total: 168, label: 'Billed $168/year' },
             features: [
-                'Includes all Plus features',
+                'Full access to all features',
                 'Unlimited Desktop Sidekick',
                 'Undetectable during screen share',
                 'Priority support',
@@ -121,24 +106,22 @@ export const Pricing = () => {
     ];
 
     const comparisonPlans = [
-        { id: 'free', name: 'Free', cta: 'Get Started', hasDropdown: false },
-        { id: 'plus', name: 'Plus', cta: 'Subscribe', hasDropdown: false },
+        { id: 'weekly', name: 'Weekly', cta: 'Subscribe', hasDropdown: false },
         { id: 'pro', name: 'Pro', cta: 'Subscribe', hasDropdown: false }
     ];
 
     type FeatureMap = {
         name: string;
-        free: string | boolean;
-        plus: string | boolean;
+        weekly: string | boolean;
         pro: string | boolean;
     };
 
     const comparisonFeatures: FeatureMap[] = [
-        { name: 'AI messages per day', free: 'Limited AI responses', plus: 'Unlimited', pro: 'Unlimited' },
-        { name: 'Lecture notetaking', free: 'Limited lecture notetaking', plus: 'Unlimited', pro: 'Unlimited' },
-        { name: 'Desktop Sidekick Overlay', free: 'Limited Access', plus: false, pro: 'Unlimited Access' },
-        { name: 'Custom Keybinds', free: false, plus: true, pro: true },
-        { name: 'Undetectability to Screen Share', free: false, plus: false, pro: true }
+        { name: 'AI messages per day', weekly: 'Unlimited', pro: 'Unlimited' },
+        { name: 'Lecture notetaking', weekly: 'Unlimited', pro: 'Unlimited' },
+        { name: 'Desktop Sidekick Overlay', weekly: false, pro: 'Unlimited Access' },
+        { name: 'Custom Keybinds', weekly: true, pro: true },
+        { name: 'Undetectability to Screen Share', weekly: false, pro: true }
     ];
 
     return (
@@ -151,7 +134,7 @@ export const Pricing = () => {
                     className="text-center mb-6"
                 >
                     <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 flex items-center justify-center gap-1 flex-wrap text-center">
-                        <span>Start</span>
+                        <span>Level up with</span>
                         <img
                             src="/teamlogos/pricinglogo.png"
                             alt="Viszmo"
@@ -160,10 +143,9 @@ export const Pricing = () => {
                             loading="lazy"
                             className="h-10 sm:h-14 md:h-20 lg:h-24 w-auto object-contain drop-shadow-lg"
                         />
-                        <span>for <span className="text-[#0ea5e9]">free.</span></span>
                     </h2>
                     <p className="text-base sm:text-lg text-slate-500 max-w-2xl mx-auto px-2">
-                        Whether you're using Viszmo for homework, deep learning, or just curious, it's free to use.
+                        Choose the plan that fits your study pace.
                     </p>
                 </motion.div>
 
@@ -185,9 +167,8 @@ export const Pricing = () => {
                 </div>
 
                 <div className="mx-auto px-4">
-                    <div className={`grid grid-cols-1 ${billingCycle === 'annual' ? 'md:grid-cols-2 max-w-4xl' : 'md:grid-cols-3 max-w-6xl'} gap-6 mb-8 mx-auto`}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl gap-6 mb-8 mx-auto">
                         {subscriptionPlans
-                            .filter(plan => plan.type === 'subscription' && !(billingCycle === 'annual' && plan.id === 'free'))
                             .map((plan, index) => (
                                 <motion.div
                                     key={plan.id}
@@ -203,7 +184,7 @@ export const Pricing = () => {
                                     )}
                                     <div className="mb-6">
                                         <div className="mb-4">
-                                            <div className={`group inline-block ${plan.id === 'pro' ? 'bg-[#8b5cf6]' : plan.id === 'free' ? 'bg-[#f43f5e]' : 'bg-[#0ea5e9]'} shadow-violet-500/20 -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105`}>
+                                            <div className={`group inline-block ${plan.id === 'pro' ? 'bg-[#8b5cf6]' : 'bg-[#0ea5e9]'} shadow-violet-500/20 -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105`}>
                                                 <h3 className="text-lg font-black text-white uppercase tracking-wider transform skew-x-12 transition-all duration-300 group-hover:skew-x-0 whitespace-nowrap">
                                                     {plan.name}
                                                 </h3>
@@ -225,20 +206,14 @@ export const Pricing = () => {
                                         <p className={`mt-4 text-sm ${plan.id === 'pro' ? 'pro-shimmer font-bold' : 'text-slate-500 font-medium'}`}>
                                             {plan.id === 'pro' 
                                                 ? 'Everything, unlimited, no compromises.' 
-                                                : plan.id === 'plus' 
-                                                    ? 'Unlimited responses and core study features.' 
-                                                    : 'Everything you need to get started.'}
+                                                : 'Unlimited responses and core study features.'}
                                         </p>
                                     </div>
 
                                     <div className="mb-6 btn-wrapper w-full">
                                         <button
                                             onClick={() => {
-                                                if (plan.id === 'free') {
-                                                    isSignedIn ? navigate('/dashboard') : navigate('/signup');
-                                                    return;
-                                                }
-                                                const id = `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
+                                                const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                 handleSubscribe(id);
                                             }}
                                             disabled={!!isRedirecting}
@@ -291,7 +266,7 @@ export const Pricing = () => {
                                         {comparisonPlans
                                             .map((plan) => {
                                                 const fullPlan = subscriptionPlans.find(p => p.id === plan.id);
-                                                const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6] shadow-violet-500/20' : plan.id === 'free' ? 'bg-[#f43f5e] shadow-rose-500/20' : 'bg-[#0ea5e9] shadow-sky-500/20';
+                                                const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6] shadow-violet-500/20' : 'bg-[#0ea5e9] shadow-sky-500/20';
 
                                                 return (
                                                     <th key={plan.id} className="pb-8 px-4 text-left align-top">
@@ -317,11 +292,7 @@ export const Pricing = () => {
                                                             <div className="btn-wrapper w-full max-w-[180px]">
                                                                 <button
                                                                     onClick={() => {
-                                                                        if (plan.id === 'free') {
-                                                                            isSignedIn ? navigate('/dashboard') : navigate('/signup');
-                                                                            return;
-                                                                        }
-                                                                        const id = `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
+                                                                        const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                                         handleSubscribe(id);
                                                                     }}
                                                                     disabled={!!isRedirecting}
@@ -346,7 +317,7 @@ export const Pricing = () => {
                                         <td colSpan={1} className="py-8">
                                             <h4 className="text-xl font-bold text-slate-900">Features</h4>
                                         </td>
-                                        <td colSpan={3} className="py-8"></td>
+                                        <td colSpan={2} className="py-8"></td>
                                     </tr>
                                     {comparisonFeatures.map((feature, idx) => (
                                         <tr key={idx} className="border-t border-slate-100 transition-colors">
@@ -389,7 +360,7 @@ export const Pricing = () => {
                             {comparisonPlans
                                 .map((plan) => {
                                     const fullPlan = subscriptionPlans.find(p => p.id === plan.id);
-                                    const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6]' : plan.id === 'free' ? 'bg-[#f43f5e]' : 'bg-[#0ea5e9]';
+                                    const highlightColor = plan.id === 'pro' ? 'bg-[#8b5cf6]' : 'bg-[#0ea5e9]';
 
                                     return (
                                         <div key={plan.id} className="bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100 shadow-sm">
@@ -401,10 +372,8 @@ export const Pricing = () => {
                                                 </div>
                                                 {fullPlan && (
                                                     <span className="text-slate-500 text-sm font-medium">
-                                                        {fullPlan.id === 'free' ? 'Free' : <>
-                                                            $<AnimatedPrice value={(fullPlan as any)[billingCycle].price} />{' '}
-                                                            {(fullPlan as any)[billingCycle].period}
-                                                        </>}
+                                                        $<AnimatedPrice value={(fullPlan as any)[billingCycle].price} />{' '}
+                                                        {(fullPlan as any)[billingCycle].period}
                                                     </span>
                                                 )}
                                             </div>
@@ -439,11 +408,7 @@ export const Pricing = () => {
                                             <div className="mt-8">
                                                 <button
                                                     onClick={() => {
-                                                        if (plan.id === 'free') {
-                                                            isSignedIn ? navigate('/dashboard') : navigate('/signup');
-                                                            return;
-                                                        }
-                                                        const id = `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
+                                                        const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                         handleSubscribe(id);
                                                     }}
                                                     disabled={!!isRedirecting}
