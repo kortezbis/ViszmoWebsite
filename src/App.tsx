@@ -311,7 +311,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
               <span className="invisible-pill-shadow"></span>
               <span className="invisible-pill-content">
                 <span className="invisible-pill-shiny"></span>
-                <span className="relative z-10 text-[#0284c7] font-bold">Sidekick</span>
+                <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#0ea5e9] via-[#3b82f6] to-[#0ea5e9] bg-[length:200%_auto] animate-shimmer font-bold">Sidekick</span>
               </span>
             </span>
           </h1>

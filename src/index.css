@@ -1623,6 +1623,16 @@ html {
     background-position: 50% 50%;
 }
 
+@keyframes shimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.animate-shimmer {
+    animation: shimmer 3s infinite linear;
+}
+
 /* ========== TRUSTED PILL STYLES ========== */
 .trusted-pill-wrap {
     position: relative;
