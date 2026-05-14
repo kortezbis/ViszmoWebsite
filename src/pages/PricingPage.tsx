@@ -15,6 +15,7 @@ export const PricingPage = ({ onOpenDownload }: { onOpenDownload?: () => void })
             <SEO 
                 title="Pricing Plans - Simple & Affordable AI Study Tools" 
                 description="Choose the right Viszmo plan for your study needs. Affordable AI-powered study assistance for students, from basic features to unlimited lecture transcription." 
+                canonicalUrl="https://www.viszmo.com/pricing"
                 noindex={false} 
             />
             <div className="flex-1 relative pt-24">

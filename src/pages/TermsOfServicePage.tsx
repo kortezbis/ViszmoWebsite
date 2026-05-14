@@ -7,6 +7,7 @@ export const TermsOfServicePage = () => {
             <SEO 
                 title="Terms of Service | Viszmo" 
                 description="Read Viszmo's Terms of Service to understand your rights and responsibilities when using our AI study tools and platform." 
+                canonicalUrl="https://www.viszmo.com/terms"
                 noindex={false} 
             />
         <StaticPageLayout

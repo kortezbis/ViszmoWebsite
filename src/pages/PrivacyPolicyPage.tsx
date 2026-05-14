@@ -7,6 +7,7 @@ export const PrivacyPolicyPage = () => {
             <SEO 
                 title="Privacy Policy | Viszmo" 
                 description="Learn how Viszmo collects, uses, and protects your personal information and data privacy." 
+                canonicalUrl="https://www.viszmo.com/privacy"
                 noindex={false} 
             />
         <StaticPageLayout

@@ -64,6 +64,7 @@ export const HowItWorksPage = ({ onOpenDownload }: { onOpenDownload?: () => void
             <SEO 
                 title="How Viszmo Works | Live Transcription & Screen Overlay" 
                 description="See how Viszmo's screen overlay and live lecture transcription give you an edge. Unlock exclusive AI study modes no one else has, with new features and study tools added every single week." 
+                canonicalUrl="https://www.viszmo.com/how-it-works"
                 noindex={false} 
             />
             <main className="flex-1 relative pt-32">

@@ -19,7 +19,7 @@ export function SEO({
   ogType = 'website',
   twitterCard = 'summary_large_image',
   canonicalUrl,
-  noindex = true 
+  noindex = false 
 }: SEOProps) {
   useEffect(() => {
     // 1. Title
