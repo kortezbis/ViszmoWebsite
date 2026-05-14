@@ -65,8 +65,8 @@ export const ViszmoVsKnowtPage = ({ onOpenDownload }: { onOpenDownload?: () => v
             className="min-h-screen bg-white text-slate-900 selection:bg-[#0ea5e9]/10"
         >
             <SEO 
-                title="Viszmo vs Knowt — Why Students Are Switching to Live AI | Viszmo" 
-                description="Knowt is great for free flashcards, but Viszmo is the only study app with a live AI overlay that reads your screen in real-time. See the comparison." 
+                title="Viszmo vs Knowt | The Best AI Study & Note Taker" 
+                description="Compare Viszmo and Knowt. While Knowt focuses on notes, Viszmo provides a live AI overlay that works on any website or video in real-time." 
                 canonicalUrl="https://www.viszmo.com/viszmo-vs-knowt"
                 noindex={false} 
             />

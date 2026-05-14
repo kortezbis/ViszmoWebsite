@@ -62,8 +62,8 @@ export const HowItWorksPage = ({ onOpenDownload }: { onOpenDownload?: () => void
     return (
         <div className="min-h-screen bg-[#ffffff] font-sans text-slate-900 selection:bg-[#0ea5e9]/10 flex flex-col">
             <SEO 
-                title="How Viszmo Works | Live Transcription & Screen Overlay" 
-                description="See how Viszmo's screen overlay and live lecture transcription give you an edge. Unlock exclusive AI study modes no one else has, with new features and study tools added every single week." 
+                title="How It Works | Master Studies with AI Screen Overlay | Viszmo" 
+                description="See how Viszmo's screen overlay and live lecture transcription give you an edge. Unlock exclusive AI study modes added every single week." 
                 canonicalUrl="https://www.viszmo.com/how-it-works"
                 noindex={false} 
             />

@@ -61,8 +61,8 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
             className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-[#0ea5e9]/10 overflow-x-hidden"
         >
             <SEO 
-                title="Viszmo Features | Exclusive AI Study Modes & Screen Overlay" 
-                description="Discover Viszmo's screen overlay, live transcription, and exclusive AI study modes found nowhere else. We add new study modes and feature updates every week to accelerate your learning." 
+                title="Features | AI Study Modes & Screen Overlay | Viszmo" 
+                description="Discover Viszmo's screen overlay, live transcription, and exclusive AI study modes. We add new features every week to accelerate your learning." 
                 canonicalUrl="https://www.viszmo.com/features"
                 noindex={false} 
             />

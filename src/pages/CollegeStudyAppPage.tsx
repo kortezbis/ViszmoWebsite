@@ -87,8 +87,8 @@ export const CollegeStudyAppPage = ({ onOpenDownload }: { onOpenDownload?: () =>
             className="min-h-screen bg-white text-slate-900 selection:bg-[#0ea5e9]/10"
         >
             <SEO 
-                title="Best AI Study App for College Students | Viszmo" 
-                description="Viszmo is the live AI study overlay for college students. Get instant answers during lectures, PDFs, or course videos — any major." 
+                title="AI Study App for College Students | Master Your Lectures | Viszmo" 
+                description="Viszmo is the live AI study overlay for college students. Get instant answers and clarity during lectures, PDFs, or research videos for any major." 
                 canonicalUrl="https://www.viszmo.com/study-app-for-college-students"
                 noindex={false} 
             />

@@ -18,32 +18,8 @@ import {
     Monitor
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { SEO } from '../dashboard/components/SEO';
 
-/**
- * Head Component for SEO
- */
-const Head = ({ title, description, canonical }: { title: string; description: string; canonical: string }) => {
-    useEffect(() => {
-        document.title = title;
-        let metaDesc = document.querySelector('meta[name="description"]');
-        if (!metaDesc) {
-            metaDesc = document.createElement('meta');
-            (metaDesc as HTMLMetaElement).name = 'description';
-            document.head.appendChild(metaDesc);
-        }
-        metaDesc.setAttribute('content', description);
-
-        let linkCanonical = document.querySelector('link[rel="canonical"]');
-        if (!linkCanonical) {
-            linkCanonical = document.createElement('link');
-            (linkCanonical as HTMLLinkElement).rel = 'canonical';
-            document.head.appendChild(linkCanonical);
-        }
-        linkCanonical.setAttribute('href', canonical);
-    }, [title, description, canonical]);
-
-    return null;
-};
 
 const FAQItem = ({ question, answer, isOpen, onClick }: { question: string; answer: string; isOpen: boolean; onClick: () => void }) => {
     return (
@@ -149,10 +125,11 @@ export const StudyOverlayPage = ({ onOpenDownload }: { onOpenDownload?: () => vo
 
     return (
         <article className="min-h-screen bg-white font-sans text-slate-900 selection:bg-[#0ea5e9]/10">
-            <Head 
-                title="Live AI Study Overlay — Get Answers on Screen While You Learn | Viszmo"
+            <SEO 
+                title="AI Study Overlay | Screen Reading Tutor | Viszmo"
                 description="Viszmo's study overlay sits on top of any app, website, or video. Ask questions live and get instant AI answers without switching tabs. The future of studying is here."
-                canonical="https://www.viszmo.com/study-overlay"
+                canonicalUrl="https://www.viszmo.com/study-overlay"
+                noindex={false}
             />
 
             {/* --- Hero Section --- */}

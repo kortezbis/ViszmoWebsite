@@ -83,8 +83,8 @@ export const RealTimeAITutorPage = ({ onOpenDownload }: { onOpenDownload?: () =>
             className="min-h-screen bg-white text-slate-900 selection:bg-[#0ea5e9]/10"
         >
             <SEO 
-                title="Real-Time AI Tutor That Reads Your Screen | Viszmo" 
-                description="Viszmo is the live AI tutor that answers questions instantly for any subject, any grade level — from elementary school through college." 
+                title="Real-Time AI Tutor | Instant Help with Screen Reading | Viszmo" 
+                description="Viszmo is the live AI tutor that answers questions instantly for any subject. Our AI reads your screen to provide real-time help without copy-pasting." 
                 canonicalUrl="https://www.viszmo.com/real-time-ai-tutor"
                 noindex={false} 
             />

@@ -94,8 +94,8 @@ export const StudyWhileWatchingVideosPage = ({ onOpenDownload }: { onOpenDownloa
             className="min-h-screen bg-white text-slate-900 selection:bg-[#0ea5e9]/10"
         >
             <SEO 
-                title="Study While Watching YouTube or Lectures — Viszmo AI Overlay" 
-                description="Viszmo sits on top of YouTube, Coursera, lecture recordings, and more. Ask questions about any video without pausing — for all ages." 
+                title="AI Screen Overlay for YouTube & Lectures | Viszmo" 
+                description="Study while watching YouTube, Coursera, or Zoom. Viszmo's AI screen overlay lets you ask questions and get instant help without pausing your videos." 
                 canonicalUrl="https://www.viszmo.com/study-while-watching-videos"
                 noindex={false} 
             />

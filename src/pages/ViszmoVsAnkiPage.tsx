@@ -61,8 +61,8 @@ export const ViszmoVsAnkiPage = ({ onOpenDownload }: { onOpenDownload?: () => vo
             className="min-h-screen bg-white text-slate-900 selection:bg-[#0ea5e9]/10"
         >
             <SEO 
-                title="Viszmo vs Anki — Real-Time Learning vs. Hardcore Memorization | Viszmo" 
-                description="Anki is the gold standard for flashcards, but Viszmo is the live AI sidekick that helps you understand the material first. See why students use both." 
+                title="Viszmo vs Anki | AI-Powered Studying Beyond Flashcards" 
+                description="Compare Viszmo and Anki. Move beyond complex deck management and switch to a live AI tutor that reads your screen instantly." 
                 canonicalUrl="https://www.viszmo.com/viszmo-vs-anki"
                 noindex={false} 
             />

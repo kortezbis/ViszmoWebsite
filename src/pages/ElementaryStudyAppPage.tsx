@@ -64,8 +64,8 @@ export const ElementaryStudyAppPage = ({ onOpenDownload }: { onOpenDownload?: ()
             className="min-h-screen bg-white text-slate-900 selection:bg-[#0ea5e9]/10"
         >
             <SEO 
-                title="Best AI Study App for Elementary School Students | Viszmo" 
-                description="Viszmo makes learning fun for elementary students. A friendly AI study sidekick that answers questions live for any subject." 
+                title="AI Study App for Elementary Students | Safe & Fun | Viszmo" 
+                description="Viszmo makes learning fun and safe for elementary students. A friendly AI study sidekick that helps children understand concepts in real-time." 
                 canonicalUrl="https://www.viszmo.com/study-app-for-elementary-students"
                 noindex={false} 
             />

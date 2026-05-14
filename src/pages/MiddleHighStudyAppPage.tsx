@@ -76,8 +76,8 @@ export const MiddleHighStudyAppPage = ({ onOpenDownload }: { onOpenDownload?: ()
             className="min-h-screen bg-white text-slate-900 selection:bg-[#0ea5e9]/10"
         >
             <SEO 
-                title="Best AI Study App for Middle School and High School Students | Viszmo" 
-                description="Viszmo is the live AI study overlay for middle and high schoolers. Get instant help on any subject — math, history, science, English, and more." 
+                title="AI Study App for Middle & High School | Ace Every Test | Viszmo" 
+                description="Viszmo is the live AI study overlay for middle and high schoolers. Get instant help on any subject—math, history, science, English—and ace your exams." 
                 canonicalUrl="https://www.viszmo.com/study-app-for-middle-and-high-school-students"
                 noindex={false} 
             />

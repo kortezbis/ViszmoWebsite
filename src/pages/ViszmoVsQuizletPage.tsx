@@ -54,8 +54,8 @@ export const ViszmoVsQuizletPage = ({ onOpenDownload }: { onOpenDownload?: () =>
             className="min-h-screen bg-white text-slate-900"
         >
             <SEO 
-                title="Viszmo vs Quizlet — Which Study App Is Better?" 
-                description="Quizlet is great for flashcards. Viszmo is great for everything else. See why students of all ages are switching to Viszmo live AI overlay." 
+                title="Viszmo vs Quizlet | Why Students Switch to AI Overlay" 
+                description="Compare Quizlet and Viszmo. See why students are switching from traditional flashcards to our real-time AI study sidekick with screen overlay." 
                 canonicalUrl="https://www.viszmo.com/viszmo-vs-quizlet"
                 noindex={false} 
             />

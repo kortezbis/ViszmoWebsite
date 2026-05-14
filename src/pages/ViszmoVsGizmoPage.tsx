@@ -60,8 +60,8 @@ export const ViszmoVsGizmoPage = ({ onOpenDownload }: { onOpenDownload?: () => v
             className="min-h-screen bg-white text-slate-900 selection:bg-[#0ea5e9]/10"
         >
             <SEO 
-                title="Viszmo vs Gizmo — The Battle of AI Study Sidekicks | Viszmo" 
-                description="Gizmo is great for notes, but Viszmo is the live study overlay that sees what you see. See why students are choosing the real-time advantage." 
+                title="Viszmo vs Gizmo | Why Viszmo is the #1 Study Sidekick" 
+                description="Compare Viszmo and Gizmo. Discover why Viszmo's live screen overlay and real-time transcription are the ultimate tools for serious students." 
                 canonicalUrl="https://www.viszmo.com/viszmo-vs-gizmo"
                 noindex={false} 
             />
