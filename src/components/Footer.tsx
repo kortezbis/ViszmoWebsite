@@ -73,6 +73,8 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
                                 <li><Link to="/pricing" className="hover:text-[#0ea5e9] transition-colors">Pricing</Link></li>
                                 <li><Link to="/features" className="hover:text-[#0ea5e9] transition-colors">Features</Link></li>
                                 <li><Link to="/how-it-works" className="hover:text-[#0ea5e9] transition-colors">How It Works</Link></li>
+                                <li><Link to="/study-overlay" className="hover:text-[#0ea5e9] transition-colors">Study Overlay</Link></li>
+                                <li><Link to="/real-time-ai-tutor" className="hover:text-[#0ea5e9] transition-colors">Real-Time AI Tutor</Link></li>
 
                             </ul>
                         </div>
@@ -81,14 +83,25 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
                         <div className="flex flex-col gap-4">
                             <h3 className="font-semibold text-slate-900">Alternatives</h3>
                             <ul className="flex flex-col gap-3 text-sm text-slate-700">
-                                <li><a href="#" className="hover:text-[#0ea5e9] transition-colors">Chegg Alt</a></li>
-                                <li><a href="#" className="hover:text-[#0ea5e9] transition-colors">Quizlet Alt</a></li>
-                                <li><a href="#" className="hover:text-[#0ea5e9] transition-colors">CourseHero Alt</a></li>
-                                <li><a href="#" className="hover:text-[#0ea5e9] transition-colors">Brainly Alt</a></li>
+                                <li><Link to="/viszmo-vs-knowt" className="hover:text-[#0ea5e9] transition-colors">Viszmo vs Knowt</Link></li>
+                                <li><Link to="/viszmo-vs-quizlet" className="hover:text-[#0ea5e9] transition-colors">Viszmo vs Quizlet</Link></li>
+                                <li><Link to="/viszmo-vs-gizmo" className="hover:text-[#0ea5e9] transition-colors">Viszmo vs Gizmo</Link></li>
+                                <li><Link to="/viszmo-vs-anki" className="hover:text-[#0ea5e9] transition-colors">Viszmo vs Anki</Link></li>
                             </ul>
                         </div>
 
                         {/* Column 4 */}
+                        <div className="flex flex-col gap-4">
+                            <h3 className="font-semibold text-slate-900">Education</h3>
+                            <ul className="flex flex-col gap-3 text-sm text-slate-700">
+                                <li><Link to="/study-app-for-elementary-students" className="hover:text-[#0ea5e9] transition-colors">Elementary Students</Link></li>
+                                <li><Link to="/study-app-for-middle-and-high-school-students" className="hover:text-[#0ea5e9] transition-colors">Middle & High School</Link></li>
+                                <li><Link to="/study-app-for-college-students" className="hover:text-[#0ea5e9] transition-colors">College Students</Link></li>
+                                <li><Link to="/real-time-ai-tutor" className="hover:text-[#0ea5e9] transition-colors">Real-Time AI Tutor</Link></li>
+                            </ul>
+                        </div>
+
+                        {/* Column 5 */}
                         <div className="flex flex-col gap-4">
                             <h3 className="font-semibold text-slate-900">Legal</h3>
                             <ul className="flex flex-col gap-3 text-sm text-slate-700">

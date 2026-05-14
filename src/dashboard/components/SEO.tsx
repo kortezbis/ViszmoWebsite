@@ -3,37 +3,74 @@ import { useEffect } from 'react';
 interface SEOProps {
   title: string;
   description?: string;
+  keywords?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article' | 'profile';
+  twitterCard?: 'summary' | 'summary_large_image';
+  canonicalUrl?: string;
   noindex?: boolean;
 }
 
-export function SEO({ title, description, noindex = true }: SEOProps) {
+export function SEO({ 
+  title, 
+  description, 
+  keywords,
+  ogImage = '/viszmofull.png',
+  ogType = 'website',
+  twitterCard = 'summary_large_image',
+  canonicalUrl,
+  noindex = true 
+}: SEOProps) {
   useEffect(() => {
-    document.title = `${title} | Viszmo`;
+    // 1. Title
+    const fullTitle = title.includes('Viszmo') ? title : `${title} | Viszmo`;
+    document.title = fullTitle;
     
-    if (description) {
-      let metaDesc = document.querySelector('meta[name="description"]');
-      if (!metaDesc) {
-        metaDesc = document.createElement('meta');
-        metaDesc.setAttribute('name', 'description');
-        document.head.appendChild(metaDesc);
-      }
-      metaDesc.setAttribute('content', description);
-    }
+    const head = document.head;
 
-    // Handle Robots indexing
-    let metaRobots = document.querySelector('meta[name="robots"]');
-    if (!metaRobots) {
-      metaRobots = document.createElement('meta');
-      metaRobots.setAttribute('name', 'robots');
-      document.head.appendChild(metaRobots);
+    const setMetaTag = (attrName: string, attrValue: string, content: string) => {
+      let element = document.querySelector(`meta[${attrName}="${attrValue}"]`);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attrName, attrValue);
+        head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    // 2. Standard Meta Tags
+    if (description) setMetaTag('name', 'description', description);
+    if (keywords) setMetaTag('name', 'keywords', keywords);
+    setMetaTag('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
+
+    // 3. Open Graph Tags
+    setMetaTag('property', 'og:title', fullTitle);
+    if (description) setMetaTag('property', 'og:description', description);
+    setMetaTag('property', 'og:type', ogType);
+    setMetaTag('property', 'og:image', ogImage);
+    setMetaTag('property', 'og:url', window.location.href);
+
+    // 4. Twitter Card Tags
+    setMetaTag('name', 'twitter:card', twitterCard);
+    setMetaTag('name', 'twitter:title', fullTitle);
+    if (description) setMetaTag('name', 'twitter:description', description);
+    setMetaTag('name', 'twitter:image', ogImage);
+
+    // 5. Canonical URL
+    let linkCanonical = document.querySelector('link[rel="canonical"]');
+    if (canonicalUrl || !linkCanonical) {
+      if (!linkCanonical) {
+        linkCanonical = document.createElement('link');
+        linkCanonical.setAttribute('rel', 'canonical');
+        head.appendChild(linkCanonical);
+      }
+      linkCanonical.setAttribute('href', canonicalUrl || window.location.href);
     }
-    metaRobots.setAttribute('content', noindex ? 'noindex, nofollow' : 'index, follow');
 
     return () => {
-      // Optional: Reset robots on unmount if needed, 
-      // but usually the next page's SEO component will handle it.
+      // Optional: Cleanup if necessary
     };
-  }, [title, description, noindex]);
+  }, [title, description, keywords, ogImage, ogType, twitterCard, canonicalUrl, noindex]);
 
   return null;
 }

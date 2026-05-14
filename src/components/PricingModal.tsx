@@ -32,7 +32,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
     monthly: {
       id: 'price_monthly',
       name: 'Monthly',
-      price: '$19.99',
+      price: '$19',
       interval: 'month',
       description: 'Our most popular plan for consistent learners.',
       features: ['Full Access to Study Tools', 'Unlimited Sidekick Access', 'Unlimited AI Generations', 'Priority Support']
@@ -40,9 +40,9 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
     yearly: {
       id: 'price_yearly',
       name: 'Yearly',
-      price: '$119.99',
+      price: '$168',
       interval: 'year',
-      savings: 'Save 50%',
+      savings: 'Save 25%',
       description: 'The best value for long-term academic success.',
       features: ['Full Access to Study Tools', 'Unlimited Sidekick Access', 'Unlimited AI Generations', 'Priority Support', 'Exclusive Beta Features']
     }
@@ -180,7 +180,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                   Yearly
                   {billingCycle !== 'yearly' && (
                     <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse shadow-lg">
-                      -50%
+                      -25%
                     </span>
                   )}
                 </button>
@@ -220,7 +220,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                     </div>
                     {plan.savings && (
                       <span className="text-xs font-bold text-emerald-500 mt-1 block">
-                        Equivalent to {(119.99/12).toFixed(2)}/mo
+                        Equivalent to ${(168/12).toFixed(0)}/mo
                       </span>
                     )}
                   </div>

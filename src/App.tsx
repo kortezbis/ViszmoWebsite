@@ -24,6 +24,7 @@ import DashboardApp from './dashboard/DashboardApp';
 import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
 import { BrowserRouter, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { PublicLayout } from './components/PublicLayout';
+import { DESKTOP_RELEASES_PAGE_URL, WINDOWS_INSTALLER_URL } from './constants/downloads';
 
 // HowItWorksPage import removed as file is missing
 import { HowItWorksPage } from './pages/HowItWorksPage';
@@ -39,6 +40,14 @@ import { ContactUsPage } from './pages/ContactUsPage';
 import { HelpCenterPage } from './pages/HelpCenterPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { DesktopSuccessPage } from './pages/DesktopSuccessPage';
+import { ViszmoVsQuizletPage } from './pages/ViszmoVsQuizletPage';
+import { RealTimeAITutorPage } from './pages/RealTimeAITutorPage';
+import { ElementaryStudyAppPage } from './pages/ElementaryStudyAppPage';
+import { MiddleHighStudyAppPage } from './pages/MiddleHighStudyAppPage';
+import { CollegeStudyAppPage } from './pages/CollegeStudyAppPage';
+import { ViszmoVsKnowtPage } from './pages/ViszmoVsKnowtPage';
+import { ViszmoVsGizmoPage } from './pages/ViszmoVsGizmoPage';
+import { ViszmoVsAnkiPage } from './pages/ViszmoVsAnkiPage';
 
 
 // List of school logo filenames
@@ -816,7 +825,7 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
   const { showSurvey, setShowSurvey } = useProfile();
   const { openAuthModal } = useAuthModal();
 
-  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup'];
+  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup', '/viszmo-vs-quizlet', '/real-time-ai-tutor', '/study-app-for-elementary-students', '/study-app-for-middle-and-high-school-students', '/study-app-for-college-students', '/viszmo-vs-knowt', '/viszmo-vs-gizmo', '/viszmo-vs-anki'];
   const isPublicPath = publicPaths.includes(location.pathname) || location.pathname.startsWith('/login') || location.pathname.startsWith('/signup');
 
   const routes = (
@@ -827,6 +836,14 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
         <Route path="/pricing" element={<PricingPage onOpenDownload={onOpenDownload} />} />
         <Route path="/how-it-works" element={<HowItWorksPage onOpenDownload={onOpenDownload} />} />
         <Route path="/study-overlay" element={<StudyOverlayPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/viszmo-vs-quizlet" element={<ViszmoVsQuizletPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/real-time-ai-tutor" element={<RealTimeAITutorPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/study-app-for-elementary-students" element={<ElementaryStudyAppPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/study-app-for-middle-and-high-school-students" element={<MiddleHighStudyAppPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/study-app-for-college-students" element={<CollegeStudyAppPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/viszmo-vs-knowt" element={<ViszmoVsKnowtPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/viszmo-vs-gizmo" element={<ViszmoVsGizmoPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/viszmo-vs-anki" element={<ViszmoVsAnkiPage onOpenDownload={onOpenDownload} />} />
 
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
@@ -898,10 +915,10 @@ export default function App() {
     const isWindows = /Win/i.test(navigator.userAgent) || /Win/i.test(navigator.platform);
     
     if (isWindows) {
-      window.location.href = "https://github.com/Kortezbis/DeskApp-Vis/releases/latest/download/Viszmo-Setup.exe";
+      window.location.href = WINDOWS_INSTALLER_URL;
     } else {
       // For Mac or other platforms, direct to the releases page instead of showing the QR code modal
-      window.location.href = "https://github.com/Kortezbis/DeskApp-Vis/releases/latest";
+      window.location.href = DESKTOP_RELEASES_PAGE_URL;
     }
   };
 

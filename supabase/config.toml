@@ -1,0 +1,4 @@
+project_id = "zkkxkcbiepyserrtfqto"
+
+[functions.send-download-link]
+verify_jwt = false
