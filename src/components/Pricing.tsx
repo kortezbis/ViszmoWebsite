@@ -124,7 +124,7 @@ export const Pricing = () => {
     ];
 
     return (
-        <section id="pricing" className="pb-24 md:pb-32 px-4 relative z-10 overflow-hidden bg-transparent">
+        <section id="pricing" className="pt-12 pb-24 md:pb-32 px-4 relative z-10 overflow-hidden bg-transparent">
             <div className="max-w-7xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -183,7 +183,7 @@ export const Pricing = () => {
                                         </div>
                                     )}
                                     <div className="mb-6">
-                                        <div className="mb-4">
+                                        <div className="h-12 mb-4 flex items-center">
                                             <div className={`group inline-block ${plan.id === 'pro' ? 'bg-[#8b5cf6]' : 'bg-[#f43f5e]'} shadow-violet-500/20 -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105`}>
                                                 <h3 className="text-lg font-black text-white uppercase tracking-wider transform skew-x-12 transition-all duration-300 group-hover:skew-x-0 whitespace-nowrap">
                                                     {plan.name}
@@ -192,7 +192,7 @@ export const Pricing = () => {
                                         </div>
                                         <div className="flex items-baseline gap-1 mb-2">
                                             <span className="text-5xl font-bold text-slate-900 tracking-tight">
-                                                {plan.id === 'free' ? 'Free' : <>$<AnimatedPrice value={(plan as any)[billingCycle].price} /></>}
+                                                $<AnimatedPrice value={(plan as any)[billingCycle].price} />
                                             </span>
                                             <span className="text-slate-500 font-medium">
                                                 {(plan as any)[billingCycle].period}
@@ -213,10 +213,6 @@ export const Pricing = () => {
                                     <div className="mb-6 btn-wrapper w-full">
                                         <button
                                             onClick={() => {
-                                                if (plan.id === 'free') {
-                                                    isSignedIn ? navigate('/dashboard') : navigate('/signup');
-                                                    return;
-                                                }
                                                 const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                 handleSubscribe(id);
                                             }}
@@ -246,7 +242,7 @@ export const Pricing = () => {
                             ))}
                     </div>
 
-                    <div className="text-center max-w-3xl mx-auto mb-16 pt-32">
+                    <div className="text-center max-w-3xl mx-auto mb-16 pt-20 border-t border-slate-100">
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -296,10 +292,6 @@ export const Pricing = () => {
                                                             <div className="btn-wrapper w-full max-w-[180px]">
                                                                 <button
                                                                     onClick={() => {
-                                                                        if (plan.id === 'free') {
-                                                                            isSignedIn ? navigate('/dashboard') : navigate('/signup');
-                                                                            return;
-                                                                        }
                                                                         const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                                         handleSubscribe(id);
                                                                     }}
