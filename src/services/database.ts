@@ -456,6 +456,9 @@ class DatabaseService {
 
     async getLectureNotes(): Promise<LectureNote[]> {
         const user = await this.ensureSessionReady();
+        const cacheKey = `notes_${user.id}`;
+        const cached = this.getCached<LectureNote[]>(cacheKey);
+        if (cached) return cached;
 
         const { data, error } = await supabase
             .from('transcripts')
@@ -469,7 +472,7 @@ class DatabaseService {
             return [];
         }
 
-        return (data || []).map((row: Record<string, unknown>) => {
+        const notes = (data || []).map((row: Record<string, unknown>) => {
             const meta = row.metadata as { workspaceId?: string; flashcardDeckId?: string } | null;
             const created = new Date(row.created_at as string).getTime();
             return {
@@ -486,8 +489,11 @@ class DatabaseService {
                 duration: (row.duration as string) || '0:00',
                 createdAt: created,
                 updatedAt: created,
-            };
+            } as LectureNote;
         });
+
+        this.setCache(cacheKey, notes);
+        return notes;
     }
 
     async getWorkspaceById(id: string): Promise<WorkspaceRow | undefined> {
@@ -772,47 +778,7 @@ class DatabaseService {
         return { cardCount: count ?? 0, mastery: 0, subdeckCount };
     }
 
-    async getLectureNotes(): Promise<LectureNote[]> {
-        const user = await this.ensureSessionReady();
-        const cacheKey = `notes_${user.id}`;
-        const cached = this.getCached<LectureNote[]>(cacheKey);
-        if (cached) return cached;
 
-        const { data, error } = await supabase
-            .from('transcripts')
-            .select('id, profile_id, title, duration, created_at, metadata')
-            .eq('profile_id', user.id)
-            .is('deleted_at', null)
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            console.error('[DB] getLectureNotes:', error.message);
-            return [];
-        }
-
-        const notes = (data || []).map((row: any) => {
-            const meta = row.metadata as { workspaceId?: string; flashcardDeckId?: string } | null;
-            const created = new Date(row.created_at as string).getTime();
-            return {
-                id: row.id,
-                userId: row.profile_id,
-                workspaceId: meta?.workspaceId,
-                flashcardDeckId: meta?.flashcardDeckId,
-                title: row.title || 'Untitled Lecture',
-                content: '',
-                summary: undefined,
-                keyTakeaways: [],
-                glossary: [],
-                date: formatLectureDateLong(created),
-                duration: row.duration || '0:00',
-                createdAt: created,
-                updatedAt: created,
-            } as LectureNote;
-        });
-
-        this.setCache(cacheKey, notes);
-        return notes;
-    }
 
     /** Mirrors iOS getNotesByWorkspace — queries metadata JSON field directly, not "fetch all → filter". */
     async getNotesByWorkspace(wsId: string): Promise<LectureNote[]> {
