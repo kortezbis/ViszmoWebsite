@@ -145,6 +145,10 @@ function prerender() {
       html = html.slice(0, headEndIndex) + canonicalTag + html.slice(headEndIndex);
     }
 
+    // 7. Inject H1 inside the root div for non-JS crawlers (like Bing Site Scan)
+    const rootRegex = /<div id="root"[^>]*>/i;
+    html = html.replace(rootRegex, `$&<h1 style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;">${meta.title}</h1>`);
+
     if (route === '/') {
       // For home page, write directly to index.html in dist
       fs.writeFileSync(TEMPLATE_PATH, html, 'utf-8');
