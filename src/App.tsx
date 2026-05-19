@@ -809,7 +809,7 @@ const ScrollToTop = () => {
     window.scrollTo(0, 0);
 
     // Dynamic pageview tracking for SPA route changes
-    if (typeof window !== 'undefined' && (window as any).gtag) {
+    if (typeof window !== 'undefined' && (window as any).gtag && (window.location.hostname === 'www.viszmo.com' || window.location.hostname === 'viszmo.com')) {
       (window as any).gtag('config', 'G-P4VHMSN0DC', {
         page_path: pathname + search,
         page_title: document.title
