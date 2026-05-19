@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Podcast, Sparkles, Loader2, Check, Info, Music } from 'lucide-react';
-import { db, type LectureNote, type StudyGuide, type Deck } from '../../services/database';
-import { invokeAiGateway } from '../../services/aiGateway';
+import { useState } from 'react';
+import { Sparkles, Check } from 'lucide-react';
+import { db } from '../../services/database';
+import { usePodcastGeneration } from '../contexts/PodcastGenerationContext';
+import { useDecks } from '../contexts/DecksContext';
 
 const PODCAST_TTS_VOICES = [
     { id: 'nova', name: 'Nova (Energetic, Female)' },
@@ -18,308 +18,191 @@ const PODCAST_TTS_VOICES = [
     { id: 'ballad', name: 'Ballad (Storytelling, Female)' },
 ];
 
-const LANGUAGES = [
-    'English', 'Spanish', 'French', 'German', 'Mandarin', 
-    'Japanese', 'Portuguese', 'Italian', 'Hindi', 'Korean'
-];
+const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Japanese', 'Portuguese', 'Italian', 'Hindi', 'Korean'] as const;
 
 const PODCAST_TYPES = [
-    'Educational', 'Conversational', 'Interview-style', 
-    'Narrative / Story', 'News briefing', 'Deep dive lecture'
+    'Educational', 'Conversational', 'Interview-style',
+    'Narrative / Story', 'News briefing', 'Deep dive lecture',
 ];
 
-const DURATIONS = [
-    { id: '~5 min', label: '5 Minutes' },
-    { id: '~10 min', label: '10 Minutes' },
-    { id: '~15 min', label: '15 Minutes' },
-    { id: '~20 min', label: '20 Minutes' },
-    { id: '~30 min', label: '30 Minutes' },
-];
+const DURATIONS = ['~5 min', '~10 min', '~15 min', '~20 min', '~30 min'];
 
-const GRADE_LEVELS = [
-    'Elementary', 'Middle School', 'High School', 
-    'College', 'Graduate', 'Professional'
-];
+const GRADE_LEVELS = ['Elementary', 'Middle School', 'High School', 'College', 'Graduate', 'Professional'] as const;
+
+const MAX_CONTENT_CHARS = 60000;
+
+export interface PodcastRoutePayload {
+    source: 'deck' | 'custom';
+    customContent?: string;
+    customTitle?: string;
+}
 
 interface GeneratePodcastFormProps {
-    workspaceId?: string;
+    workspaceId: string;
+    payload: PodcastRoutePayload;
     onClose?: () => void;
 }
 
-export default function GeneratePodcastForm({ workspaceId, onClose }: GeneratePodcastFormProps) {
-    const navigate = useNavigate();
+export default function GeneratePodcastForm({ workspaceId, payload, onClose }: GeneratePodcastFormProps) {
+    const { startGeneration } = usePodcastGeneration();
+    const { workspaces } = useDecks();
 
-    const [lectures, setLectures] = useState<LectureNote[]>([]);
-    const [guides, setGuides] = useState<StudyGuide[]>([]);
-    const [decks, setDecks] = useState<Deck[]>([]);
-    const [loadingSources, setLoadingSources] = useState(true);
+    const workspace = workspaces.find(w => w.id === workspaceId);
 
-    const [selectedSourceType, setSelectedSourceType] = useState<'workspace' | 'lecture' | 'guide' | 'deck' | 'text'>(workspaceId ? 'workspace' : 'text');
-    const [selectedSourceId, setSelectedSourceId] = useState<string>('');
-    const [customText, setCustomText] = useState('');
-    
-    // Settings
-    const [selectedLanguage, setSelectedLanguage] = useState('English');
-    const [selectedType, setSelectedType] = useState('Educational');
+    const [selectedLanguage, setSelectedLanguage] = useState<string>(LANGUAGES[0]);
+    const [selectedType, setSelectedType] = useState(PODCAST_TYPES[0]);
     const [selectedVoice, setSelectedVoice] = useState('nova');
     const [selectedDuration, setSelectedDuration] = useState('~10 min');
-    const [selectedGradeLevel, setSelectedGradeLevel] = useState('College');
+    const [selectedGradeLevel, setSelectedGradeLevel] = useState<string>(GRADE_LEVELS[3]);
     const [focusArea, setFocusArea] = useState('');
 
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [generationStep, setGenerationStep] = useState<'script' | 'audio' | 'saving' | 'done'>('script');
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const loadSources = async () => {
-            try {
-                const [l, g, d] = await Promise.all([
-                    db.getLectureNotes(),
-                    db.getStudyGuides(),
-                    db.getDecks()
-                ]);
-                setLectures(workspaceId ? l.filter(x => x.workspaceId === workspaceId) : l);
-                setGuides(workspaceId ? g.filter(x => x.workspaceId === workspaceId) : g);
-                setDecks(workspaceId ? d.filter(x => x.workspaceId === workspaceId) : d);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoadingSources(false);
-            }
-        };
-        loadSources();
-    }, [workspaceId]);
+    const [queued, setQueued] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleGenerate = async () => {
-        if (isGenerating) return;
         setError(null);
+        setIsSubmitting(true);
 
         let content = '';
         let titleHint = 'Study Podcast';
 
         try {
-            if (selectedSourceType === 'workspace') {
-                content = await db.getWorkspaceContent(workspaceId);
-                if (!content.trim()) throw new Error('No content found in this workspace to use.');
-            } else if (selectedSourceType === 'lecture') {
-                const l = lectures.find(x => x.id === selectedSourceId);
-                if (!l) throw new Error('Please select a lecture');
-                content = l.content;
-                titleHint = l.title;
-            } else if (selectedSourceType === 'guide') {
-                const g = guides.find(x => x.id === selectedSourceId);
-                if (!g) throw new Error('Please select a study guide');
-                content = g.content;
-                titleHint = g.title;
-            } else if (selectedSourceType === 'deck') {
-                const d = decks.find(x => x.id === selectedSourceId);
-                if (!d) throw new Error('Please select a deck');
-                const cards = await db.getFlashcardsByDeckId(d.id);
-                content = cards.map(c => `Q: ${c.front}\nA: ${c.back}`).join('\n\n');
-                titleHint = d.title;
+            if (payload.source === 'custom' && payload.customContent?.trim()) {
+                content = payload.customContent.trim();
+                titleHint = payload.customTitle?.trim() || titleHint;
             } else {
-                if (!customText.trim()) throw new Error('Please enter some text');
-                content = customText;
+                const workspaceContent = await db.getWorkspaceContent(workspaceId);
+                if (!workspaceContent.trim()) {
+                    throw new Error('Add flashcards or notes to this deck before generating a podcast.');
+                }
+                const workspaceTitle = workspace?.name || 'Workspace';
+                titleHint = workspaceTitle;
+                content = `Workspace: ${workspaceTitle}\n\nContent:\n${workspaceContent}`;
             }
 
-            setIsGenerating(true);
-            setGenerationStep('script');
+            if (content.length > MAX_CONTENT_CHARS) {
+                content = content.slice(0, MAX_CONTENT_CHARS);
+            }
 
-            const scriptRes = await invokeAiGateway<{ title: string; script: string }>('podcast_script', {
+            startGeneration({
+                workspaceId,
                 content,
+                titleHint,
                 language: selectedLanguage,
                 podcastType: selectedType,
                 duration: selectedDuration,
                 gradeLevel: selectedGradeLevel,
-                focus: focusArea.trim() || undefined
+                focus: focusArea.trim() || undefined,
+                voice: selectedVoice,
             });
 
-            setGenerationStep('audio');
-            const audioRes = await invokeAiGateway<{ audioBase64: string; mimeType: string }>('podcast_tts', {
-                text: scriptRes.script,
-                voice: selectedVoice
-            });
-
-            setGenerationStep('saving');
-            const podcastId = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-            const fileName = `${workspaceId || 'global'}/${podcastId}.mp3`;
-            
-            const byteCharacters = atob(audioRes.audioBase64);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'audio/mpeg' });
-
-            const publicUrl = await db.uploadPodcastAudio(fileName, blob);
-
-            await db.savePodcast({
-                id: podcastId,
-                workspaceId: workspaceId || '',
-                title: scriptRes.title || `Podcast: ${titleHint}`,
-                audioUrl: publicUrl,
-                script: { text: scriptRes.script },
-                voiceId: selectedVoice
-            });
-
-            setGenerationStep('done');
+            setQueued(true);
             setTimeout(() => {
                 if (onClose) onClose();
-                navigate(`/dashboard/podcasts/${podcastId}`);
-            }, 1000);
-
+            }, 1200);
         } catch (err) {
-            console.error(err);
-            setError(err instanceof Error ? err.message : 'Generation failed');
-            setIsGenerating(false);
+            setError(err instanceof Error ? err.message : 'Failed to start generation');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
-    if (isGenerating) {
+    if (queued) {
         return (
-            <div className="flex flex-col items-center justify-center py-12 px-4 space-y-8 animate-in fade-in duration-500">
-                <div className="w-20 h-20 bg-brand-primary/10 rounded-3xl flex items-center justify-center relative">
-                    <Podcast size={40} className="text-brand-primary animate-pulse" />
-                    <div className="absolute -right-2 -bottom-2 bg-brand-primary text-white p-1.5 rounded-lg shadow-lg">
-                        <Sparkles size={14} />
-                    </div>
+            <div className="flex flex-col items-center justify-center py-12 px-4 space-y-6 animate-in fade-in duration-500">
+                <div className="w-20 h-20 bg-green-500/10 rounded-3xl flex items-center justify-center">
+                    <Check size={40} className="text-green-500" />
                 </div>
-                
                 <div className="text-center space-y-2">
-                    <h2 className="text-xl font-black">Generating Podcast</h2>
-                    <p className="text-foreground-secondary text-sm font-medium">Sit back while we work our magic...</p>
-                </div>
-                
-                <div className="w-full max-w-xs space-y-4">
-                    <StepItem active={generationStep === 'script'} done={['audio', 'saving', 'done'].includes(generationStep)} label="Writing script..." index={1} />
-                    <StepItem active={generationStep === 'audio'} done={['saving', 'done'].includes(generationStep)} label="Synthesizing audio..." index={2} />
-                    <StepItem active={generationStep === 'saving'} done={generationStep === 'done'} label="Saving to library..." index={3} />
+                    <h2 className="text-xl font-black">Podcast Queued!</h2>
+                    <p className="text-foreground-secondary text-sm font-medium">
+                        Your podcast is generating in the background.<br />
+                        You'll get a notification when it's ready.
+                    </p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin">
-            <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.2em]">1. Source Material</h3>
-                </div>
-                
-                <div className="grid grid-cols-5 gap-2">
-                    {(['workspace', 'lecture', 'guide', 'deck', 'text'] as const).map(type => (
-                        <button
-                            key={type}
-                            onClick={() => setSelectedSourceType(type)}
-                            className={`py-2.5 rounded-xl border text-[9px] font-black uppercase tracking-tight transition-all ${selectedSourceType === type ? 'bg-brand-primary text-white border-brand-primary shadow-lg shadow-brand-primary/20' : 'bg-surface border-border text-foreground-secondary hover:border-foreground-muted'}`}
-                        >
-                            {type === 'workspace' ? (workspaceId ? 'Deck' : 'All') : type === 'lecture' ? 'Note' : type === 'guide' ? 'Guide' : type === 'deck' ? 'Deck' : 'Text'}
-                        </button>
-                    ))}
-                </div>
+        <div className="space-y-5 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin">
+            <p className="text-sm text-foreground-secondary font-medium leading-relaxed">
+                {payload.source === 'deck'
+                    ? 'Using your deck content. Tune language, format, length, level, and narrator voice.'
+                    : 'Using your uploaded or pasted material. Adjust how it should sound, including narrator voice.'}
+            </p>
 
-                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                    {selectedSourceType === 'workspace' && (
-                        <div className="p-4 bg-surface/50 border border-border rounded-2xl flex items-center gap-4">
-                            <div className="w-10 h-10 bg-brand-primary/10 rounded-xl flex items-center justify-center text-brand-primary shrink-0">
-                                <Podcast size={20} />
-                            </div>
-                            <div className="min-w-0">
-                                <p className="text-sm font-bold text-foreground truncate">Workspace Intelligence</p>
-                                <p className="text-[10px] text-foreground-secondary leading-tight">We'll analyze all notes and cards in this deck.</p>
-                            </div>
-                        </div>
-                    )}
+            <div className="space-y-4">
+                <SettingRow label="Choose Language">
+                    <select
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        className="w-full p-3 bg-surface rounded-xl border border-border focus:border-brand-primary outline-none text-xs font-bold"
+                    >
+                        {LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                </SettingRow>
 
-                    {(['lecture', 'guide', 'deck'].includes(selectedSourceType)) && (
-                        <select 
-                            value={selectedSourceId} 
-                            onChange={(e) => setSelectedSourceId(e.target.value)}
-                            className="w-full p-3.5 bg-surface rounded-2xl border border-border focus:border-brand-primary outline-none text-sm font-bold"
-                        >
-                            <option value="">Select {selectedSourceType}...</option>
-                            {selectedSourceType === 'lecture' && lectures.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
-                            {selectedSourceType === 'guide' && guides.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
-                            {selectedSourceType === 'deck' && decks.map(d => <option key={d.id} value={d.id}>{d.title}</option>)}
-                        </select>
-                    )}
-
-                    {selectedSourceType === 'text' && (
-                        <textarea
-                            value={customText}
-                            onChange={(e) => setCustomText(e.target.value)}
-                            placeholder="Paste notes or text to convert..."
-                            className="w-full h-32 p-4 bg-surface rounded-2xl border border-border focus:border-brand-primary outline-none text-sm font-medium leading-relaxed resize-none"
-                        />
-                    )}
-                </div>
-            </section>
-
-            <section className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.2em] ml-1">Style</label>
-                    <select 
-                        value={selectedType} 
+                <SettingRow label="Type of podcast">
+                    <select
+                        value={selectedType}
                         onChange={(e) => setSelectedType(e.target.value)}
                         className="w-full p-3 bg-surface rounded-xl border border-border focus:border-brand-primary outline-none text-xs font-bold"
                     >
                         {PODCAST_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
-                </div>
-                <div className="space-y-2">
-                    <label className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.2em] ml-1">Length</label>
-                    <select 
-                        value={selectedDuration} 
+                </SettingRow>
+
+                <SettingRow label="Duration">
+                    <select
+                        value={selectedDuration}
                         onChange={(e) => setSelectedDuration(e.target.value)}
                         className="w-full p-3 bg-surface rounded-xl border border-border focus:border-brand-primary outline-none text-xs font-bold"
                     >
-                        {DURATIONS.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
+                        {DURATIONS.map(d => <option key={d} value={d}>{d.replace('~', '')}</option>)}
                     </select>
-                </div>
-            </section>
+                </SettingRow>
 
-            <section className="space-y-2">
-                <label className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.2em] ml-1">Narrator Voice</label>
-                <div className="grid grid-cols-2 gap-2">
-                    {PODCAST_TTS_VOICES.slice(0, 4).map(v => (
-                        <button
-                            key={v.id}
-                            onClick={() => setSelectedVoice(v.id)}
-                            className={`p-3 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all ${selectedVoice === v.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'bg-surface border-border text-foreground-secondary hover:border-foreground-muted'}`}
-                        >
-                            <Music size={14} className={selectedVoice === v.id ? 'animate-bounce' : ''} />
-                            {v.name.split(' ')[0]}
-                        </button>
-                    ))}
-                    <select 
-                        value={PODCAST_TTS_VOICES.slice(0, 4).some(v => v.id === selectedVoice) ? '' : selectedVoice}
-                        onChange={(e) => setSelectedVoice(e.target.value)}
-                        className="col-span-2 p-3 bg-surface rounded-xl border border-border focus:border-brand-primary outline-none text-xs font-bold mt-1"
+                <SettingRow label="Grade level">
+                    <select
+                        value={selectedGradeLevel}
+                        onChange={(e) => setSelectedGradeLevel(e.target.value)}
+                        className="w-full p-3 bg-surface rounded-xl border border-border focus:border-brand-primary outline-none text-xs font-bold"
                     >
-                        <option value="" disabled>More voices...</option>
+                        {GRADE_LEVELS.map(g => <option key={g} value={g}>{g}</option>)}
+                    </select>
+                </SettingRow>
+
+                <SettingRow label="Narrator voice">
+                    <select
+                        value={selectedVoice}
+                        onChange={(e) => setSelectedVoice(e.target.value)}
+                        className="w-full p-3 bg-surface rounded-xl border border-border focus:border-brand-primary outline-none text-xs font-bold"
+                    >
                         {PODCAST_TTS_VOICES.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
                     </select>
-                </div>
-            </section>
+                </SettingRow>
+            </div>
 
             <section className="space-y-2">
-                <label className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.2em] ml-1">Audience Focus (Optional)</label>
-                <input
-                    type="text"
+                <label className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.2em] ml-1">
+                    What should the podcast focus on? (optional)
+                </label>
+                <textarea
                     value={focusArea}
                     onChange={(e) => setFocusArea(e.target.value)}
-                    placeholder="e.g. Focus on definitions..."
-                    className="w-full p-3 bg-surface rounded-xl border border-border focus:border-brand-primary outline-none text-xs font-medium"
+                    placeholder="e.g. Exam vocabulary only, common misconceptions…"
+                    className="w-full h-24 p-3 bg-surface rounded-xl border border-border focus:border-brand-primary outline-none text-xs font-medium resize-none leading-relaxed"
                 />
             </section>
 
             <div className="pt-2 sticky bottom-0 bg-background/80 backdrop-blur-sm pb-2">
                 {error && <p className="text-red-500 text-[10px] font-bold text-center mb-3">{error}</p>}
-                <button 
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black text-base shadow-xl shadow-brand-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group"
+                <button
+                    onClick={() => void handleGenerate()}
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black text-base shadow-xl shadow-brand-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                     <Sparkles size={20} className="group-hover:rotate-12 transition-transform" />
                     Create Podcast
@@ -329,14 +212,11 @@ export default function GeneratePodcastForm({ workspaceId, onClose }: GeneratePo
     );
 }
 
-function StepItem({ active, done, label, index }: { active: boolean, done: boolean, label: string, index: number }) {
+function SettingRow({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <div className="flex items-center gap-3">
-            <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold transition-all duration-300 ${done ? 'bg-green-500 text-white' : active ? 'bg-brand-primary text-white scale-110' : 'bg-surface-active text-foreground-secondary opacity-50'}`}>
-                {done ? <Check size={14} /> : index}
-            </div>
-            <span className={`text-sm font-bold transition-colors duration-300 ${active ? 'text-foreground' : 'text-foreground-secondary opacity-60'}`}>{label}</span>
-            {active && <Loader2 size={16} className="animate-spin text-brand-primary ml-auto" />}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <span className="text-sm font-medium text-foreground sm:flex-1">{label}</span>
+            <div className="sm:flex-1 sm:max-w-[260px] sm:ml-auto w-full">{children}</div>
         </div>
     );
 }

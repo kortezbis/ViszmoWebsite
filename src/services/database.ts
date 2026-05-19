@@ -789,7 +789,7 @@ class DatabaseService {
 
         const { data, error } = await supabase
             .from('transcripts')
-            .select('id, profile_id, title, duration, created_at, metadata')
+            .select('*')
             .filter('metadata->>workspaceId', 'eq', wsId)
             .is('deleted_at', null);
 
@@ -807,7 +807,7 @@ class DatabaseService {
                 workspaceId: wsId,
                 flashcardDeckId: meta?.flashcardDeckId,
                 title: row.title || 'Untitled Lecture',
-                content: '', // Omitted for workspace list performance
+                content: (row.content as string) || '',
                 summary: undefined,
                 keyTakeaways: [],
                 glossary: [],
@@ -1190,6 +1190,36 @@ class DatabaseService {
         this.clearCache('notes_');
     }
 
+    async createStudyGuide(title: string, workspaceId: string, content: string, topic?: string | null): Promise<StudyGuide> {
+        await this.ensureSessionReady();
+        const user = await this.ensureSessionReady();
+        const { data, error } = await supabase
+            .from('study_guides')
+            .insert({
+                profile_id: user.id,
+                title,
+                content,
+                topic: topic ?? null,
+                workspace_id: workspaceId,
+            })
+            .select('*')
+            .single();
+
+        if (error) throw error;
+
+        this.clearCache('guides_');
+
+        return {
+            id: data.id,
+            userId: data.profile_id,
+            workspaceId: data.workspace_id ?? undefined,
+            title: data.title,
+            topic: data.topic,
+            content: data.content,
+            createdAt: new Date(data.created_at).getTime(),
+        };
+    }
+
     async deleteStudyGuide(id: string): Promise<void> {
         await this.ensureSessionReady();
         const { error } = await supabase
@@ -1556,6 +1586,13 @@ class DatabaseService {
             console.error('[DB] saveStudyProgress:', error.message);
             throw error;
         }
+    }
+
+    /**
+     * Award XP for gamification flows. Extend with Supabase updates when `profiles` exposes XP fields or an RPC.
+     */
+    async addXp(_amount: number): Promise<void> {
+        return Promise.resolve();
     }
 }
 

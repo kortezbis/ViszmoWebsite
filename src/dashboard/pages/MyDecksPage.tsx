@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
-import { MoreVertical, FolderOpen, Trash2, Mic, BookMarked, Edit2, Plus, ChevronRight, X, Loader2, BookOpen, Layers, Podcast, Search, Flame, Moon, Sun, FileText } from 'lucide-react';
+import { MoreVertical, FolderOpen, Trash2, Mic, BookMarked, Edit2, Plus, ChevronRight, X, Loader2, BookOpen, Layers, Podcast, Search, Flame, FileText, Bell } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { db, type WorkspaceRow, type DeckRow, type LectureNote, type StudyGuide, type PodcastRow } from '../../services/database';
 import { useDecks } from '../contexts/DecksContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { CreateModal } from '../components/CreateModal';
 import { SEO } from '../components/SEO';
+import { useNotifications } from '../contexts/NotificationsContext';
+import { ProfileDropdown } from '../components/ProfileDropdown';
 
-type TabId = 'My Decks' | 'Lectures' | 'Study Guides' | 'Podcasts' | 'Trash';
+type TabId = 'My Decks' | 'Trash';
 type RenameTargetType = 'myDecks' | 'lecture' | 'studyGuides';
 
 export default function MyDecksPage() {
-    const { resolvedTheme, toggleTheme } = useTheme();
+    const { resolvedTheme } = useTheme();
     const navigate = useNavigate();
+    const { unreadCount } = useNotifications();
     const [activeTab, setActiveTab] = useState<TabId>('My Decks');
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
     const [closingMenuId, setClosingMenuId] = useState<string | null>(null);
@@ -44,6 +47,7 @@ export default function MyDecksPage() {
 
 
     const [modalInitialStep, setModalInitialStep] = useState<any>(undefined);
+    const [modalInitialCreateType, setModalInitialCreateType] = useState<'flashcards' | 'study-guide' | 'podcast' | undefined>(undefined);
 
 
 
@@ -53,7 +57,7 @@ export default function MyDecksPage() {
 
     const [podcasts, setPodcasts] = useState<PodcastRow[]>([]);
     const [isDeleteHolding, setIsDeleteHolding] = useState<string | null>(null);
-    const tabs: TabId[] = ['My Decks', 'Lectures', 'Study Guides', 'Podcasts', 'Trash'];
+    const tabs: TabId[] = ['My Decks', 'Trash'];
 
     const workspaces = allWorkspaces.filter(w => !w.parentId);
 
@@ -212,6 +216,7 @@ export default function MyDecksPage() {
     const closeCreateModal = () => {
         setIsCreateModalOpen(false);
         setModalInitialStep(undefined);
+        setModalInitialCreateType(undefined);
         setSelectedWorkspaceId(null);
     };
 
@@ -298,12 +303,20 @@ export default function MyDecksPage() {
                         <span className="text-base font-bold text-foreground">0</span>
                     </div>
 
+                    {/* Bell notification */}
                     <button
-                        onClick={toggleTheme}
-                        className="h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center"
+                        onClick={(e) => { e.stopPropagation(); navigate('/dashboard/notifications'); }}
+                        className="relative h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center"
+                        aria-label="Notifications"
                     >
-                        {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                        <Bell size={20} />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+                        )}
                     </button>
+
+                    {/* Profile */}
+                    <ProfileDropdown />
                 </div>
             </header>
 
@@ -731,7 +744,8 @@ export default function MyDecksPage() {
                             <button
                                 type="button"
                                 onClick={() => {
-                                    setModalInitialStep('podcast');
+                                    setModalInitialStep('destination');
+                                    setModalInitialCreateType('podcast');
                                     setIsCreateModalOpen(true);
                                 }}
                                 className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all"
@@ -750,9 +764,6 @@ export default function MyDecksPage() {
                                         className="flex items-center gap-4 flex-1 text-left min-w-0"
                                         onClick={() => navigate(`/dashboard/podcasts/${p.id}`)}
                                     >
-                                        <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
-                                            <Mic size={20} />
-                                        </div>
                                         <div className="min-w-0">
                                             <h3 className="font-bold text-foreground group-hover:text-brand-primary transition-colors mb-0.5 truncate">
                                                 {p.title}
@@ -976,6 +987,7 @@ export default function MyDecksPage() {
                 onClose={closeCreateModal}
                 initialWorkspaceId={selectedWorkspaceId}
                 initialStep={modalInitialStep}
+                initialCreateType={modalInitialCreateType}
             />
         </div>
     );

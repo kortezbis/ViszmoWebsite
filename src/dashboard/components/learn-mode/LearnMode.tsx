@@ -11,6 +11,9 @@ import { CompletionScreen } from './CompletionScreen';
 import { generateTeachingContent } from './utils/aiExplanations';
 import { gradeWrittenAnswer } from './utils/lcsGrading';
 import { CheckCircle2, XCircle, Volume2, Square, Lightbulb, BookOpen, Sparkles, Mic } from 'lucide-react';
+import { db } from '../../../services/database';
+import { useProfile } from '../../../contexts/ProfileContext';
+import { XP_REWARDS } from '../../../utils/gamification';
 
 // ============================================
 // TYPES
@@ -61,7 +64,7 @@ function GoalSelection({ onSelect }: { onSelect: (goal: LearnGoal) => void }) {
                             <Sparkles className="w-5 h-5 text-brand-primary shrink-0" />
                         </div>
                         <p className="text-sm text-foreground-secondary leading-relaxed">
-                            AI explanations, typing, fill-in-the-blank, and short quizzes.
+                            Smart explanations, typing, fill-in-the-blank, and short quizzes.
                         </p>
                     </button>
 
@@ -981,6 +984,7 @@ function TrueFalseQuestion({ card, allCards, onAnswer, onSkip }: { card: LearnCa
 // ============================================
 
 export function LearnMode({ cards, settings, onComplete, onExit }: LearnModeProps) {
+    const { refreshProfile } = useProfile();
     const [goal, setGoal] = useState<LearnGoal | null>(null);
 
     // Study Mode State
@@ -1102,6 +1106,7 @@ export function LearnMode({ cards, settings, onComplete, onExit }: LearnModeProp
         if (correct && updatedCard.mastery >= 2) {
             setMastered(prev => [...prev, updatedCard]);
             setStats(prev => ({ ...prev, masteredThisSession: prev.masteredThisSession + 1 }));
+            void db.addXp(XP_REWARDS.CARD_MASTERED).then(() => refreshProfile());
         } else {
             newQueue.push(updatedCard);
         }
@@ -1166,6 +1171,7 @@ export function LearnMode({ cards, settings, onComplete, onExit }: LearnModeProp
         if (correct && updatedCard.mastery >= 2) {
             setMastered(prev => [...prev, updatedCard]);
             setStats(prev => ({ ...prev, masteredThisSession: prev.masteredThisSession + 1 }));
+            void db.addXp(XP_REWARDS.CARD_MASTERED).then(() => refreshProfile());
         } else {
             newQueue.push(updatedCard);
         }

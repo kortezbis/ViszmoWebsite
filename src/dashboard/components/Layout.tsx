@@ -30,9 +30,12 @@ import {
     MoreHorizontal,
     Sun,
     Moon,
-    Menu
+    Menu,
+    Plus
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useDecks } from '../contexts/DecksContext';
+import { CreateModal } from './CreateModal';
 // import { PixelTransition } from './PixelTransition';
 
 interface LayoutProps {
@@ -66,6 +69,9 @@ function Sidebar({
     };
     const { resolvedTheme, toggleTheme } = useTheme();
     const [showAllModes, setShowAllModes] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const { workspaces } = useDecks();
+    const mainWorkspaces = workspaces.filter(ws => !ws.parentId);
 
     const isActive = (path: string) => {
         if (path === '/dashboard') return location.pathname === '/dashboard';
@@ -150,7 +156,7 @@ function Sidebar({
                         className={`${location.pathname.startsWith('/dashboard/decks') ? 'sidebar-item-active' : 'sidebar-item'} group relative`}
                         title={isCollapsed ? "Library" : ""}
                     >
-                        <BookOpen className="w-5 h-5 shrink-0" />
+                        <Layers className="w-5 h-5 shrink-0" />
                         {!isCollapsed && (
                             <span className="whitespace-nowrap">
                                 Library
@@ -207,6 +213,64 @@ function Sidebar({
                 */}
 
                 {/* Practice section removed to clean up sidebar */}
+                
+                {/* Dynamic Workspace / Decks List */}
+                <div className="mt-6">
+                    {isCollapsed ? (
+                        <div className="flex flex-col items-center gap-2">
+                            {mainWorkspaces.map((ws) => (
+                                <Link
+                                    key={ws.id}
+                                    to={`/dashboard/workspaces/${ws.id}`}
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                                        location.pathname === `/dashboard/workspaces/${ws.id}`
+                                            ? 'bg-surface-hover text-brand-primary'
+                                            : 'hover:bg-surface-hover text-foreground-secondary'
+                                    }`}
+                                    title={ws.name}
+                                >
+                                    <div
+                                        className="w-3.5 h-3.5 rounded-full shadow-sm"
+                                        style={{ backgroundColor: ws.color }}
+                                    />
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="flex items-center justify-between px-4 mb-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted whitespace-nowrap">
+                                    decks
+                                </span>
+                                <button
+                                    onClick={() => setIsCreateModalOpen(true)}
+                                    className="p-1 rounded-md text-foreground-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+                                >
+                                    <Plus size={16} />
+                                </button>
+                            </div>
+                            <div className="space-y-1">
+                                {mainWorkspaces.map((ws) => (
+                                    <Link
+                                        key={ws.id}
+                                        to={`/dashboard/workspaces/${ws.id}`}
+                                        className={`${location.pathname === `/dashboard/workspaces/${ws.id}` ? 'sidebar-item-active' : 'sidebar-item'} group relative`}
+                                    >
+                                        <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                                            <div
+                                                className="w-3.5 h-3.5 rounded-full shadow-sm"
+                                                style={{ backgroundColor: ws.color }}
+                                            />
+                                        </div>
+                                        <span className="truncate font-bold text-sm whitespace-nowrap">
+                                            {ws.name}
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </nav>
 
             {/* Footer Section */}
@@ -214,107 +278,6 @@ function Sidebar({
 
 
 
-
-                <div className="relative w-full">
-                    <AnimatePresence>
-                        {isUserMenuOpen && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.8, filter: "blur(8px)", y: 20 }}
-                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
-                                exit={{ opacity: 0, scale: 0.8, filter: "blur(8px)", y: 20 }}
-                                transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                                className="absolute bottom-0 left-full ml-6 w-64 bg-white dark:bg-[#18181b] border border-black/5 dark:border-white/10 rounded-2xl shadow-xl z-50 overflow-hidden p-1.5 text-left"
-                            >
-                                <div className="px-3 py-2 border-b border-black/5 dark:border-white/5 mb-1.5 mx-1">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold shadow-sm overflow-hidden">
-                                            {userImageUrl ? (
-                                                <img src={userImageUrl} alt={userName || ''} className="w-full h-full object-cover" />
-                                            ) : (
-                                                (userName?.[0] || userEmail?.[0] || 'U').toUpperCase()
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold text-foreground truncate">{userName || 'User'}</p>
-                                            <p className="text-xs text-foreground-secondary truncate font-medium">{userEmail}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={() => {
-                                        navigate('/');
-                                        setIsUserMenuOpen(false);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl"
-                                >
-                                    <Home className="w-4 h-4 text-zinc-500" />
-                                    Return to Viszmo
-                                </button>
-
-
-                                <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl">
-                                    <User className="w-4 h-4 text-zinc-500" />
-                                    Profile
-                                </button>
-                                <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl">
-                                    <Users className="w-4 h-4 text-zinc-500" />
-                                    Refer Friends
-                                </button>
-
-
-                                {/* App Settings Toggles */}
-                                <div className="space-y-0.5">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleTheme();
-                                        }}
-                                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl group"
-                                    >
-                                        {resolvedTheme === 'dark' ? <Sun className="w-4 h-4 text-zinc-500" /> : <Moon className="w-4 h-4 text-zinc-500" />}
-                                        {resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                                    </button>
-                                </div>
-
-                                <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1.5 mx-1"></div>
-
-                                <button 
-                                    onClick={handleLogout}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors rounded-xl"
-                                >
-                                    <LogOut className="w-4 h-4" />
-                                    Log Out
-                                </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    <button
-                        onClick={() => {
-                            setIsUserMenuOpen(!isUserMenuOpen);
-                        }}
-                        className={`sidebar-item w-full group relative mb-2 ${isCollapsed ? 'justify-center' : ''} ${isUserMenuOpen ? 'sidebar-item-active' : ''}`}
-                        title={isCollapsed ? "My Account" : ""}
-                    >
-                        <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border shadow-sm bg-brand-primary/10 flex items-center justify-center text-[10px] font-bold text-brand-primary">
-                            {userImageUrl ? (
-                                <img
-                                    src={userImageUrl}
-                                    alt="Profile"
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                (userName?.[0] || userEmail?.[0] || 'U').toUpperCase()
-                            )}
-                        </div>
-                        {!isCollapsed && (
-                            <span className="font-medium">
-                                My Account
-                            </span>
-                        )}
-                    </button>
-                </div>
 
                 <button
                     onClick={() => navigate('/pricing')}
@@ -325,6 +288,12 @@ function Sidebar({
                     {!isCollapsed && <span>Upgrade to Pro</span>}
                 </button>
             </div>
+            
+            <CreateModal 
+                isOpen={isCreateModalOpen} 
+                onClose={() => setIsCreateModalOpen(false)}
+                initialStep="create-deck"
+            />
         </aside>
     );
 }
@@ -362,10 +331,9 @@ export function Layout({ children }: LayoutProps) {
             )}
 
             <div
-            className={`flex-1 min-h-screen overflow-y-auto transition-all duration-300 ${hideSidebar ? 'ml-0' : (isCollapsed ? 'ml-[80px]' : 'ml-[240px]')}`}
+            className={`flex-1 h-screen overflow-hidden transition-all duration-300 ${hideSidebar ? 'ml-0' : (isCollapsed ? 'ml-[80px]' : 'ml-[240px]')}`}
             style={{ 
                 width: hideSidebar ? '100%' : `calc(100% - ${isCollapsed ? 80 : 240}px)`,
-                scrollbarGutter: 'stable'
             }}
             >
                 {children}

@@ -83,6 +83,18 @@ export default function WorkspaceDetailPage() {
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
     const [closingMenuId, setClosingMenuId] = useState<string | null>(null);
     const [modalInitialStep, setModalInitialStep] = useState<any>(undefined);
+    const [modalInitialCreateType, setModalInitialCreateType] = useState<'flashcards' | 'study-guide' | 'podcast' | undefined>(undefined);
+
+    const openWorkspaceCreate = (type: 'flashcards' | 'study-guide' | 'podcast' | 'lecture') => {
+        if (type === 'lecture') {
+            setModalInitialStep('record');
+            setModalInitialCreateType(undefined);
+        } else {
+            setModalInitialStep('choose');
+            setModalInitialCreateType(type);
+        }
+        setIsCreateModalOpen(true);
+    };
 
     // Modal States
     const [modalType, setModalType] = useState<'rename' | 'subdeck' | 'deck' | null>(null);
@@ -340,7 +352,7 @@ export default function WorkspaceDetailPage() {
 
     return (
         <div
-            className="w-full h-full overflow-y-auto bg-background"
+            className="w-full h-full flex flex-col overflow-hidden bg-background"
             onClick={() => {
                 closeMainMenu();
                 closeSubMenu();
@@ -348,8 +360,8 @@ export default function WorkspaceDetailPage() {
             }}
         >
             <SEO title={workspace?.name || 'Workspace'} description={`Manage and study materials in your ${workspace?.name || 'Viszmo workspace'}.`} />
-            {/* Sticky Header - Mirroring dashvis exactly */}
-            <div className="sticky top-14 md:top-0 z-20 bg-background/95 backdrop-blur-md">
+            {/* Fixed header — title, actions, and tabs */}
+            <div className="shrink-0 z-20 bg-background/95 backdrop-blur-md">
                 <div className="max-w-4xl mx-auto px-6 pt-8 pb-2">
                     <div className="flex items-center justify-between mb-4 gap-2">
                         <div className="flex items-center gap-3 min-w-0">
@@ -460,7 +472,10 @@ export default function WorkspaceDetailPage() {
                                         type="button"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            setIsCreateModalOpen(true);
+                                            if (activeTab === 'Cards') openWorkspaceCreate('flashcards');
+                                            else if (activeTab === 'Lectures') openWorkspaceCreate('lecture');
+                                            else if (activeTab === 'Study Guides') openWorkspaceCreate('study-guide');
+                                            else openWorkspaceCreate('podcast');
                                         }}
                                         className="px-5 py-2.5 rounded-full border border-border bg-surface hover:bg-surface-hover text-foreground font-bold text-sm transition-all flex items-center gap-2 shadow-sm active:scale-95"
                                     >
@@ -472,13 +487,13 @@ export default function WorkspaceDetailPage() {
                                     <button
                                         type="button"
                                         disabled={totalCardsCount === 0}
-                                        className="px-5 py-2.5 rounded-full bg-[#1E293B] text-white font-bold text-sm hover:bg-black transition-all flex items-center gap-2 shadow-lg shadow-black/10 disabled:opacity-40 active:scale-95"
+                                        className="px-5 py-2.5 rounded-full bg-brand-primary text-white font-bold text-sm hover:bg-brand-primary/90 transition-all flex items-center gap-2 shadow-lg shadow-brand-primary/20 disabled:opacity-40 active:scale-95"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setIsStudyModalOpen(true);
                                         }}
                                     >
-                                        <Play size={16} className="fill-white shrink-0" />
+                                        <img src="/dashimages/branding/gamepad.png" alt="Study" className="w-4 h-4 shrink-0" />
                                         <span>Study Deck</span>
                                     </button>
                                 </div>
@@ -507,9 +522,10 @@ export default function WorkspaceDetailPage() {
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
 
-            <div className="max-w-4xl mx-auto py-8 px-6 pb-40 min-h-[70vh]">
+            <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="max-w-4xl mx-auto py-8 px-6 pb-40">
                 {activeTab === 'Cards' && (
                     <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both">
                         {/* Sub Decks Section */}
@@ -631,8 +647,7 @@ export default function WorkspaceDetailPage() {
                                         type="button"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            setModalInitialStep('choose');
-                                            setIsCreateModalOpen(true);
+                                            openWorkspaceCreate('flashcards');
                                         }}
                                         className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all"
                                     >
@@ -645,68 +660,68 @@ export default function WorkspaceDetailPage() {
                                             key={card.id}
                                             className="group bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/30 transition-all shadow-sm relative"
                                         >
-                                            <div className="flex items-start justify-between gap-4">
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-bold text-foreground mb-2 line-clamp-2">
+                                            <div className="flex flex-col">
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <p className="text-sm font-bold text-foreground mb-2 line-clamp-2 flex-1 min-w-0">
                                                         {card.front}
                                                     </p>
-                                                    <div className="h-px bg-border w-full my-3" />
-                                                    <p className="text-sm text-foreground-secondary line-clamp-3 whitespace-pre-wrap">
-                                                        {card.back}
-                                                    </p>
-                                                </div>
-                                                <div className="relative shrink-0">
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setActiveMenuId(activeMenuId === `card-${card.id}` ? null : `card-${card.id}`);
-                                                        }}
-                                                        className={`p-1.5 rounded-full transition-all duration-300 ${activeMenuId === `card-${card.id}`
-                                                            ? 'bg-black/5 dark:bg-white/5 text-zinc-900 dark:text-zinc-100'
-                                                            : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
-                                                            }`}
-                                                    >
-                                                        <MoreVertical size={18} className={activeMenuId === `card-${card.id}` ? 'popover-menu-trigger-rotate' : ''} />
-                                                    </button>
-
-                                                    {(activeMenuId === `card-${card.id}` || closingMenuId === `card-${card.id}`) && (
-                                                        <div
-                                                            className={`absolute top-11 right-0 w-40 z-50 popover-menu-surface p-1.5 flex flex-col shadow-2xl ${closingMenuId === `card-${card.id}` ? 'popover-menu-dropdown-closing' : 'popover-menu-dropdown-animate'}`}
-                                                            onClick={(e) => e.stopPropagation()}
+                                                    <div className="relative shrink-0">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setActiveMenuId(activeMenuId === `card-${card.id}` ? null : `card-${card.id}`);
+                                                            }}
+                                                            className={`p-1.5 rounded-full transition-all duration-300 ${activeMenuId === `card-${card.id}`
+                                                                ? 'bg-black/5 dark:bg-white/5 text-zinc-900 dark:text-zinc-100'
+                                                                : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200'
+                                                                }`}
                                                         >
-                                                            <button
-                                                                type="button"
-                                                                className="popover-menu-item"
-                                                                onClick={() => {
-                                                                    navigate(`/dashboard/edit-deck/${card.deckId}`);
-                                                                    setActiveMenuId(null);
-                                                                }}
+                                                            <MoreVertical size={18} className={activeMenuId === `card-${card.id}` ? 'popover-menu-trigger-rotate' : ''} />
+                                                        </button>
+
+                                                        {(activeMenuId === `card-${card.id}` || closingMenuId === `card-${card.id}`) && (
+                                                            <div
+                                                                className={`absolute top-11 right-0 w-40 z-50 popover-menu-surface p-1.5 flex flex-col shadow-2xl ${closingMenuId === `card-${card.id}` ? 'popover-menu-dropdown-closing' : 'popover-menu-dropdown-animate'}`}
+                                                                onClick={(e) => e.stopPropagation()}
                                                             >
-                                                                <Edit2 size={14} className="text-zinc-500 shrink-0" />
-                                                                Edit
-                                                            </button>
-                                                            <div className="popover-menu-divider" />
-                                                            <button
-                                                                type="button"
-                                                                className={`hold-to-delete-container py-2 ${isDeleteHolding === `card-${card.id}` ? 'hold-to-delete-active' : ''}`}
-                                                                onMouseDown={() => setIsDeleteHolding(`card-${card.id}`)}
-                                                                onMouseUp={() => setIsDeleteHolding(null)}
-                                                                onMouseLeave={() => setIsDeleteHolding(null)}
-                                                                onTouchStart={() => setIsDeleteHolding(`card-${card.id}`)}
-                                                                onTouchEnd={() => setIsDeleteHolding(null)}
-                                                            >
-                                                                <div className="hold-to-delete-progress" />
-                                                                <div className="relative z-10 flex items-center gap-2 w-full">
-                                                                    <Trash2 size={14} className="shrink-0" />
-                                                                    <span className="font-semibold text-xs">
-                                                                        {isDeleteHolding === `card-${card.id}` ? 'Confirm' : 'Delete'}
-                                                                    </span>
-                                                                </div>
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                                                <button
+                                                                    type="button"
+                                                                    className="popover-menu-item"
+                                                                    onClick={() => {
+                                                                        navigate(`/dashboard/edit-deck/${card.deckId}`);
+                                                                        setActiveMenuId(null);
+                                                                    }}
+                                                                >
+                                                                    <Edit2 size={14} className="text-zinc-500 shrink-0" />
+                                                                    Edit
+                                                                </button>
+                                                                <div className="popover-menu-divider" />
+                                                                <button
+                                                                    type="button"
+                                                                    className={`hold-to-delete-container py-2 ${isDeleteHolding === `card-${card.id}` ? 'hold-to-delete-active' : ''}`}
+                                                                    onMouseDown={() => setIsDeleteHolding(`card-${card.id}`)}
+                                                                    onMouseUp={() => setIsDeleteHolding(null)}
+                                                                    onMouseLeave={() => setIsDeleteHolding(null)}
+                                                                    onTouchStart={() => setIsDeleteHolding(`card-${card.id}`)}
+                                                                    onTouchEnd={() => setIsDeleteHolding(null)}
+                                                                >
+                                                                    <div className="hold-to-delete-progress" />
+                                                                    <div className="relative z-10 flex items-center gap-2 w-full">
+                                                                        <Trash2 size={14} className="shrink-0" />
+                                                                        <span className="font-semibold text-xs">
+                                                                            {isDeleteHolding === `card-${card.id}` ? 'Confirm' : 'Delete'}
+                                                                        </span>
+                                                                    </div>
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
+                                                <div className="h-px border-t border-dashed border-border -mx-4 my-3" />
+                                                <p className="text-sm text-foreground-secondary line-clamp-3 whitespace-pre-wrap">
+                                                    {card.back}
+                                                </p>
                                             </div>
                                         </div>
                                     ))
@@ -715,8 +730,7 @@ export default function WorkspaceDetailPage() {
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setModalInitialStep('choose');
-                                            setIsCreateModalOpen(true);
+                                            openWorkspaceCreate('flashcards');
                                         }}
                                         className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all mt-2"
                                     >
@@ -742,47 +756,21 @@ export default function WorkspaceDetailPage() {
                                 ))}
                             </div>
                         ) : workspaceLectures.length === 0 ? (
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setModalInitialStep('record');
-                                        setIsCreateModalOpen(true);
-                                    }}
-                                    className="flex-1 flex items-center justify-center gap-3 p-6 border border-border border-dashed rounded-3xl text-foreground-secondary hover:text-brand-primary hover:bg-brand-primary/5 hover:border-brand-primary/50 w-full transition-all group"
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <Mic size={24} className="text-rose-500" />
-                                    </div>
-                                    <div className="text-left">
-                                        <span className="block font-bold text-foreground">Live Record</span>
-                                        <span className="text-xs text-foreground-secondary">Record class and generate cards</span>
-                                    </div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setModalInitialStep('import');
-                                        setIsCreateModalOpen(true);
-                                    }}
-                                    className="flex-1 flex items-center justify-center gap-3 p-6 border border-border border-dashed rounded-3xl text-foreground-secondary hover:text-brand-primary hover:bg-brand-primary/5 hover:border-brand-primary/50 w-full transition-all group"
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <Upload size={24} className="text-brand-primary" />
-                                    </div>
-                                    <div className="text-left">
-                                        <span className="block font-bold text-foreground">Upload File</span>
-                                        <span className="text-xs text-foreground-secondary">PDF, PPTX, MP3, and more</span>
-                                    </div>
-                                </button>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => openWorkspaceCreate('lecture')}
+                                className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all"
+                            >
+                                <Plus size={20} />
+                                <span className="font-medium">Add Lecture</span>
+                            </button>
                         ) : (
-                            workspaceLectures.map((n) => (
-                                <div
-                                    key={n.id}
-                                    className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/30 transition-all shadow-sm relative"
-                                >
+                            <>
+                                {workspaceLectures.map((n) => (
+                                    <div
+                                        key={n.id}
+                                        className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/30 transition-all shadow-sm relative"
+                                    >
                                     <button
                                         type="button"
                                         className="flex items-center gap-4 flex-1 text-left min-w-0"
@@ -850,7 +838,16 @@ export default function WorkspaceDetailPage() {
                                         </div>
                                     </div>
                                 </div>
-                            ))
+                            ))}
+                                <button
+                                    type="button"
+                                    onClick={() => openWorkspaceCreate('lecture')}
+                                    className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all mt-2"
+                                >
+                                    <Plus size={20} />
+                                    <span className="font-medium">Add Lecture</span>
+                                </button>
+                            </>
                         )}
                     </div>
                 )}
@@ -870,83 +867,90 @@ export default function WorkspaceDetailPage() {
                         ) : workspaceGuides.length === 0 ? (
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setModalInitialStep('type');
-                                    setIsCreateModalOpen(true);
-                                }}
+                                onClick={() => openWorkspaceCreate('study-guide')}
                                 className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all"
                             >
                                 <Plus size={20} />
-                                <span className="font-medium">Add more study guides</span>
+                                <span className="font-medium">Add Study Guide</span>
                             </button>
                         ) : (
-                            workspaceGuides.map((g) => (
-                                <div
-                                    key={g.id}
-                                    className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/30 transition-all shadow-sm relative"
-                                >
-                                    <button
-                                        type="button"
-                                        className="flex items-center gap-3 flex-1 text-left min-w-0"
-                                        onClick={() => navigate(`/dashboard/study-guides/${g.id}`)}
+                            <>
+                                {workspaceGuides.map((g) => (
+                                    <div
+                                        key={g.id}
+                                        className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/30 transition-all shadow-sm relative"
                                     >
-                                        <div className="min-w-0">
-                                            <h3 className="font-bold text-foreground truncate">{g.title}</h3>
-                                            {g.topic && <p className="text-sm text-foreground-secondary truncate">{g.topic}</p>}
-                                        </div>
-                                    </button>
+                                        <button
+                                            type="button"
+                                            className="flex items-center gap-3 flex-1 text-left min-w-0"
+                                            onClick={() => navigate(`/dashboard/study-guides/${g.id}`)}
+                                        >
+                                            <div className="min-w-0">
+                                                <h3 className="font-bold text-foreground truncate">{g.title}</h3>
+                                                {g.topic && <p className="text-sm text-foreground-secondary truncate">{g.topic}</p>}
+                                            </div>
+                                        </button>
 
-                                    <div className="flex items-center gap-3">
-                                        <div className="relative shrink-0">
-                                            <button
-                                                type="button"
-                                                className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-                                                onClick={(e) => toggleSubMenu(e, `guide-${g.id}`)}
-                                            >
-                                                <MoreVertical
-                                                    size={20}
-                                                    className={activeMenuId === `guide-${g.id}` ? 'popover-menu-trigger-rotate' : ''}
-                                                />
-                                            </button>
-
-                                            {/* Guide Menu */}
-                                            {(activeMenuId === `guide-${g.id}` || closingMenuId === `guide-${g.id}`) && (
-                                                <div
-                                                    className={`absolute top-11 right-0 w-56 z-50 popover-menu-surface p-1.5 flex flex-col shadow-2xl ${closingMenuId === `guide-${g.id}` ? 'popover-menu-dropdown-closing' : 'popover-menu-dropdown-animate'}`}
-                                                    onClick={(e) => e.stopPropagation()}
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative shrink-0">
+                                                <button
+                                                    type="button"
+                                                    className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                                                    onClick={(e) => toggleSubMenu(e, `guide-${g.id}`)}
                                                 >
-                                                    <button
-                                                        type="button"
-                                                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl text-left"
-                                                        onClick={() => navigate(`/dashboard/study-guides/${g.id}`)}
+                                                    <MoreVertical
+                                                        size={20}
+                                                        className={activeMenuId === `guide-${g.id}` ? 'popover-menu-trigger-rotate' : ''}
+                                                    />
+                                                </button>
+
+                                                {/* Guide Menu */}
+                                                {(activeMenuId === `guide-${g.id}` || closingMenuId === `guide-${g.id}`) && (
+                                                    <div
+                                                        className={`absolute top-11 right-0 w-56 z-50 popover-menu-surface p-1.5 flex flex-col shadow-2xl ${closingMenuId === `guide-${g.id}` ? 'popover-menu-dropdown-closing' : 'popover-menu-dropdown-animate'}`}
+                                                        onClick={(e) => e.stopPropagation()}
                                                     >
-                                                        <FolderOpen size={16} className="text-zinc-500 shrink-0" />
-                                                        Open
-                                                    </button>
-                                                    <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1.5 mx-1" />
-                                                    <button
-                                                        type="button"
-                                                        className={`hold-to-delete-container ${isDeleteHolding === `guide-${g.id}` ? 'hold-to-delete-active' : ''}`}
-                                                        onMouseDown={() => setIsDeleteHolding(`guide-${g.id}`)}
-                                                        onMouseUp={() => setIsDeleteHolding(null)}
-                                                        onMouseLeave={() => setIsDeleteHolding(null)}
-                                                        onTouchStart={() => setIsDeleteHolding(`guide-${g.id}`)}
-                                                        onTouchEnd={() => setIsDeleteHolding(null)}
-                                                    >
-                                                        <div className="hold-to-delete-progress" />
-                                                        <div className="relative z-10 flex items-center gap-2.5 w-full">
-                                                            <Trash2 size={16} className="shrink-0" />
-                                                            <span className="font-bold">
-                                                                {isDeleteHolding === `guide-${g.id}` ? 'Hold to confirm' : 'Delete'}
-                                                            </span>
-                                                        </div>
-                                                    </button>
-                                                </div>
-                                            )}
+                                                        <button
+                                                            type="button"
+                                                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl text-left"
+                                                            onClick={() => navigate(`/dashboard/study-guides/${g.id}`)}
+                                                        >
+                                                            <FolderOpen size={16} className="text-zinc-500 shrink-0" />
+                                                            Open
+                                                        </button>
+                                                        <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1.5 mx-1" />
+                                                        <button
+                                                            type="button"
+                                                            className={`hold-to-delete-container ${isDeleteHolding === `guide-${g.id}` ? 'hold-to-delete-active' : ''}`}
+                                                            onMouseDown={() => setIsDeleteHolding(`guide-${g.id}`)}
+                                                            onMouseUp={() => setIsDeleteHolding(null)}
+                                                            onMouseLeave={() => setIsDeleteHolding(null)}
+                                                            onTouchStart={() => setIsDeleteHolding(`guide-${g.id}`)}
+                                                            onTouchEnd={() => setIsDeleteHolding(null)}
+                                                        >
+                                                            <div className="hold-to-delete-progress" />
+                                                            <div className="relative z-10 flex items-center gap-2.5 w-full">
+                                                                <Trash2 size={16} className="shrink-0" />
+                                                                <span className="font-bold">
+                                                                    {isDeleteHolding === `guide-${g.id}` ? 'Hold to confirm' : 'Delete'}
+                                                                </span>
+                                                            </div>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => openWorkspaceCreate('study-guide')}
+                                    className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all mt-2"
+                                >
+                                    <Plus size={20} />
+                                    <span className="font-medium">Add Study Guide</span>
+                                </button>
+                            </>
                         )}
                     </div>
                 )}
@@ -966,91 +970,96 @@ export default function WorkspaceDetailPage() {
                         ) : workspacePodcasts.length === 0 ? (
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setModalInitialStep('podcast');
-                                    setIsCreateModalOpen(true);
-                                }}
+                                onClick={() => openWorkspaceCreate('podcast')}
                                 className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all"
                             >
                                 <Plus size={20} />
-                                <span className="font-medium">Add more podcasts</span>
+                                <span className="font-medium">Add Podcast</span>
                             </button>
                         ) : (
-                            workspacePodcasts.map((p) => (
-                                <div
-                                    key={p.id}
-                                    className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/30 transition-all shadow-sm relative"
-                                >
-                                    <button
-                                        type="button"
-                                        className="flex items-center gap-4 flex-1 text-left min-w-0"
-                                        onClick={() => navigate(`/dashboard/podcasts/${p.id}`)}
+                            <>
+                                {workspacePodcasts.map((p) => (
+                                    <div
+                                        key={p.id}
+                                        className="group flex items-center justify-between bg-surface border border-border rounded-2xl p-4 hover:border-brand-primary/30 transition-all shadow-sm relative"
                                     >
-                                        <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 shrink-0">
-                                            <Mic size={20} />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <h3 className="font-bold text-foreground truncate">{p.title}</h3>
-                                            <p className="text-sm text-foreground-secondary truncate">AI Podcast Summary</p>
-                                        </div>
-                                    </button>
+                                        <button
+                                            type="button"
+                                            className="flex items-center gap-4 flex-1 text-left min-w-0"
+                                            onClick={() => navigate(`/dashboard/podcasts/${p.id}`)}
+                                        >
+                                            <div className="min-w-0">
+                                                <h3 className="font-bold text-foreground truncate">{p.title}</h3>
+                                                <p className="text-sm text-foreground-secondary truncate">AI Podcast Summary</p>
+                                            </div>
+                                        </button>
 
-                                    <div className="flex items-center gap-3">
-                                        <div className="relative shrink-0">
-                                            <button
-                                                type="button"
-                                                className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-                                                onClick={(e) => toggleSubMenu(e, `pod-${p.id}`)}
-                                            >
-                                                <MoreVertical
-                                                    size={20}
-                                                    className={activeMenuId === `pod-${p.id}` ? 'popover-menu-trigger-rotate' : ''}
-                                                />
-                                            </button>
-
-                                            {/* Podcast Menu */}
-                                            {(activeMenuId === `pod-${p.id}` || closingMenuId === `pod-${p.id}`) && (
-                                                <div
-                                                    className={`absolute top-11 right-0 w-56 z-50 popover-menu-surface p-1.5 flex flex-col shadow-2xl ${closingMenuId === `pod-${p.id}` ? 'popover-menu-dropdown-closing' : 'popover-menu-dropdown-animate'}`}
-                                                    onClick={(e) => e.stopPropagation()}
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative shrink-0">
+                                                <button
+                                                    type="button"
+                                                    className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                                                    onClick={(e) => toggleSubMenu(e, `pod-${p.id}`)}
                                                 >
-                                                    <button
-                                                        type="button"
-                                                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl text-left"
-                                                        onClick={() => navigate(`/dashboard/podcasts/${p.id}`)}
+                                                    <MoreVertical
+                                                        size={20}
+                                                        className={activeMenuId === `pod-${p.id}` ? 'popover-menu-trigger-rotate' : ''}
+                                                    />
+                                                </button>
+
+                                                {/* Podcast Menu */}
+                                                {(activeMenuId === `pod-${p.id}` || closingMenuId === `pod-${p.id}`) && (
+                                                    <div
+                                                        className={`absolute top-11 right-0 w-56 z-50 popover-menu-surface p-1.5 flex flex-col shadow-2xl ${closingMenuId === `pod-${p.id}` ? 'popover-menu-dropdown-closing' : 'popover-menu-dropdown-animate'}`}
+                                                        onClick={(e) => e.stopPropagation()}
                                                     >
-                                                        <FolderOpen size={16} className="text-zinc-500 shrink-0" />
-                                                        Open
-                                                    </button>
-                                                    <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1.5 mx-1" />
-                                                    <button
-                                                        type="button"
-                                                        className={`hold-to-delete-container ${isDeleteHolding === `pod-${p.id}` ? 'hold-to-delete-active' : ''}`}
-                                                        onMouseDown={() => setIsDeleteHolding(`pod-${p.id}`)}
-                                                        onMouseUp={() => setIsDeleteHolding(null)}
-                                                        onMouseLeave={() => setIsDeleteHolding(null)}
-                                                        onTouchStart={() => setIsDeleteHolding(`pod-${p.id}`)}
-                                                        onTouchEnd={() => setIsDeleteHolding(null)}
-                                                    >
-                                                        <div className="hold-to-delete-progress" />
-                                                        <div className="relative z-10 flex items-center gap-2.5 w-full">
-                                                            <Trash2 size={16} className="shrink-0" />
-                                                            <span className="font-bold">
-                                                                {isDeleteHolding === `pod-${p.id}` ? 'Hold to confirm' : 'Delete'}
-                                                            </span>
-                                                        </div>
-                                                    </button>
-                                                </div>
-                                            )}
+                                                        <button
+                                                            type="button"
+                                                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl text-left"
+                                                            onClick={() => navigate(`/dashboard/podcasts/${p.id}`)}
+                                                        >
+                                                            <FolderOpen size={16} className="text-zinc-500 shrink-0" />
+                                                            Open
+                                                        </button>
+                                                        <div className="h-px bg-zinc-100 dark:bg-zinc-800 my-1.5 mx-1" />
+                                                        <button
+                                                            type="button"
+                                                            className={`hold-to-delete-container ${isDeleteHolding === `pod-${p.id}` ? 'hold-to-delete-active' : ''}`}
+                                                            onMouseDown={() => setIsDeleteHolding(`pod-${p.id}`)}
+                                                            onMouseUp={() => setIsDeleteHolding(null)}
+                                                            onMouseLeave={() => setIsDeleteHolding(null)}
+                                                            onTouchStart={() => setIsDeleteHolding(`pod-${p.id}`)}
+                                                            onTouchEnd={() => setIsDeleteHolding(null)}
+                                                        >
+                                                            <div className="hold-to-delete-progress" />
+                                                            <div className="relative z-10 flex items-center gap-2.5 w-full">
+                                                                <Trash2 size={16} className="shrink-0" />
+                                                                <span className="font-bold">
+                                                                    {isDeleteHolding === `pod-${p.id}` ? 'Hold to confirm' : 'Delete'}
+                                                                </span>
+                                                            </div>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => openWorkspaceCreate('podcast')}
+                                    className="flex items-center gap-3 p-4 border border-border border-dashed rounded-2xl text-foreground-secondary hover:text-foreground hover:bg-surface-hover/50 w-full transition-all mt-2"
+                                >
+                                    <Plus size={20} />
+                                    <span className="font-medium">Add Podcast</span>
+                                </button>
+                            </>
                         )}
                     </div>
                 )}
 
 
+            </div>
             </div>
 
             {/* Modals */}
@@ -1193,9 +1202,10 @@ export default function WorkspaceDetailPage() {
             {/* Unified Create Modal */}
             <CreateModal
                 isOpen={isCreateModalOpen}
-                onClose={() => { setIsCreateModalOpen(false); setModalInitialStep(undefined); }}
+                onClose={() => { setIsCreateModalOpen(false); setModalInitialStep(undefined); setModalInitialCreateType(undefined); }}
                 initialWorkspaceId={workspaceId}
                 initialStep={modalInitialStep}
+                initialCreateType={modalInitialCreateType}
             />
         </div>
     );

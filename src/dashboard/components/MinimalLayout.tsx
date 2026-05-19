@@ -29,7 +29,7 @@ interface MinimalLayoutProps {
 
 const MAIN_LINKS: { to: string; label: string; icon: typeof Home }[] = [
     { to: '/dashboard', label: 'Home', icon: Home },
-    { to: '/dashboard/decks', label: 'My Deck', icon: BookOpen },
+    { to: '/dashboard/decks', label: 'Library', icon: BookOpen },
     { to: '/dashboard/transcripts', label: 'Transcripts', icon: ScrollText },
     { to: '/dashboard/chat', label: 'Chat', icon: MessageSquare },
 ];

@@ -10,26 +10,28 @@ import {
     Flame,
     Search,
     Plus,
-    Moon,
-    Sun
+    Bell
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { db, type DeckRow } from '../../services/database';
 import { useTheme } from '../contexts/ThemeContext';
 import { useDecks } from '../contexts/DecksContext';
+import { useNotifications } from '../contexts/NotificationsContext';
+import { ProfileDropdown } from '../components/ProfileDropdown';
 import { CreateModal } from '../components/CreateModal';
 import { SEO } from '../components/SEO';
 
 export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileModal = () => {} }: { onOpenDownload?: () => void, onOpenMobileModal?: () => void }) {
     const navigate = useNavigate();
     const { userName, userEmail } = useAuth();
-    const { resolvedTheme, toggleTheme } = useTheme();
+    const { resolvedTheme } = useTheme();
     const { decks, decksLoading } = useDecks();
     const [recentDecks, setRecentDecks] = useState<DeckRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [modalInitialStep, setModalInitialStep] = useState<any>(undefined);
+    const { unreadCount } = useNotifications();
 
     const first = userName?.split(/\s+/)[0] || userEmail?.split('@')[0] || 'User';
 
@@ -122,12 +124,20 @@ export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileM
                         <span className="text-base font-bold text-foreground">0</span>
                     </div>
 
+                    {/* Bell notification */}
                     <button
-                        onClick={toggleTheme}
-                        className="h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center"
+                        onClick={() => navigate('/dashboard/notifications')}
+                        className="relative h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center"
+                        aria-label="Notifications"
                     >
-                        {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                        <Bell size={20} />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+                        )}
                     </button>
+
+                    {/* Profile */}
+                    <ProfileDropdown />
                 </div>
             </header>
 

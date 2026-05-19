@@ -19,7 +19,10 @@ export default function GeneratePodcastPage() {
 
             <div className="max-w-xl mx-auto px-6 py-12">
                 <div className="p-8 bg-surface border border-border rounded-[32px] shadow-2xl">
-                    <GeneratePodcastForm workspaceId={workspaceId} />
+                    <GeneratePodcastForm
+                        workspaceId={workspaceId!}
+                        payload={{ source: 'deck' }}
+                    />
                 </div>
             </div>
         </div>

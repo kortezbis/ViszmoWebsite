@@ -29,19 +29,23 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDecks } from '../contexts/DecksContext';
-import { generateFlashcardsFromText } from '../../services/flashcardGenerator';
+import { generateFlashcardsFromText, generateFlashcardsFromFile, generateCardsFromPrompt } from '../../services/flashcardGenerator';
 import { supabase } from '../../lib/supabase';
-import { generateFlashcardsFromFile } from '../../services/flashcardGenerator';
-import GeneratePodcastForm from './GeneratePodcastForm';
+import { invokeAiGateway } from '../../services/aiGateway';
+import { db } from '../../services/database';
+import GeneratePodcastForm, { type PodcastRoutePayload } from './GeneratePodcastForm';
+
+type CreateContentType = 'flashcards' | 'study-guide' | 'podcast';
 
 interface CreateModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialWorkspaceId?: string | null;
     initialStep?: Step;
+    initialCreateType?: CreateContentType;
 }
 
-type Step = 'type' | 'destination' | 'create-deck' | 'choose' | 'generate' | 'import' | 'youtube' | 'subject' | 'link' | 'quizlet' | 'csv' | 'podcast' | 'record';
+type Step = 'type' | 'destination' | 'create-deck' | 'choose' | 'generate' | 'import' | 'youtube' | 'subject' | 'link' | 'quizlet' | 'csv' | 'podcast-prep' | 'record';
 type UploadStatus = 'idle' | 'uploading' | 'processing' | 'done' | 'error';
 
 const CREATE_OPTIONS = [
@@ -126,18 +130,21 @@ const CREATE_OPTIONS = [
         bgClass: 'bg-zinc-500/10',
         action: 'import-csv' as const,
     },
-    {
-        id: 'podcast',
-        brandingImage: '/logos/branding/podcast.png',
-        title: 'Generate Podcast',
-        subtitle: 'Convert your notes into an AI podcast.',
-        colorClass: 'text-rose-500',
-        bgClass: 'bg-rose-500/10',
-        action: 'podcast' as const,
-    },
 ];
 
-export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }: CreateModalProps) {
+function getFilteredCreateOptions(createType: CreateContentType) {
+    return CREATE_OPTIONS.filter((opt) => {
+        if (createType === 'flashcards') {
+            return opt.id !== 'podcast';
+        }
+        if (createType === 'podcast' || createType === 'study-guide') {
+            return !['record', 'podcast', 'manual', 'import-csv', 'quizlet'].includes(opt.id);
+        }
+        return true;
+    });
+}
+
+export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep, initialCreateType }: CreateModalProps) {
     const navigate = useNavigate();
     const { createDeck, setActiveDeck, workspaces, createWorkspace } = useDecks();
     const modalRef = useRef<HTMLDivElement>(null);
@@ -145,12 +152,15 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
     const abortRef = useRef<AbortController | null>(null);
 
     const [step, setStep] = useState<Step>(initialStep || 'type');
+    const [createType, setCreateType] = useState<CreateContentType>(initialCreateType || 'flashcards');
+    const [podcastPayload, setPodcastPayload] = useState<PodcastRoutePayload | null>(null);
 
     useEffect(() => {
         if (isOpen) {
-            setStep(initialStep || 'type');
+            setStep(initialStep || (initialWorkspaceId ? 'choose' : 'type'));
+            setCreateType(initialCreateType || 'flashcards');
         }
-    }, [isOpen, initialStep]);
+    }, [isOpen, initialStep, initialWorkspaceId, initialCreateType]);
 
     const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(initialWorkspaceId || null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -201,7 +211,9 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
     }, [searchQuery, mainWorkspaces, subWorkspaces]);
 
     const resetState = useCallback(() => {
-        setStep(initialWorkspaceId ? 'choose' : 'type');
+        setStep(initialStep || (initialWorkspaceId ? 'choose' : 'type'));
+        setCreateType(initialCreateType || 'flashcards');
+        setPodcastPayload(null);
         setSelectedWorkspaceId(initialWorkspaceId || null);
         setSearchQuery('');
         setNewDeckName('');
@@ -214,7 +226,7 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
         setDragOver(false);
         setExpandedWorkspaces(new Set());
         abortRef.current?.abort();
-    }, [initialWorkspaceId]);
+    }, [initialWorkspaceId, initialStep, initialCreateType]);
 
     const handleClose = useCallback(() => {
         resetState();
@@ -272,9 +284,77 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
         })();
     };
 
+    const goToPodcastPrep = (payload: PodcastRoutePayload) => {
+        if (!selectedWorkspaceId) {
+            setGenError('Please select a deck first.');
+            return;
+        }
+        setPodcastPayload(payload);
+        setStep('podcast-prep');
+    };
+
+    const handleStudyGuideFromContent = async (content: string, titleHint: string) => {
+        if (!selectedWorkspaceId) return;
+        setIsProcessing(true);
+        setGenError(null);
+        abortRef.current = new AbortController();
+        try {
+            let finalContent = content;
+            if (finalContent.length > 60000) finalContent = finalContent.slice(0, 60000);
+            const result = await invokeAiGateway<{ title?: string; content: string; topic?: string }>(
+                'study_guide',
+                { content: `Generate a comprehensive study guide from this material:\n\n${finalContent}` },
+                { signal: abortRef.current.signal },
+            );
+            const guide = await db.createStudyGuide(
+                `Guide: ${titleHint}`,
+                selectedWorkspaceId,
+                result.content,
+                result.topic ?? null,
+            );
+            handleClose();
+            navigate(`/dashboard/study-guides/${guide.id}`);
+        } catch (e: unknown) {
+            if ((e as Error)?.name === 'AbortError') return;
+            setGenError(e instanceof Error ? e.message : 'Study guide generation failed.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleStudyGuideFromDeck = async () => {
+        if (!selectedWorkspaceId) return;
+        setIsProcessing(true);
+        setGenError(null);
+        try {
+            const workspaceContent = await db.getWorkspaceContent(selectedWorkspaceId);
+            if (!workspaceContent.trim()) {
+                throw new Error('Add flashcards or notes to this deck before generating a study guide.');
+            }
+            const ws = workspaces.find(w => w.id === selectedWorkspaceId);
+            const titleHint = ws?.name || 'Workspace';
+            const content = `Workspace: ${titleHint}\n\nContent:\n${workspaceContent}`;
+            await handleStudyGuideFromContent(content, titleHint);
+        } catch (e: unknown) {
+            setGenError(e instanceof Error ? e.message : 'Study guide generation failed.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     const handleGenerateFromText = async () => {
         const text = pasteContent.trim();
         if (!text) return;
+
+        if (createType === 'podcast') {
+            goToPodcastPrep({ source: 'custom', customContent: text, customTitle: 'Pasted Notes' });
+            return;
+        }
+        if (createType === 'study-guide') {
+            await handleStudyGuideFromContent(text, 'Pasted Notes');
+            return;
+        }
+
         setIsGenerating(true);
         setGenError(null);
         abortRef.current = new AbortController();
@@ -307,7 +387,21 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
             setUploadStatus('processing');
             abortRef.current = new AbortController();
             const cards = await generateFlashcardsFromFile(publicUrl, file.type, abortRef.current.signal);
-            if (!cards.length) throw new Error('AI could not extract cards from this file.');
+            if (!cards.length) throw new Error('AI could not extract content from this file.');
+
+            if (createType === 'podcast') {
+                const text = cards.map(c => `Q: ${c.front}\nA: ${c.back}`).join('\n\n');
+                goToPodcastPrep({ source: 'custom', customContent: text, customTitle: file.name.replace(/\.[^.]+$/, '') });
+                setUploadStatus('idle');
+                return;
+            }
+            if (createType === 'study-guide') {
+                const text = cards.map(c => `Q: ${c.front}\nA: ${c.back}`).join('\n\n');
+                await handleStudyGuideFromContent(text, file.name.replace(/\.[^.]+$/, ''));
+                setUploadStatus('idle');
+                return;
+            }
+
             const newDeckId = await createDeck(file.name.replace(/\.[^.]+$/, ''), undefined, cards, selectedWorkspaceId || undefined);
             setActiveDeck(newDeckId);
             setUploadStatus('done');
@@ -342,13 +436,47 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
         if (action === 'link') { setStep('link'); setInputValue(''); return; }
         if (action === 'quizlet') { setStep('quizlet'); setInputValue(''); return; }
         if (action === 'import-csv') { setStep('csv'); return; }
-        if (action === 'podcast') { setStep('podcast'); return; }
         if (action === 'record') { setStep('record'); return; }
     };
 
     const handleUnifiedGenerate = async (type: 'youtube' | 'subject' | 'link' | 'quizlet') => {
         const val = inputValue.trim();
         if (!val) return;
+
+        if (createType === 'podcast') {
+            const titles: Record<typeof type, string> = {
+                youtube: 'YouTube Content',
+                subject: val,
+                link: 'Web Content',
+                quizlet: 'Quizlet Content',
+            };
+            const content: Record<typeof type, string> = {
+                youtube: `YouTube Video: ${val}`,
+                subject: val,
+                link: `Website: ${val}`,
+                quizlet: `Quizlet Set: ${val}`,
+            };
+            goToPodcastPrep({ source: 'custom', customContent: content[type], customTitle: titles[type] });
+            return;
+        }
+
+        if (createType === 'study-guide') {
+            const titles: Record<typeof type, string> = {
+                youtube: 'YouTube Content',
+                subject: val,
+                link: 'Web Content',
+                quizlet: 'Quizlet Content',
+            };
+            const content: Record<typeof type, string> = {
+                youtube: `YouTube Video: ${val}`,
+                subject: val,
+                link: `Website: ${val}`,
+                quizlet: `Quizlet Set: ${val}`,
+            };
+            await handleStudyGuideFromContent(content[type], titles[type]);
+            return;
+        }
+
         setIsProcessing(true);
         setGenError(null);
         abortRef.current = new AbortController();
@@ -494,26 +622,34 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
     const stepTitle = step === 'type' ? 'Create New'
         : step === 'destination' ? 'Select Deck'
             : step === 'create-deck' ? 'Create New Deck'
-                : step === 'choose' ? 'Create'
-                    : step === 'generate' ? 'Text / Paste'
-                        : step === 'youtube' ? 'YouTube'
-                            : step === 'subject' ? 'Subject / Topic'
-                                : step === 'link' ? 'Web Link'
-                                    : step === 'quizlet' ? 'Quizlet'
-                                        : step === 'csv' ? 'Import CSV'
-                                            : 'Upload / Photo';
+                : step === 'choose' ? (createType === 'study-guide' ? 'Study Guide' : createType === 'podcast' ? 'Podcast' : 'Create')
+                    : step === 'podcast-prep' ? 'Create podcast'
+                        : step === 'generate' ? 'Text / Paste'
+                            : step === 'youtube' ? 'YouTube'
+                                : step === 'subject' ? 'Subject / Topic'
+                                    : step === 'link' ? 'Web Link'
+                                        : step === 'quizlet' ? 'Quizlet'
+                                            : step === 'csv' ? 'Import CSV'
+                                                : step === 'record' ? 'Lecture Notes'
+                                                    : 'Upload / Photo';
 
     const stepSubtitle = step === 'type' ? 'Choose what you want to create'
         : step === 'destination' ? 'Choose where to organize your new set'
             : step === 'create-deck' ? 'Set up your workspace'
-                : step === 'choose' ? 'Choose how you want to build your set.'
-                    : step === 'generate' ? 'AI will extract key concepts automatically'
-                        : step === 'youtube' ? 'AI extracts cards from video link or topic'
-                            : step === 'subject' ? 'AI builds a set from any topic prompt'
-                                : step === 'link' ? 'AI crawls a website to extract content'
-                                    : step === 'quizlet' ? 'Import cards directly from a Quizlet URL'
-                                        : step === 'csv' ? 'Upload an Anki or CSV/TSV file'
-                                            : 'AI processes your file and generates cards';
+                : step === 'choose' ? (createType === 'study-guide'
+                    ? 'Choose how you want to build your study guide.'
+                    : createType === 'podcast'
+                        ? 'Choose what to turn into a listenable episode.'
+                        : 'Choose how you want to build your set.')
+                    : step === 'podcast-prep' ? 'Tune language, format, length, level, and voice.'
+                        : step === 'generate' ? 'AI will extract key concepts automatically'
+                            : step === 'youtube' ? 'AI extracts cards from video link or topic'
+                                : step === 'subject' ? 'AI builds a set from any topic prompt'
+                                    : step === 'link' ? 'AI crawls a website to extract content'
+                                        : step === 'quizlet' ? 'Import cards directly from a Quizlet URL'
+                                            : step === 'csv' ? 'Upload an Anki or CSV/TSV file'
+                                                : step === 'record' ? 'Record or upload lectures'
+                                                    : 'AI processes your file and generates cards';
 
     return (
         <AnimatePresence>
@@ -545,7 +681,11 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
                                         onClick={() => {
                                             if (step === 'destination') setStep('type');
                                             else if (step === 'create-deck') setStep('type');
-                                            else if (step === 'choose') setStep('destination');
+                                            else if (step === 'choose') {
+                                                if (initialWorkspaceId) handleClose();
+                                                else setStep('destination');
+                                            }
+                                            else if (step === 'podcast-prep') setStep('choose');
                                             else setStep('choose');
                                         }}
                                         className="p-1.5 rounded-xl hover:bg-surface-hover text-foreground-secondary hover:text-foreground transition-colors"
@@ -591,7 +731,7 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
                                             <h4 className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.2em] px-1">Create & Study</h4>
                                             <div className="space-y-2">
                                                 <button
-                                                    onClick={() => setStep('destination')}
+                                                    onClick={() => { setCreateType('flashcards'); setStep('destination'); }}
                                                     className="w-full flex items-center gap-4 p-4 rounded-2xl bg-surface-hover/50 hover:bg-surface-hover border border-black/5 dark:border-white/[0.05] hover:border-brand-primary/30 transition-all group text-left"
                                                 >
                                                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform p-1.5">
@@ -619,7 +759,10 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
                                                 </button>
 
                                                 <button
-                                                    onClick={() => { navigate('/dashboard/decks?tab=study-guides'); handleClose(); }}
+                                                    onClick={() => {
+                                                        setCreateType('study-guide');
+                                                        setStep(initialWorkspaceId ? 'choose' : 'destination');
+                                                    }}
                                                     className="w-full flex items-center gap-4 p-4 rounded-2xl bg-surface-hover/50 hover:bg-surface-hover border border-black/5 dark:border-white/[0.05] hover:border-brand-primary/30 transition-all group text-left"
                                                 >
                                                     <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform p-1.5">
@@ -633,7 +776,10 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
                                                 </button>
 
                                                 <button
-                                                    onClick={() => setStep('podcast')}
+                                                    onClick={() => {
+                                                        setCreateType('podcast');
+                                                        setStep(initialWorkspaceId ? 'choose' : 'destination');
+                                                    }}
                                                     className="w-full flex items-center gap-4 p-4 rounded-2xl bg-surface-hover/50 hover:bg-surface-hover border border-black/5 dark:border-white/[0.05] hover:border-brand-primary/30 transition-all group text-left"
                                                 >
                                                     <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform p-1.5">
@@ -784,8 +930,54 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
 
                                 {step === 'choose' && (
                                     <motion.div key="choose" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="p-5">
+                                        {(createType === 'podcast' || createType === 'study-guide') && selectedWorkspaceId && (
+                                            <div className="space-y-4 mb-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (createType === 'podcast') {
+                                                            goToPodcastPrep({ source: 'deck' });
+                                                        } else {
+                                                            void handleStudyGuideFromDeck();
+                                                        }
+                                                    }}
+                                                    disabled={isProcessing}
+                                                    className="w-full flex items-center gap-4 p-5 rounded-2xl bg-surface-hover/40 hover:bg-surface-hover border border-black/5 dark:border-white/[0.05] hover:border-brand-primary/30 transition-all group text-left shadow-sm disabled:opacity-60"
+                                                >
+                                                    <div className="w-14 h-14 rounded-2xl bg-brand-primary/10 flex items-center justify-center shrink-0 p-2">
+                                                        <img src="/logos/branding/binder.png" alt="" className="w-full h-full object-contain" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <span className="font-bold text-foreground text-base block">Current Deck</span>
+                                                        <span className="block text-xs text-foreground-secondary mt-1 leading-relaxed">
+                                                            {createType === 'podcast'
+                                                                ? 'Generate audio from everything in this workspace.'
+                                                                : 'Build using items from this existing deck.'}
+                                                        </span>
+                                                    </div>
+                                                    <ChevronRight size={16} className="text-foreground-muted group-hover:text-foreground transition-colors shrink-0" />
+                                                </button>
+                                                <div className="flex items-center gap-3 py-1">
+                                                    <div className="h-px bg-border flex-1" />
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground-muted whitespace-nowrap">Or import new material</span>
+                                                    <div className="h-px bg-border flex-1" />
+                                                </div>
+                                            </div>
+                                        )}
+                                        {genError && (
+                                            <div className="flex items-start gap-2 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
+                                                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                                                {genError}
+                                            </div>
+                                        )}
+                                        {isProcessing && (
+                                            <div className="flex items-center justify-center gap-2 py-6 text-sm text-foreground-secondary">
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Generating study guide…
+                                            </div>
+                                        )}
                                         <div className="space-y-1.5 max-h-[80vh] overflow-y-auto pr-1 scrollbar-thin">
-                                            {CREATE_OPTIONS.map((option) => (
+                                            {getFilteredCreateOptions(createType).map((option) => (
                                                 <button
                                                     key={option.id}
                                                     onClick={() => handleOptionAction(option.action)}
@@ -979,15 +1171,19 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep }
                                     </motion.div>
                                 )}
 
-                                {step === 'podcast' && (
+                                {step === 'podcast-prep' && selectedWorkspaceId && podcastPayload && (
                                     <motion.div
-                                        key="podcast"
+                                        key="podcast-prep"
                                         initial={{ opacity: 0, x: 12 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -12 }}
                                         className="p-5"
                                     >
-                                        <GeneratePodcastForm onClose={handleClose} workspaceId={selectedWorkspaceId || undefined} />
+                                        <GeneratePodcastForm
+                                            workspaceId={selectedWorkspaceId}
+                                            payload={podcastPayload}
+                                            onClose={handleClose}
+                                        />
                                     </motion.div>
                                 )}
 

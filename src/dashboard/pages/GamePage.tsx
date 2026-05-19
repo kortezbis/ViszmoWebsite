@@ -48,7 +48,7 @@ const CONTENT: Record<string, { title: string; description: string; buttonText: 
     },
     'Learn': {
         title: "Ready to master?",
-        description: "An adaptive 3-round course that teaches you concepts using AI-powered explanations and multiple question types.",
+        description: "An adaptive 3-round course that teaches you concepts using smart explanations and multiple question types.",
         buttonText: "Start Learning"
     },
     'Rapid Fire': {
@@ -198,12 +198,12 @@ export default function GamePage({ initialModeName }: GamePageProps) {
 
     // Use the fetched local cards as the deck cards
     const deck = useMemo(() => {
-        const base = activeDeck || { id: 'none', title: 'No Deck Selected', cards: [], color: 'bg-gray-500' };
+        const base = activeDeck || { id: 'none', title: 'Study Session', cards: [], color: 'bg-gray-500' };
         if (workspaceIdFromUrl) {
             const workspace = workspaces.find(w => w.id === workspaceIdFromUrl);
             return {
                 id: `workspace-${workspaceIdFromUrl}`,
-                title: workspace ? `Study All: ${workspace.name}` : 'Workspace',
+                title: workspace ? workspace.name : 'Workspace',
                 cards: localCards,
                 color: workspace?.color || '#3B82F6',
                 workspaceId: workspaceIdFromUrl

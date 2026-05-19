@@ -36,6 +36,7 @@ export default function DeckDetailPage() {
     const [generateMenuOpen, setGenerateMenuOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [modalInitialStep, setModalInitialStep] = useState<any>(undefined);
+    const [modalInitialCreateType, setModalInitialCreateType] = useState<'flashcards' | 'study-guide' | 'podcast' | undefined>(undefined);
     
     // Lectures State
     const [lectures, setLectures] = useState<LectureNote[]>([]);
@@ -130,7 +131,7 @@ export default function DeckDetailPage() {
 
     return (
         <div 
-            className="w-full h-full overflow-y-auto bg-background"
+            className="w-full h-full flex flex-col overflow-hidden bg-background"
             onClick={() => {
                 setIsMenuOpen(false);
                 setActiveMenuId(null);
@@ -138,7 +139,7 @@ export default function DeckDetailPage() {
             }}
         >
             <SEO title={deck?.title || 'Deck Details'} description={`Study flashcards and materials for ${deck?.title || 'your deck'}.`} />
-            <div className="sticky top-14 md:top-0 z-10 bg-surface">
+            <div className="shrink-0 z-10 bg-surface">
                 <div className="max-w-4xl mx-auto px-6 pt-8 pb-4">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 min-w-0">
@@ -234,7 +235,8 @@ export default function DeckDetailPage() {
                                             <button 
                                                 className="w-full flex items-start gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-surface-hover transition-colors"
                                                 onClick={() => {
-                                                    setModalInitialStep('podcast');
+                                                    setModalInitialStep('choose');
+                                                    setModalInitialCreateType('podcast');
                                                     setIsCreateModalOpen(true);
                                                     setGenerateMenuOpen(false);
                                                 }}
@@ -268,9 +270,9 @@ export default function DeckDetailPage() {
                                     type="button"
                                     onClick={handleStudyDeck}
                                     disabled={cards.length === 0}
-                                    className="px-5 py-2.5 rounded-full bg-[#1E293B] text-white font-bold text-sm hover:bg-black transition-all flex items-center gap-2 shadow-lg shadow-black/10 disabled:opacity-40 active:scale-95"
+                                    className="px-5 py-2.5 rounded-full bg-brand-primary text-white font-bold text-sm hover:bg-brand-primary/90 transition-all flex items-center gap-2 shadow-lg shadow-brand-primary/20 disabled:opacity-40 active:scale-95"
                                 >
-                                    <Play size={16} className="fill-white" />
+                                    <img src="/dashimages/branding/gamepad.png" alt="Study" className="w-4 h-4 shrink-0" />
                                     Study Deck
                                 </button>
                             </div>
@@ -299,6 +301,7 @@ export default function DeckDetailPage() {
                 </div>
             </div>
 
+            <div className="flex-1 overflow-y-auto min-h-0">
             <div className="max-w-4xl mx-auto py-8 px-6 pb-40">
                 {activeTab === 'Cards' && (
                     <div className="flex flex-col gap-3">
@@ -341,6 +344,7 @@ export default function DeckDetailPage() {
                                                         <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted block mb-1">Front</span>
                                                         <p className="text-sm font-bold text-foreground line-clamp-3">{card.front}</p>
                                                     </div>
+                                                    <div className="h-px border-t border-dashed border-border -mx-5 my-4" />
                                                     <div>
                                                         <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted block mb-1">Back</span>
                                                         <p className="text-sm text-foreground-secondary line-clamp-3 leading-relaxed">{card.back}</p>
@@ -419,12 +423,13 @@ export default function DeckDetailPage() {
                         <button 
                             onClick={() => {
                                 if (activeTab === 'Study Guides') {
-                                    setModalInitialStep('generate');
-                                    setIsCreateModalOpen(true);
+                                    setModalInitialStep('choose');
+                                    setModalInitialCreateType('study-guide');
                                 } else {
-                                    setModalInitialStep('podcast');
-                                    setIsCreateModalOpen(true);
+                                    setModalInitialStep('choose');
+                                    setModalInitialCreateType('podcast');
                                 }
+                                setIsCreateModalOpen(true);
                             }}
                             className="flex items-center gap-2 px-6 py-2 bg-brand-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-brand-primary/20"
                         >
@@ -435,10 +440,12 @@ export default function DeckDetailPage() {
 
                 <CreateModal 
                     isOpen={isCreateModalOpen} 
-                    onClose={() => { setIsCreateModalOpen(false); setModalInitialStep(undefined); }}
+                    onClose={() => { setIsCreateModalOpen(false); setModalInitialStep(undefined); setModalInitialCreateType(undefined); }}
                     initialWorkspaceId={deck?.workspaceId}
                     initialStep={modalInitialStep}
+                    initialCreateType={modalInitialCreateType}
                 />
+            </div>
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +18,7 @@ import { AuthModal } from './components/AuthModal';
 import { DownloadAppModal } from './components/DownloadAppModal';
 import { useProfile } from './contexts/ProfileContext';
 import { AuthModalProvider, useAuthModal } from './contexts/AuthModalContext';
-import DashboardApp from './dashboard/DashboardApp';
+const DashboardApp = lazy(() => import('./dashboard/DashboardApp'));
 // VisDashboard2App import removed
 
 import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
@@ -826,6 +826,17 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
   const location = useLocation();
   const { showSurvey, setShowSurvey } = useProfile();
   const { openAuthModal } = useAuthModal();
+  const { isSignedIn, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && isSignedIn) {
+      const publicOnlyPaths = ['/login', '/signup', '/forgot-password'];
+      if (publicOnlyPaths.includes(location.pathname) || location.pathname.startsWith('/login') || location.pathname.startsWith('/signup')) {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isSignedIn, isLoading, location.pathname, navigate]);
 
   const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup', '/viszmo-vs-quizlet', '/real-time-ai-tutor', '/study-app-for-elementary-students', '/study-app-for-middle-and-high-school-students', '/study-app-for-college-students', '/viszmo-vs-knowt', '/viszmo-vs-gizmo', '/viszmo-vs-anki', '/study-while-watching-videos'];
   const isPublicPath = publicPaths.includes(location.pathname) || location.pathname.startsWith('/login') || location.pathname.startsWith('/signup');
@@ -872,7 +883,13 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
         <Route path="/dashboard/*" element={
           <>
             <SignedIn>
-              <DashboardApp onOpenDownload={onOpenDownload} onOpenMobileModal={onOpenMobileDownload} />
+              <Suspense fallback={
+                <div className="flex h-screen items-center justify-center">
+                  <div className="w-8 h-8 border-4 border-[#0ea5e9] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              }>
+                <DashboardApp onOpenDownload={onOpenDownload} onOpenMobileModal={onOpenMobileDownload} />
+              </Suspense>
             </SignedIn>
             <SignedOut>
               <RedirectToSignIn afterSignInUrl="/dashboard" />
