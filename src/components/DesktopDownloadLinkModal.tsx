@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Monitor, Smartphone, Mail, Send, X } from 'lucide-react';
+import { Loader2, Monitor, Smartphone, Mail, Send, X, UserPlus, CheckCircle } from 'lucide-react';
 import { sendDownloadLinkEmail } from '../services/sendDownloadLinkEmail';
+import { useAuthModal } from '../contexts/AuthModalContext';
 
 interface DesktopDownloadLinkModalProps {
     isOpen: boolean;
@@ -78,66 +79,113 @@ export function DesktopDownloadLinkModal({ isOpen, onClose }: DesktopDownloadLin
                         </div>
 
                         <div className="px-6 py-6 flex flex-col flex-1 min-h-0 overflow-y-auto">
-                            <div className="flex gap-3 rounded-2xl bg-sky-50 border border-sky-100/80 px-4 py-3 mb-5 text-left">
-                                <Smartphone className="w-5 h-5 text-[#0ea5e9] shrink-0 mt-0.5" aria-hidden />
-                                <p className="text-sm font-semibold text-slate-700 leading-snug">
-                                    Want a download link emailed for when you&apos;re on your computer?
-                                </p>
-                            </div>
+                            {!sent ? (
+                                <>
+                                    <div className="flex gap-3 rounded-2xl bg-sky-50 border border-sky-100/80 px-4 py-3 mb-5 text-left">
+                                        <Smartphone className="w-5 h-5 text-[#0ea5e9] shrink-0 mt-0.5" aria-hidden />
+                                        <p className="text-sm font-semibold text-slate-700 leading-snug">
+                                            Want a download link emailed for when you&apos;re on your computer?
+                                        </p>
+                                    </div>
 
-                            <label className="block text-xs font-bold text-slate-600 mb-1.5" htmlFor="desktop-link-email">
-                                Email address
-                            </label>
-                            <div className="relative mb-3">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" aria-hidden />
-                                <input
-                                    id="desktop-link-email"
-                                    type="email"
-                                    autoComplete="email"
-                                    placeholder="you@example.com"
-                                    value={email}
-                                    onChange={(e) => {
-                                        setEmail(e.target.value);
-                                        resetFeedback();
-                                    }}
-                                    className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]/30 focus:border-[#0ea5e9]"
-                                />
-                            </div>
+                                    <label className="block text-xs font-bold text-slate-600 mb-1.5" htmlFor="desktop-link-email">
+                                        Email address
+                                    </label>
+                                    <div className="relative mb-3">
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" aria-hidden />
+                                        <input
+                                            id="desktop-link-email"
+                                            type="email"
+                                            autoComplete="email"
+                                            placeholder="you@example.com"
+                                            value={email}
+                                            onChange={(e) => {
+                                                setEmail(e.target.value);
+                                                resetFeedback();
+                                            }}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') void handleSend(); }}
+                                            className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]/30 focus:border-[#0ea5e9]"
+                                        />
+                                    </div>
 
-                            {formError ? (
-                                <p className="text-xs text-red-600 font-medium mb-3">{formError}</p>
-                            ) : null}
-                            {sent ? (
-                                <p className="text-xs text-emerald-600 font-semibold mb-3">
-                                    Check your inbox for the desktop download link.
-                                </p>
-                            ) : null}
+                                    {formError ? (
+                                        <p className="text-xs text-red-600 font-medium mb-3">{formError}</p>
+                                    ) : null}
 
-                            <button
-                                type="button"
-                                disabled={sending}
-                                onClick={() => void handleSend()}
-                                className="w-full rounded-xl bg-gradient-to-b from-sky-400 to-[#0ea5e9] text-white font-bold text-sm py-3.5 px-4 shadow-lg shadow-sky-500/25 hover:opacity-95 transition-opacity disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center gap-2"
-                            >
-                                {sending ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-                                ) : (
-                                    <Send className="w-4 h-4" aria-hidden />
-                                )}
-                                Send download link
-                            </button>
+                                    <button
+                                        type="button"
+                                        disabled={sending}
+                                        onClick={() => void handleSend()}
+                                        className="w-full rounded-xl bg-gradient-to-b from-sky-400 to-[#0ea5e9] text-white font-bold text-sm py-3.5 px-4 shadow-lg shadow-sky-500/25 hover:opacity-95 transition-opacity disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center gap-2"
+                                    >
+                                        {sending ? (
+                                            <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                                        ) : (
+                                            <Send className="w-4 h-4" aria-hidden />
+                                        )}
+                                        Send download link
+                                    </button>
 
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="mt-4 text-center text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors"
-                            >
-                                Maybe later
-                            </button>
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="mt-4 text-center text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+                                    >
+                                        Maybe later
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    {/* Success + signup prompt */}
+                                    <div className="flex flex-col items-center text-center mb-6">
+                                        <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mb-4">
+                                            <CheckCircle className="w-8 h-8 text-emerald-500" />
+                                        </div>
+                                        <h3 className="text-lg font-black text-slate-900 mb-1">Link sent!</h3>
+                                        <p className="text-sm font-medium text-slate-500 leading-snug">
+                                            Check your inbox for the Viszmo desktop download link.
+                                        </p>
+                                    </div>
+
+                                    <div className="rounded-2xl bg-sky-50 border border-sky-100 px-5 py-4 mb-5 text-left">
+                                        <p className="text-sm font-bold text-slate-800 mb-1">🎉 One more step</p>
+                                        <p className="text-sm font-medium text-slate-600 leading-snug">
+                                            Create a free account to unlock AI flashcards, lecture transcription, and more — all saved in your dashboard.
+                                        </p>
+                                    </div>
+
+                                    <SignupButton onClose={onClose} />
+
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="mt-4 text-center text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+                                    >
+                                        Maybe later
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </motion.div>
                 </div>
             )}
         </AnimatePresence>
+    );
+}
+
+function SignupButton({ onClose }: { onClose: () => void }) {
+    const { openAuthModal } = useAuthModal();
+    return (
+        <button
+            type="button"
+            onClick={() => {
+                onClose();
+                openAuthModal('signup');
+            }}
+            className="w-full rounded-xl bg-gradient-to-b from-sky-400 to-[#0ea5e9] text-white font-bold text-sm py-3.5 px-4 shadow-lg shadow-sky-500/25 hover:opacity-95 transition-opacity flex items-center justify-center gap-2"
+        >
+            <UserPlus className="w-4 h-4" aria-hidden />
+            Create your free account
+        </button>
     );
 }
