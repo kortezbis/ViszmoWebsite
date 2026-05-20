@@ -954,31 +954,32 @@ export default function App() {
   };
 
   const handleDownload = () => {
-    // 1. Check if signed in
+    // 1. On mobile, offer to email the desktop link immediately
+    if (isMobileClient()) {
+      setShowDesktopLinkModal(true);
+      return;
+    }
+
+    // 2. Check if signed in (only for desktop direct download)
     if (!isSignedIn) {
       setPendingDownload(true);
       openAuthModal('signup');
       return;
     }
 
-    // 2. Wait for profile if loading
+    // 3. Wait for profile if loading
     if (loading) {
       setPendingDownload(true);
       return;
     }
 
-    // 3. Check if onboarding completed
+    // 4. Check if onboarding completed
     if (!profile || !profile.onboarding_completed) {
       setPendingDownload(true);
       setShowSurvey(true);
       return;
     }
 
-    // 4. On mobile, offer to email the desktop link; otherwise start download
-    if (isMobileClient()) {
-      setShowDesktopLinkModal(true);
-      return;
-    }
     initiateDownload();
   };
 
