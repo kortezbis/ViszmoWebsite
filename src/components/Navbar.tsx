@@ -126,13 +126,13 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { },
                 {/* Mobile Menu Button */}
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="md:hidden w-9 h-9 rounded-full bg-white/50 border border-white/30 backdrop-blur-sm flex items-center justify-center hover:bg-white/70 transition-all"
+                    className="md:hidden flex items-center justify-center transition-opacity hover:opacity-70 text-[#0ea5e9]"
                     aria-label="Menu"
                 >
                     {isMobileMenuOpen ? (
-                        <XIcon className="w-4 h-4 text-gray-900" />
+                        <XIcon className="w-4 h-4" />
                     ) : (
-                        <Menu className="w-4 h-4 text-gray-900" />
+                        <Menu className="w-4 h-4" />
                     )}
                 </button>
             </div>
@@ -195,9 +195,17 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { },
                                             setIsMobileMenuOpen(false);
                                         }}
                                     >
-                                        <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
-                                            <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
-                                        </svg>
+                                        {navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.platform.toUpperCase().indexOf('IPHONE') >= 0 || navigator.platform.toUpperCase().indexOf('IPAD') >= 0 ? (
+                                            <svg className="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
+                                                <polyline points="7 10 12 15 17 10" />
+                                                <line x1="12" y1="15" x2="12" y2="3" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
+                                                <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
+                                            </svg>
+                                        )}
                                         <span className="btn-text">Dashboard</span>
                                     </button>
                                 </div>

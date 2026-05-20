@@ -109,7 +109,7 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
                                 <li><Link to="/privacy" className="hover:text-[#0ea5e9] transition-colors">Privacy Policy</Link></li>
                                 <li><Link to="/terms" className="hover:text-[#0ea5e9] transition-colors">Terms of Service</Link></li>
                                 <li><Link to="/contact" className="hover:text-[#0ea5e9] transition-colors">Contact Support</Link></li>
-                                <li><a href="mailto:support@Viszmo.com" className="hover:text-[#0ea5e9] transition-colors">support@Viszmo.com</a></li>
+                                <li><a href="mailto:support@viszmo.com" className="hover:text-[#0ea5e9] transition-colors">support@Viszmo.com</a></li>
                             </ul>
                         </div>
                     </div>

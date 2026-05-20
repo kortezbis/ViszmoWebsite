@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { MoreVertical, FolderOpen, Trash2, Mic, BookMarked, Edit2, Plus, ChevronRight, X, Loader2, BookOpen, Layers, Podcast, Search, Flame, FileText, Bell } from 'lucide-react';
+import { MoreVertical, FolderOpen, Trash2, Mic, BookMarked, Edit2, Plus, ChevronRight, X, Loader2, BookOpen, Layers, Podcast, Search, Flame, FileText } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { db, type WorkspaceRow, type DeckRow, type LectureNote, type StudyGuide, type PodcastRow } from '../../services/database';
 import { useDecks } from '../contexts/DecksContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { CreateModal } from '../components/CreateModal';
 import { SEO } from '../components/SEO';
-import { useNotifications } from '../contexts/NotificationsContext';
 import { ProfileDropdown } from '../components/ProfileDropdown';
+import { NotificationsDropdown } from '../components/NotificationsDropdown';
 
 type TabId = 'My Decks' | 'Trash';
 type RenameTargetType = 'myDecks' | 'lecture' | 'studyGuides';
@@ -15,7 +15,6 @@ type RenameTargetType = 'myDecks' | 'lecture' | 'studyGuides';
 export default function MyDecksPage() {
     const { resolvedTheme } = useTheme();
     const navigate = useNavigate();
-    const { unreadCount } = useNotifications();
     const [activeTab, setActiveTab] = useState<TabId>('My Decks');
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
     const [closingMenuId, setClosingMenuId] = useState<string | null>(null);
@@ -304,16 +303,7 @@ export default function MyDecksPage() {
                     </div>
 
                     {/* Bell notification */}
-                    <button
-                        onClick={(e) => { e.stopPropagation(); navigate('/dashboard/notifications'); }}
-                        className="relative h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center"
-                        aria-label="Notifications"
-                    >
-                        <Bell size={20} />
-                        {unreadCount > 0 && (
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
-                        )}
-                    </button>
+                    <NotificationsDropdown />
 
                     {/* Profile */}
                     <ProfileDropdown />

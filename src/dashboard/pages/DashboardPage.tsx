@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
     Upload,
     Mic,
@@ -9,31 +9,50 @@ import {
     Sparkles,
     Flame,
     Search,
-    Plus,
-    Bell
+    Plus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
-import { db, type DeckRow } from '../../services/database';
-import { useTheme } from '../contexts/ThemeContext';
 import { useDecks } from '../contexts/DecksContext';
-import { useNotifications } from '../contexts/NotificationsContext';
 import { ProfileDropdown } from '../components/ProfileDropdown';
+import { NotificationsDropdown } from '../components/NotificationsDropdown';
 import { CreateModal } from '../components/CreateModal';
 import { SEO } from '../components/SEO';
+
+function WindowsTileIcon({ size = 24, className = '' }: { size?: number; className?: string }) {
+    return (
+        <svg width={size} height={size} className={className} viewBox="0 0 30 30" fill="currentColor" aria-hidden>
+            <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z" />
+        </svg>
+    );
+}
 
 export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileModal = () => {} }: { onOpenDownload?: () => void, onOpenMobileModal?: () => void }) {
     const navigate = useNavigate();
     const { userName, userEmail } = useAuth();
-    const { resolvedTheme } = useTheme();
     const { decks, decksLoading } = useDecks();
     const [recentDecks, setRecentDecks] = useState<DeckRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [modalInitialStep, setModalInitialStep] = useState<any>(undefined);
-    const { unreadCount } = useNotifications();
+    const [isNarrowScreen, setIsNarrowScreen] = useState(false);
+    const [isWindowsPlatform, setIsWindowsPlatform] = useState(false);
 
     const first = userName?.split(/\s+/)[0] || userEmail?.split('@')[0] || 'User';
+
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 767px)');
+        const sync = () => setIsNarrowScreen(mq.matches);
+        sync();
+        mq.addEventListener('change', sync);
+        return () => mq.removeEventListener('change', sync);
+    }, []);
+
+    useEffect(() => {
+        const p = (navigator.platform || '').toUpperCase();
+        const win = /Win/i.test(navigator.userAgent || '') || p.includes('WIN');
+        setIsWindowsPlatform(win);
+    }, []);
 
     useEffect(() => {
         if (!decksLoading) {
@@ -42,53 +61,64 @@ export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileM
         }
     }, [decks, decksLoading]);
 
-    const actionCards = [
-        {
-            title: 'Upload a file',
-            description: 'Get notes or flashcards to practice with.',
-            icon: Upload,
-            color: 'blue',
-            action: () => navigate('/dashboard/decks?tab=lectures')
+    const actionCards = useMemo(
+        () => {
+            const desktopIcon = isWindowsPlatform ? WindowsTileIcon : Sparkles;
+            const desktopTitle = isNarrowScreen ? 'Send download link' : 'Download Now';
+            const desktopDescription = isNarrowScreen
+                ? 'Get an email with a link to install Viszmo on your Windows or Mac computer.'
+                : 'Download the Viszmo app for your desktop to study anywhere.';
+
+            return [
+                {
+                    title: 'Upload a file',
+                    description: 'Get notes or flashcards to practice with.',
+                    icon: Upload,
+                    color: 'blue',
+                    action: () => navigate('/dashboard/decks?tab=lectures'),
+                },
+                {
+                    title: 'Live Record Class',
+                    description: 'Start recording and let Viszmo turn them into notes.',
+                    icon: Mic,
+                    color: 'red',
+                    action: () => {
+                        setModalInitialStep('record');
+                        setIsCreateModalOpen(true);
+                    },
+                },
+                {
+                    title: 'Flashcard Set',
+                    description: 'Flashcard set • Create or study terms',
+                    icon: Layers,
+                    color: 'amber',
+                    action: () => navigate('/dashboard/decks'),
+                },
+                {
+                    title: 'Library',
+                    description: '',
+                    icon: FileText,
+                    color: 'indigo',
+                    action: () => navigate('/dashboard/decks'),
+                },
+                {
+                    title: desktopTitle,
+                    description: desktopDescription,
+                    icon: desktopIcon,
+                    color: 'cyan',
+                    action: onOpenDownload,
+                },
+                {
+                    title: 'Download Mobile iOS',
+                    description: 'Get the Viszmo mobile app to study on the go.',
+                    icon: Podcast,
+                    color: 'purple',
+                    action: onOpenMobileModal,
+                },
+            ];
         },
-        {
-            title: 'Live Record Class',
-            description: 'Start recording and let Viszmo turn them into notes.',
-            icon: Mic,
-            color: 'red',
-            action: () => {
-                setModalInitialStep('record');
-                setIsCreateModalOpen(true);
-            }
-        },
-        {
-            title: 'Flashcard Set',
-            description: 'Flashcard set • Create or study terms',
-            icon: Layers,
-            color: 'amber',
-            action: () => navigate('/dashboard/decks')
-        },
-        {
-            title: 'Library',
-            description: '',
-            icon: FileText,
-            color: 'indigo',
-            action: () => navigate('/dashboard/decks')
-        },
-        {
-            title: 'Download Now',
-            description: 'Download the Viszmo app for your desktop to study anywhere.',
-            icon: Sparkles,
-            color: 'cyan',
-            action: onOpenDownload
-        },
-        {
-            title: 'Download Mobile iOS',
-            description: 'Get the Viszmo mobile app to study on the go.',
-            icon: Podcast,
-            color: 'purple',
-            action: onOpenMobileModal
-        }
-    ];
+        [isNarrowScreen, isWindowsPlatform, navigate, onOpenDownload, onOpenMobileModal],
+    );
 
     return (
         <div className="w-full h-full overflow-y-auto bg-background">
@@ -125,16 +155,7 @@ export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileM
                     </div>
 
                     {/* Bell notification */}
-                    <button
-                        onClick={() => navigate('/dashboard/notifications')}
-                        className="relative h-11 w-11 rounded-full hover:bg-surface-hover text-foreground-secondary hover:scale-110 active:scale-90 transition-all flex items-center justify-center"
-                        aria-label="Notifications"
-                    >
-                        <Bell size={20} />
-                        {unreadCount > 0 && (
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
-                        )}
-                    </button>
+                    <NotificationsDropdown />
 
                     {/* Profile */}
                     <ProfileDropdown />
@@ -165,6 +186,9 @@ export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileM
                                 className="min-w-[280px] flex-1 bg-surface border border-border rounded-3xl p-6 flex flex-col justify-between hover:border-brand-primary/50 transition-all snap-start group shadow-sm hover:shadow-xl hover:shadow-brand-primary/5 text-left"
                             >
                                 <div>
+                                    <div className="mb-4 w-12 h-12 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary group-hover:scale-105 transition-transform">
+                                        <card.icon size={24} />
+                                    </div>
                                     <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-brand-primary transition-colors">{card.title}</h3>
                                     <p className="text-sm text-foreground-secondary leading-relaxed mb-8 font-medium">
                                         {card.description}

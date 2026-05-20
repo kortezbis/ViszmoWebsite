@@ -22,7 +22,6 @@ const TranscriptDetailPage = lazy(() => import('./pages/TranscriptDetailPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ChatPage = lazy(() => import('./pages/ChatPage'));
 const SummarizersPage = lazy(() => import('./pages/SummarizersPage'));
-const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const StreakPage = lazy(() => import('./pages/StreakPage'));
 const StudyGuideDetailPage = lazy(() => import('./pages/StudyGuideDetailPage'));
 const DeckHubPage = lazy(() => import('./pages/DeckHubPage'));
@@ -84,7 +83,6 @@ export default function DashboardApp({ onOpenDownload, onOpenMobileModal }: { on
                                                         <Route path="edit-deck/:deckId" element={<EditDeckPage />} />
                                                         <Route path="chat" element={<ChatPage />} />
                                                         <Route path="summarizers" element={<SummarizersPage />} />
-                                                        <Route path="notifications" element={<NotificationsPage />} />
                                                         <Route path="streak" element={<StreakPage />} />
                                                     </Routes>
                                                 </Suspense>

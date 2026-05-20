@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '../contexts/SidebarContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/auth';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { PricingModal } from '../../components/PricingModal';
+import { NotificationsModal } from './NotificationsModal';
 
 import {
     BookOpen,
@@ -31,7 +33,8 @@ import {
     Sun,
     Moon,
     Menu,
-    Plus
+    Plus,
+    X,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useDecks } from '../contexts/DecksContext';
@@ -48,7 +51,8 @@ interface SidebarProps {
     isUserMenuOpen: boolean;
     setIsUserMenuOpen: (v: boolean) => void;
     onSelectMode: (path: string) => void;
-    hideSidebar: boolean;
+    sidebarOffScreen: boolean;
+    isMdUp: boolean;
 }
 
 function Sidebar({
@@ -57,11 +61,13 @@ function Sidebar({
     isUserMenuOpen,
     setIsUserMenuOpen,
     onSelectMode,
-    hideSidebar,
+    sidebarOffScreen,
+    isMdUp,
 }: SidebarProps) {
     const { userEmail, userName, userImageUrl, signOut } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const { setIsPricingOpen } = useSidebar();
 
     const handleLogout = async () => {
         await signOut();
@@ -80,7 +86,7 @@ function Sidebar({
 
     return (
         <aside
-            className={`sidebar z-[60] border-r border-border flex flex-col transition-all duration-300 ${isCollapsed ? 'sidebar-collapsed' : ''} ${hideSidebar ? '-translate-x-full' : 'translate-x-0'}`}
+            className={`sidebar z-[60] border-r border-border flex flex-col transition-all duration-300 max-md:shadow-2xl ${isCollapsed ? 'sidebar-collapsed' : ''} ${sidebarOffScreen ? '-translate-x-full' : 'translate-x-0'}`}
             style={{ 
                 background: resolvedTheme === 'dark' ? '#111112' : '#ffffff',
                 boxShadow: isCollapsed ? 'none' : '10px 0 40px rgba(0, 0, 0, 0.05)'
@@ -108,7 +114,7 @@ function Sidebar({
                         />
                     )}
                 </Link>
-                {!isCollapsed && (
+                {!isCollapsed && isMdUp && (
                     <button 
                         onClick={() => setIsCollapsed(true)}
                         className="p-1.5 rounded-lg hover:bg-surface-hover text-foreground-secondary transition-colors"
@@ -119,11 +125,11 @@ function Sidebar({
                 )}
             </div>
 
-            {isCollapsed && (
+            {isCollapsed && isMdUp && (
                 <div className="flex justify-center mt-4 mb-2">
                     <button 
                         onClick={() => setIsCollapsed(false)}
-                        className="p-2 rounded-lg hover:bg-surface-hover text-foreground-secondary transition-colors"
+                        className="p-2 rounded-lg hover:bg-surface-hover text-[#0ea5e9] transition-colors"
                         aria-label="Expand Sidebar"
                     >
                         <Menu size={20} />
@@ -280,7 +286,7 @@ function Sidebar({
 
 
                 <button
-                    onClick={() => navigate('/pricing')}
+                    onClick={() => setIsPricingOpen(true)}
                     className={`btn-primary w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-brand-primary/25 mt-2 ${isCollapsed ? 'px-0' : 'px-5'}`}
                     title={isCollapsed ? "Upgrade to Pro" : ""}
                 >
@@ -299,24 +305,85 @@ function Sidebar({
 }
 
 export function Layout({ children }: LayoutProps) {
-    const { hideSidebar } = useSidebar();
+    const { hideSidebar, isPricingOpen, setIsPricingOpen, isNotificationsOpen, setIsNotificationsOpen } = useSidebar();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
+    const [isMdUp, setIsMdUp] = useState(() =>
+        typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : true,
+    );
     const navigate = useNavigate();
+    const location = useLocation();
+    const { resolvedTheme } = useTheme();
+
+    useEffect(() => {
+        const mq = window.matchMedia('(min-width: 768px)');
+        const onChange = () => {
+            setIsMdUp(mq.matches);
+            if (mq.matches) setMobileNavOpen(false);
+        };
+        mq.addEventListener('change', onChange);
+        return () => mq.removeEventListener('change', onChange);
+    }, []);
+
+    useEffect(() => {
+        setMobileNavOpen(false);
+    }, [location.pathname]);
+
+    const effectiveCollapsed = isMdUp && isCollapsed;
+    const sidebarOffScreen = hideSidebar || (!isMdUp && !mobileNavOpen);
+    const mainMarginLeft =
+        hideSidebar ? 'ml-0' : isMdUp ? (isCollapsed ? 'ml-[80px]' : 'ml-[240px]') : 'ml-0';
+    const mainWidth =
+        hideSidebar ? '100%' : isMdUp ? `calc(100% - ${isCollapsed ? 80 : 240}px)` : '100%';
+
     return (
         <div className="min-h-screen bg-background text-foreground overflow-hidden">
             {/* <PixelTransition isActive={showTransition} onComplete={() => setShowTransition(false)} /> */}
+
+            {!hideSidebar && !isMdUp && (
+                <>
+                    {mobileNavOpen && (
+                        <button
+                            type="button"
+                            className="fixed inset-0 z-[55] bg-black/40 md:hidden"
+                            aria-label="Close menu"
+                            onClick={() => setMobileNavOpen(false)}
+                        />
+                    )}
+                    <header className="md:hidden fixed top-0 left-0 right-0 z-[58] h-14 border-b border-border flex items-center justify-between px-4 bg-background/95 backdrop-blur">
+                        <Link to="/dashboard" className="flex items-center min-w-0 py-1">
+                            <img
+                                src="/viszmofull.png"
+                                alt="Viszmo"
+                                className="h-7 object-contain max-w-[140px]"
+                                style={resolvedTheme !== 'dark' ? { filter: 'brightness(0)' } : {}}
+                            />
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={() => setMobileNavOpen((o) => !o)}
+                            className="p-2 rounded-lg border border-[#0ea5e9]/30 text-[#0ea5e9] hover:bg-sky-500/10 transition-colors"
+                            aria-expanded={mobileNavOpen}
+                            aria-label="Toggle menu"
+                        >
+                            {mobileNavOpen ? <X size={22} /> : <Menu size={22} />}
+                        </button>
+                    </header>
+                </>
+            )}
 
             <AnimatePresence mode="wait">
                 {!hideSidebar && (
                     <Sidebar
                         key="sidebar"
-                        isCollapsed={isCollapsed}
+                        isCollapsed={effectiveCollapsed}
                         setIsCollapsed={setIsCollapsed}
                         isUserMenuOpen={isUserMenuOpen}
                         setIsUserMenuOpen={setIsUserMenuOpen}
                         onSelectMode={(path) => { navigate(path); }}
-                        hideSidebar={hideSidebar}
+                        sidebarOffScreen={sidebarOffScreen}
+                        isMdUp={isMdUp}
                     />
                 )}
             </AnimatePresence>
@@ -331,13 +398,15 @@ export function Layout({ children }: LayoutProps) {
             )}
 
             <div
-            className={`flex-1 h-screen overflow-hidden transition-all duration-300 ${hideSidebar ? 'ml-0' : (isCollapsed ? 'ml-[80px]' : 'ml-[240px]')}`}
-            style={{ 
-                width: hideSidebar ? '100%' : `calc(100% - ${isCollapsed ? 80 : 240}px)`,
-            }}
+            className={`flex-1 h-screen overflow-hidden transition-all duration-300 ${mainMarginLeft} ${!hideSidebar && !isMdUp ? 'pt-14' : ''}`}
+            style={{ width: mainWidth }}
             >
                 {children}
             </div>
+
+            {/* Premium Global Modals */}
+            <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} />
+            <NotificationsModal isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
         </div>
     );
 }

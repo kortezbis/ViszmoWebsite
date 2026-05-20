@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase';
 
-export type DownloadEmailProduct = 'windows' | 'ios';
+export type DownloadEmailProduct = 'windows' | 'ios' | 'desktop';
 
 function readBodyError(data: unknown): string | null {
   if (data && typeof data === 'object' && 'error' in data) {

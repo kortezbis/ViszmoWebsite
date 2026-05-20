@@ -3,14 +3,28 @@ import React, { createContext, useContext, useState } from 'react';
 interface SidebarContextType {
     hideSidebar: boolean;
     setHideSidebar: (hide: boolean) => void;
+    isPricingOpen: boolean;
+    setIsPricingOpen: (open: boolean) => void;
+    isNotificationsOpen: boolean;
+    setIsNotificationsOpen: (open: boolean) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
     const [hideSidebar, setHideSidebar] = useState(false);
+    const [isPricingOpen, setIsPricingOpen] = useState(false);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
     return (
-        <SidebarContext.Provider value={{ hideSidebar, setHideSidebar }}>
+        <SidebarContext.Provider value={{
+            hideSidebar,
+            setHideSidebar,
+            isPricingOpen,
+            setIsPricingOpen,
+            isNotificationsOpen,
+            setIsNotificationsOpen
+        }}>
             {children}
         </SidebarContext.Provider>
     );

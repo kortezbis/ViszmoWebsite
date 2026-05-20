@@ -10,12 +10,12 @@ import {
   ThumbsUp, 
   ThumbsDown, 
   Volume2,
-  ArrowUp,
   MessageSquare,
   Trash2,
   ArrowLeft
 } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
+import PaperPlane2 from '../../components/PaperPlane2';
 import { chatGeneral, type ChatMessage } from '../../services/aiGateway';
 import { 
   getChats, 
@@ -361,7 +361,7 @@ export default function ChatPage() {
                   : 'bg-foreground text-background dark:bg-white dark:text-black hover:scale-105 active:scale-95'
               }`}
             >
-              {isTyping ? <Loader2 size={18} className="animate-spin" /> : <ArrowUp size={18} />}
+              {isTyping ? <Loader2 size={18} className="animate-spin" /> : <PaperPlane2 className="w-[18px] h-[18px]" />}
             </button>
           </form>
         </div>

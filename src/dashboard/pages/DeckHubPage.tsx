@@ -81,7 +81,10 @@ export default function DeckHubPage() {
     }, [isPlaying, isFlipped, cards.length]);
 
     const breadcrumbPath = useMemo(() => {
-        const path = ['Library'];
+        const path: { label: string; path?: string }[] = [
+            { label: 'Library', path: '/dashboard/decks' }
+        ];
+
         if (deckId) {
             const d = getDeckById(deckId);
             if (d) {
@@ -89,24 +92,28 @@ export default function DeckHubPage() {
                 if (ws) {
                     if (ws.parentId) {
                         const parent = workspaces.find(p => p.id === ws.parentId);
-                        if (parent) path.push(parent.name);
+                        if (parent) {
+                            path.push({ label: parent.name, path: `/dashboard/workspaces/${parent.id}` });
+                        }
                     }
-                    path.push(ws.name);
+                    path.push({ label: ws.name, path: `/dashboard/workspaces/${ws.id}` });
                 }
-                path.push(d.title);
+                path.push({ label: d.title });
             } else {
-                path.push(title);
+                path.push({ label: title });
             }
         } else if (workspaceId) {
             const ws = workspaces.find(w => w.id === workspaceId);
             if (ws) {
                 if (ws.parentId) {
                     const parent = workspaces.find(p => p.id === ws.parentId);
-                    if (parent) path.push(parent.name);
+                    if (parent) {
+                        path.push({ label: parent.name, path: `/dashboard/workspaces/${parent.id}` });
+                    }
                 }
-                path.push(ws.name);
+                path.push({ label: ws.name, path: `/dashboard/workspaces/${ws.id}` });
             } else {
-                path.push(title);
+                path.push({ label: title });
             }
         }
         return path;
@@ -279,98 +286,104 @@ export default function DeckHubPage() {
 
     return (
         <div className="w-full h-full overflow-y-auto bg-background text-foreground relative">
-            <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <button onClick={() => navigate(-1)} className="p-2 hover:bg-surface-hover rounded-full transition-colors">
-                        <ChevronLeft size={24} />
-                    </button>
-                    <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-foreground-secondary opacity-60 leading-none mb-1">
-                            {breadcrumbPath.map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-1.5">
-                                    <span className={idx === breadcrumbPath.length - 1 ? 'text-foreground' : ''}>{item}</span>
-                                    {idx < breadcrumbPath.length - 1 && <ChevronRight size={10} />}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <button className="p-2.5 hover:bg-surface-hover rounded-xl text-foreground-secondary transition-all"><Share2 size={20} /></button>
-                    <div className="relative">
-                        <button 
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="p-2.5 hover:bg-surface-hover rounded-xl text-foreground-secondary transition-all"
-                        >
-                            <MoreVertical size={20} />
-                        </button>
-                        <AnimatePresence>
-                            {isMenuOpen && (
-                                <>
-                                    <div className="fixed inset-0 z-10" onClick={() => setIsMenuOpen(false)} />
-                                    <motion.div 
-                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute right-0 mt-2 w-48 bg-surface border border-border rounded-2xl shadow-2xl z-20 overflow-hidden"
-                                    >
-                                        <button 
-                                            onClick={() => { setIsRenaming(true); setNewTitle(title); setIsMenuOpen(false); }}
-                                            className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-surface-hover flex items-center gap-3"
-                                        >
-                                            <Edit size={16} />
-                                            <span>Rename Deck</span>
-                                        </button>
-                                        <button 
-                                            onClick={handleDeleteDeck}
-                                            className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-surface-hover text-red-500 flex items-center gap-3"
-                                        >
-                                            <Trash2 size={16} />
-                                            <span>Delete Deck</span>
-                                        </button>
-                                    </motion.div>
-                                </>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
-            </header>
-
             <div className="max-w-5xl mx-auto px-6 py-12" onClick={() => setIsMenuOpen(false)}>
+                {/* Breadcrumbs & Back Button */}
+                <div className="flex items-center gap-3 mb-6">
+                    <button onClick={() => navigate(-1)} className="p-1.5 hover:bg-surface-hover rounded-xl text-foreground-secondary hover:text-foreground transition-all">
+                        <ArrowLeft size={18} />
+                    </button>
+                    <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-foreground-secondary leading-none">
+                        {breadcrumbPath.map((item, idx) => {
+                            const isLast = idx === breadcrumbPath.length - 1;
+                            return (
+                                <div key={idx} className="flex items-center gap-1.5 animate-in fade-in slide-in-from-left-1 duration-300">
+                                    {!isLast && item.path ? (
+                                        <button
+                                            onClick={() => navigate(item.path!)}
+                                            className="hover:text-foreground transition-all cursor-pointer bg-transparent border-none p-0 font-black uppercase tracking-widest text-[11px] text-foreground-secondary opacity-60 hover:opacity-100"
+                                        >
+                                            {item.label}
+                                        </button>
+                                    ) : (
+                                        <span className={isLast ? 'text-foreground font-black' : 'opacity-60 font-black'}>
+                                            {item.label}
+                                        </span>
+                                    )}
+                                    {!isLast && <ChevronRight size={10} className="opacity-40" />}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
                 <div className="mb-12">
-                    {isRenaming ? (
-                        <div className="flex items-center gap-4">
-                            <input 
-                                autoFocus
-                                type="text"
-                                value={newTitle}
-                                onChange={e => setNewTitle(e.target.value)}
-                                onKeyDown={e => {
-                                    if (e.key === 'Enter') handleRenameDeck();
-                                    if (e.key === 'Escape') setIsRenaming(false);
-                                }}
-                                onBlur={handleRenameDeck}
-                                className="text-4xl font-black tracking-tight bg-transparent outline-none w-full border-none focus:ring-0 p-0 mb-2"
-                                placeholder="Enter title..."
-                            />
-                        </div>
-                    ) : (
-                        <h2 
-                            onClick={() => { setIsRenaming(true); setNewTitle(title); }}
-                            className="text-4xl font-black tracking-tight mb-2 cursor-pointer hover:opacity-80 transition-opacity"
-                        >
-                            {title}
-                        </h2>
-                    )}
-                    <div className="flex items-center gap-4 text-sm font-bold text-foreground-secondary">
-                        <div className="flex items-center gap-1.5">
-                            <Layers size={16} />
-                            <span>{cards.length} Flashcards</span>
-                        </div>
-                        <div className="w-1 h-1 rounded-full bg-border" />
-                        <div className="flex items-center gap-1.5">
-                            <Star size={16} className="text-warning fill-warning/20" />
-                            <span>0 Starred</span>
+                    <div className="flex items-center justify-between gap-4">
+                        {isRenaming ? (
+                            <div className="flex-1">
+                                <input 
+                                    autoFocus
+                                    type="text"
+                                    value={newTitle}
+                                    onChange={e => setNewTitle(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') handleRenameDeck();
+                                        if (e.key === 'Escape') setIsRenaming(false);
+                                    }}
+                                    onBlur={handleRenameDeck}
+                                    className="text-4xl font-black tracking-tight bg-transparent outline-none w-full border-none focus:ring-0 p-0"
+                                    placeholder="Enter title..."
+                                />
+                            </div>
+                        ) : (
+                            <h2 
+                                onClick={() => { setIsRenaming(true); setNewTitle(title); }}
+                                className="text-4xl font-black tracking-tight cursor-pointer hover:opacity-80 transition-opacity flex-1"
+                            >
+                                {title}
+                            </h2>
+                        )}
+                        
+                        {/* Actions (Share & More Options) */}
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button className="p-2.5 bg-surface border border-border hover:bg-surface-hover rounded-xl text-foreground-secondary hover:text-foreground transition-all">
+                                <Share2 size={18} />
+                            </button>
+                            <div className="relative">
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
+                                    className="p-2.5 bg-surface border border-border hover:bg-surface-hover rounded-xl text-foreground-secondary hover:text-foreground transition-all"
+                                >
+                                    <MoreVertical size={18} />
+                                </button>
+                                <AnimatePresence>
+                                    {isMenuOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-10" onClick={() => setIsMenuOpen(false)} />
+                                            <motion.div 
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                className="absolute right-0 mt-2 w-48 bg-surface border border-border rounded-2xl shadow-2xl z-20 overflow-hidden"
+                                            >
+                                                <button 
+                                                    onClick={() => { setIsRenaming(true); setNewTitle(title); setIsMenuOpen(false); }}
+                                                    className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-surface-hover flex items-center gap-3"
+                                                >
+                                                    <Edit size={16} />
+                                                    <span>Rename Deck</span>
+                                                </button>
+                                                <button 
+                                                    onClick={handleDeleteDeck}
+                                                    className="w-full px-4 py-3 text-left text-sm font-bold hover:bg-surface-hover text-red-500 flex items-center gap-3"
+                                                >
+                                                    <Trash2 size={16} />
+                                                    <span>Delete Deck</span>
+                                                </button>
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
                     </div>
                 </div>

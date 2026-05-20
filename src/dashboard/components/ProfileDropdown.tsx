@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { useTheme } from '../contexts/ThemeContext';
+import { useSidebar } from '../contexts/SidebarContext';
 import { LogOut, User, Home, Sun, Moon, Crown } from 'lucide-react';
 
 interface ProfileDropdownProps {
@@ -13,6 +14,7 @@ interface ProfileDropdownProps {
 export function ProfileDropdown({ openUp = false }: ProfileDropdownProps) {
     const { userEmail, userName, userImageUrl, signOut } = useAuth();
     const { resolvedTheme, toggleTheme } = useTheme();
+    const { setIsPricingOpen } = useSidebar();
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -97,7 +99,7 @@ export function ProfileDropdown({ openUp = false }: ProfileDropdownProps) {
                         </button>
 
                         <button
-                            onClick={() => { navigate('/pricing'); setOpen(false); }}
+                            onClick={() => { setIsPricingOpen(true); setOpen(false); }}
                             className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-foreground-secondary hover:text-foreground hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors rounded-xl text-left"
                         >
                             <Crown className="w-4 h-4 text-amber-500" />

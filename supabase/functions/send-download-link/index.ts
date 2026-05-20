@@ -8,15 +8,26 @@ const corsHeaders = {
 const DEFAULT_WINDOWS_URL =
   "https://github.com/Kortezbis/DeskApp-Vis/releases/latest/download/Viszmo-Setup.exe";
 
-type Product = "windows" | "ios";
+type Product = "windows" | "ios" | "desktop";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const DEFAULT_RELEASES_URL =
+  "https://github.com/Kortezbis/DeskApp-Vis/releases/latest";
 
 function resolveDownloadUrl(product: Product): { url: string; label: string } | null {
   if (product === "windows") {
     return {
       url: Deno.env.get("WINDOWS_INSTALLER_URL") ?? DEFAULT_WINDOWS_URL,
       label: "Viszmo for Windows",
+    };
+  }
+  if (product === "desktop") {
+    const releases =
+      Deno.env.get("DESKTOP_RELEASES_PAGE_URL")?.trim() ?? DEFAULT_RELEASES_URL;
+    return {
+      url: releases,
+      label: "Viszmo desktop (Windows & Mac)",
     };
   }
   const ios = Deno.env.get("IOS_APP_STORE_URL")?.trim();
@@ -50,7 +61,13 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const email = typeof body.email === "string" ? body.email.trim() : "";
-    const product = body.product === "ios" ? "ios" : "windows";
+    const rawProduct = typeof body.product === "string" ? body.product : "windows";
+    const product: Product =
+      rawProduct === "ios"
+        ? "ios"
+        : rawProduct === "desktop"
+          ? "desktop"
+          : "windows";
 
     if (!email || !emailRegex.test(email)) {
       return new Response(JSON.stringify({ error: "Please enter a valid email address" }), {
@@ -75,9 +92,11 @@ Deno.serve(async (req) => {
 
     const { url, label } = resolved;
     const subject =
-      product === "windows"
-        ? "Your Viszmo download link"
-        : "Your Viszmo App Store link";
+      product === "ios"
+        ? "Your Viszmo App Store link"
+        : product === "desktop"
+          ? "Your Viszmo desktop app link"
+          : "Your Viszmo download link";
 
     const html = `<!DOCTYPE html>
 <html>

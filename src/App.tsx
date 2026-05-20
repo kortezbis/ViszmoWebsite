@@ -16,6 +16,8 @@ import { SignupPage } from './pages/SignupPage';
 import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
 import { DownloadAppModal } from './components/DownloadAppModal';
+import { DesktopDownloadLinkModal } from './components/DesktopDownloadLinkModal';
+import { isMobileClient } from './lib/isMobileClient';
 import { useProfile } from './contexts/ProfileContext';
 import { AuthModalProvider, useAuthModal } from './contexts/AuthModalContext';
 const DashboardApp = lazy(() => import('./dashboard/DashboardApp'));
@@ -928,6 +930,7 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
 
 export default function App() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [showDesktopLinkModal, setShowDesktopLinkModal] = useState(false);
   const { isOpen, view, closeAuthModal, openAuthModal } = useAuthModal();
   const { isSignedIn } = useAuth();
   const [pendingDownload, setPendingDownload] = useState(() => {
@@ -971,7 +974,11 @@ export default function App() {
       return;
     }
 
-    // 4. If everything is good, show download options
+    // 4. On mobile, offer to email the desktop link; otherwise start download
+    if (isMobileClient()) {
+      setShowDesktopLinkModal(true);
+      return;
+    }
     initiateDownload();
   };
 
@@ -980,7 +987,11 @@ export default function App() {
     if (pendingDownload && isSignedIn && !loading && profile?.onboarding_completed) {
       setPendingDownload(false);
       localStorage.removeItem('viszmo_pending_download');
-      initiateDownload();
+      if (isMobileClient()) {
+        setShowDesktopLinkModal(true);
+      } else {
+        initiateDownload();
+      }
     }
   }, [pendingDownload, isSignedIn, loading, profile]);
 
@@ -998,6 +1009,10 @@ export default function App() {
         onOpenMobileDownload={handleOpenMobileModal}
       />
       <DownloadAppModal isOpen={showDownloadModal} onClose={() => setShowDownloadModal(false)} />
+      <DesktopDownloadLinkModal
+        isOpen={showDesktopLinkModal}
+        onClose={() => setShowDesktopLinkModal(false)}
+      />
       <AuthModal 
         isOpen={isOpen} 
         initialView={view} 
