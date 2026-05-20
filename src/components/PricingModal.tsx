@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Crown, Zap, Shield, Sparkles, Star } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../dashboard/contexts/ThemeContext';
 import { useAuth } from '../lib/auth';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { supabase } from '../lib/supabase';
