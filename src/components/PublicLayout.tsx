@@ -7,9 +7,16 @@ interface PublicLayoutProps {
     onOpenDownload: () => void;
     onOpenMobileDownload: () => void;
     onOpenAuth: (view: 'login' | 'signup') => void;
+    onOpenMacWaitlist?: () => void;
 }
 
-export const PublicLayout = ({ children, onOpenDownload, onOpenMobileDownload, onOpenAuth }: PublicLayoutProps) => {
+export const PublicLayout = ({
+    children,
+    onOpenDownload,
+    onOpenMobileDownload,
+    onOpenAuth,
+    onOpenMacWaitlist,
+}: PublicLayoutProps) => {
     return (
         <div className="relative min-h-screen font-sans text-slate-900 bg-white flex flex-col">
             <Navbar onOpenModal={onOpenDownload} onOpenMobileModal={onOpenMobileDownload} onOpenAuth={onOpenAuth} />
@@ -33,7 +40,11 @@ export const PublicLayout = ({ children, onOpenDownload, onOpenMobileDownload, o
                 {children}
             </main>
 
-            <Footer onOpenModal={onOpenDownload} onOpenMobileModal={onOpenMobileDownload} />
+            <Footer
+                onOpenModal={onOpenDownload}
+                onOpenMobileModal={onOpenMobileDownload}
+                onOpenMacWaitlist={onOpenMacWaitlist}
+            />
         </div>
     );
 };

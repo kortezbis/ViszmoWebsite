@@ -15,7 +15,6 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@supabase/supabase-js": "^2.100.1",
-    "baseline-browser-mapping": "^2.10.31",
     "classnames": "^2.5.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^0.555.0",

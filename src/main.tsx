@@ -7,6 +7,7 @@ import { ProfileProvider } from './contexts/ProfileContext'
 import { AuthProvider } from './lib/auth'
 
 import { AuthModalProvider } from './contexts/AuthModalContext'
+import { PreviewModeProvider } from './contexts/PreviewModeContext'
 
 // Ensure root element exists
 const rootElement = document.getElementById('root')
@@ -24,7 +25,9 @@ createRoot(rootElement).render(
     <AuthProvider>
       <ProfileProvider>
         <AuthModalProvider>
-          <App />
+          <PreviewModeProvider>
+            <App />
+          </PreviewModeProvider>
         </AuthModalProvider>
       </ProfileProvider>
     </AuthProvider>

@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { StaticPageLayout } from '../components/StaticPageLayout';
 import { SEO } from '../dashboard/components/SEO';
+import { useDesktopDownloadLabel } from '../components/DownloadCtaButton';
 import { Download, Zap, Users, HelpCircle, Monitor, Layout, AlertTriangle, MessageSquare, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const HelpCenterPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
+    const downloadLabel = useDesktopDownloadLabel('download-now');
+
     return (
         <>
             <SEO 
@@ -29,7 +32,7 @@ export const HelpCenterPage = ({ onOpenDownload }: { onOpenDownload?: () => void
                     </div>
                     <div className="group inline-block bg-[#0ea5e9] shadow-[#0ea5e9]/20 -skew-x-12 px-4 py-1.5 shadow-md transform transition-all duration-300 hover:skew-x-0 hover:scale-105 mb-2">
                         <h3 className="text-sm font-black text-white uppercase tracking-wider transform skew-x-12 transition-all duration-300 group-hover:skew-x-0 whitespace-nowrap">
-                            Download Now
+                            {downloadLabel}
                         </h3>
                     </div>
                     <p className="text-xs text-slate-500 font-medium mt-2">Get started for free</p>

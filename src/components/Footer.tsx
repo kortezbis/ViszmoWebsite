@@ -5,9 +5,15 @@ import { Link } from 'react-router-dom';
 interface FooterProps {
     onOpenModal?: () => void;
     onOpenMobileModal?: () => void;
+    /** Opens Mac waitlist / coming-soon flow. */
+    onOpenMacWaitlist?: () => void;
 }
 
-export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } }: FooterProps) => {
+export const Footer = ({
+    onOpenModal = () => { },
+    onOpenMobileModal = () => { },
+    onOpenMacWaitlist,
+}: FooterProps) => {
     const currentYear = 2026; // As requested by user
 
     return (
@@ -58,9 +64,15 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
                                 <li><button onClick={onOpenMobileModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Mobile iOS</button></li>
                                 <li><button onClick={onOpenModal} className="hover:text-[#0ea5e9] transition-colors text-left">Download Windows</button></li>
                                 <li>
-                                    <span className="text-slate-700 cursor-not-allowed flex items-center gap-2">
-                                        Download Mac<span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300">Soon</span>
-                                    </span>
+                                    <button
+                                        onClick={onOpenMacWaitlist ?? onOpenModal}
+                                        className="hover:text-[#0ea5e9] transition-colors text-left flex items-center gap-2"
+                                    >
+                                        Download Mac
+                                        <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300">
+                                            Coming Soon
+                                        </span>
+                                    </button>
                                 </li>
                             </ul>
                         </div>
@@ -121,7 +133,7 @@ export const Footer = ({ onOpenModal = () => { }, onOpenMobileModal = () => { } 
                         © {currentYear} Viszmo AI. All rights reserved.
                     </p>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center justify-center md:justify-end gap-3">
                         <span className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                             <span className="text-xs font-medium text-slate-800">Systems Operational</span>

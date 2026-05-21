@@ -4,6 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from './Logo';
 import { useAuth, UserButton } from '../lib/auth';
 import { useNavigate, Link } from 'react-router-dom';
+import { usePreviewMode } from '../contexts/PreviewModeContext';
+import { PlatformDownloadIcon } from './PlatformDownloadIcons';
+import { useDesktopDownloadLabel } from './DownloadCtaButton';
 
 interface NavbarProps {
     onOpenModal?: () => void;
@@ -13,6 +16,8 @@ interface NavbarProps {
 
 export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { }, onOpenAuth = () => { } }: NavbarProps) => {
     const navigate = useNavigate();
+    const { isApplePlatform } = usePreviewMode();
+    const downloadLabel = useDesktopDownloadLabel('download-now');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { isSignedIn } = useAuth();
     const [showExploreMenu, setShowExploreMenu] = useState(false);
@@ -107,18 +112,12 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { },
 
                     <div className="btn-wrapper">
                         <button className="btn btn-sm" onClick={onOpenModal}>
-                            {navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.platform.toUpperCase().indexOf('IPHONE') >= 0 || navigator.platform.toUpperCase().indexOf('IPAD') >= 0 ? (
-                                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
-                                    <polyline points="7 10 12 15 17 10" />
-                                    <line x1="12" y1="15" x2="12" y2="3" />
-                                </svg>
-                            ) : (
-                                <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
-                                    <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
-                                </svg>
-                            )}
-                            <span className="btn-text">Download Now</span>
+                            <PlatformDownloadIcon
+                                isApple={isApplePlatform}
+                                className="w-4 h-4 mr-2 shrink-0"
+                                size={16}
+                            />
+                            <span className="btn-text">{downloadLabel}</span>
                         </button>
                     </div>
                 </div>
@@ -195,17 +194,7 @@ export const Navbar = ({ onOpenModal = () => { }, onOpenMobileModal = () => { },
                                             setIsMobileMenuOpen(false);
                                         }}
                                     >
-                                        {navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.platform.toUpperCase().indexOf('IPHONE') >= 0 || navigator.platform.toUpperCase().indexOf('IPAD') >= 0 ? (
-                                            <svg className="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
-                                                <polyline points="7 10 12 15 17 10" />
-                                                <line x1="12" y1="15" x2="12" y2="3" />
-                                            </svg>
-                                        ) : (
-                                            <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
-                                                <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
-                                            </svg>
-                                        )}
+                                        <PlatformDownloadIcon isApple={isApplePlatform} className="btn-svg" />
                                         <span className="btn-text">Dashboard</span>
                                     </button>
                                 </div>

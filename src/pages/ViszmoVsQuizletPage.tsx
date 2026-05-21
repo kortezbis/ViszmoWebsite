@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, Zap, Monitor, BookOpen, GraduationCap, Globe2, MessageSquare, Plus } from 'lucide-react';
 import { SEO } from '../dashboard/components/SEO';
+import { useDesktopDownloadLabel } from '../components/DownloadCtaButton';
 import { useNavigate } from 'react-router-dom';
 
 const comparisonData = [
@@ -45,6 +46,8 @@ const faqs = [
 
 export const ViszmoVsQuizletPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
     const navigate = useNavigate();
+    const tryFreeLabel = useDesktopDownloadLabel('try-free');
+    const startFasterLabel = useDesktopDownloadLabel('start-faster');
 
     return (
         <motion.div
@@ -86,7 +89,7 @@ export const ViszmoVsQuizletPage = ({ onOpenDownload }: { onOpenDownload?: () =>
                                 onClick={onOpenDownload}
                                 className="px-8 py-4 bg-[#0ea5e9] text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:scale-105 transition-all"
                             >
-                                Try Viszmo Free
+                                {tryFreeLabel}
                             </button>
                             <button 
                                 onClick={() => navigate('/how-it-works')}
@@ -254,7 +257,7 @@ export const ViszmoVsQuizletPage = ({ onOpenDownload }: { onOpenDownload?: () =>
                                 onClick={onOpenDownload}
                                 className="px-10 py-5 bg-white text-[#0ea5e9] font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-lg"
                             >
-                                Start Studying Faster
+                                {startFasterLabel}
                             </button>
                         </div>
                     </div>

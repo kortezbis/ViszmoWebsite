@@ -7,11 +7,11 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
 });
 
 const PLANS = {
-  weekly: { priceId: "price_1TUjayIaAtXoqGKDiGxGl17D", productId: "prod_UTgypEDlzeU4zM", planName: "weekly" },
-  plus_monthly: { priceId: "price_1TWgUyIaAtXoqGKDEslXicZ3", productId: "prod_UVhuvUcLPV4Jdb", planName: "plus" },
-  plus_yearly: { priceId: "price_1TUjr3IaAtXoqGKDvBZjFvc6", productId: "prod_UVhuvUcLPV4Jdb", planName: "plus" },
-  pro_monthly: { priceId: "price_1TULdTIaAtXoqGKDeux08PiV", productId: "prod_UTIDNLwKoKql16", planName: "pro" },
-  pro_yearly: { priceId: "price_1TUjrzIaAtXoqGKDwOddlN6G", productId: "prod_UThG8UtbykYX4V", planName: "pro" },
+  weekly: { priceId: "price_1TZaIGIaAtXoqGKDFfpms35U", productId: "prod_UYhhYYXqCcxG5M", planName: "pro" },
+  plus_monthly: { priceId: "price_1TZZmCIaAtXoqGKDqf1oStbU", productId: "prod_UYhAXpEq9A9Pu8", planName: "plus" },
+  plus_yearly: { priceId: "price_1TZZvYIaAtXoqGKDcKyknB1x", productId: "prod_UYhKGtUP0PdkOM", planName: "plus" },
+  pro_monthly: { priceId: "price_1TZaETIaAtXoqGKDxRHYaMzC", productId: "prod_UYhdGZaqnmuGcg", planName: "pro" },
+  pro_yearly: { priceId: "price_1TujrzIaAtXoqGKDwOddlN6G", productId: "prod_UThG8UtbykYX4V", planName: "pro" },
 };
 
 const corsHeaders = {

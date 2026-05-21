@@ -15,6 +15,7 @@ import {
     Eye
 } from 'lucide-react';
 import { SEO } from '../dashboard/components/SEO';
+import { DownloadCtaButton, useDesktopDownloadLabel } from '../components/DownloadCtaButton';
 import { useNavigate } from 'react-router-dom';
 
 const comparisonData = [
@@ -50,6 +51,7 @@ const faqs = [
 ];
 
 export const ViszmoVsGizmoPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
+    const getFreeLabel = useDesktopDownloadLabel('get-free');
     const navigate = useNavigate();
 
     return (
@@ -83,9 +85,7 @@ export const ViszmoVsGizmoPage = ({ onOpenDownload }: { onOpenDownload?: () => v
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                             <div className="btn-wrapper scale-110">
-                                <button className="btn" onClick={onOpenDownload}>
-                                    <span className="btn-text">Get Viszmo Free</span>
-                                </button>
+                                <DownloadCtaButton onClick={onOpenDownload} variant="get-free" />
                             </div>
                             <button 
                                 onClick={() => navigate('/how-it-works')}
@@ -195,7 +195,7 @@ export const ViszmoVsGizmoPage = ({ onOpenDownload }: { onOpenDownload?: () => v
                             onClick={onOpenDownload}
                             className="px-12 py-6 bg-[#0ea5e9] text-white font-black rounded-[2rem] shadow-2xl shadow-blue-500/20 hover:scale-105 transition-all text-2xl"
                         >
-                            Get Viszmo Free
+                            {getFreeLabel}
                         </button>
                     </div>
                 </section>

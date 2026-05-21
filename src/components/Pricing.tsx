@@ -13,8 +13,7 @@ type BillingCycle = 'monthly' | 'annual';
 const AnimatedPrice = ({ value }: { value: number }) => {
     const count = useMotionValue(value);
     const rounded = useTransform(count, (latest) => {
-        const val = Number(latest.toFixed(2));
-        return val % 1 === 0 ? val.toString() : val.toFixed(2);
+        return Number(latest).toFixed(2);
     });
 
     useEffect(() => {
@@ -74,15 +73,13 @@ export const Pricing = () => {
 
     const subscriptionPlans = [
         {
-            id: 'weekly',
-            name: 'Weekly',
-            monthly: { price: 7.00, period: '/week' },
-            annual: { price: 7.00, period: '/week', total: 7.00, label: 'Billed weekly' },
+            id: 'plus',
+            name: 'Plus',
+            monthly: { price: 9.99, period: '/mo' },
+            annual: { price: 7.50, period: '/mo', total: 89.99, label: 'Billed $89.99/year' },
             features: [
-                'Unlimited AI responses',
+                'Full access to study dashboard',
                 'Unlimited lecture notetaking',
-                'Unlimited access to latest AI models',
-                'Priority support',
             ],
             cta: 'Subscribe',
             popular: false,
@@ -91,13 +88,12 @@ export const Pricing = () => {
         {
             id: 'pro',
             name: 'Pro',
-            monthly: { price: 19, period: '/mo' },
-            annual: { price: 14, period: '/mo', total: 168, label: 'Billed $168/year' },
+            monthly: { price: 19.99, period: '/mo' },
+            annual: { price: 14.00, period: '/mo', total: 167.99, label: 'Billed $167.99/year' },
             features: [
-                'Includes all Weekly features',
-                'Unlimited Desktop Sidekick',
+                'Includes all Plus features',
+                'Overlay access with unlimited responses',
                 'Undetectable during screen share',
-                'Priority support',
             ],
             cta: 'Subscribe',
             popular: true,
@@ -106,21 +102,21 @@ export const Pricing = () => {
     ];
 
     const comparisonPlans = [
-        { id: 'weekly', name: 'Weekly', cta: 'Subscribe', hasDropdown: false },
+        { id: 'plus', name: 'Plus', cta: 'Subscribe', hasDropdown: false },
         { id: 'pro', name: 'Pro', cta: 'Subscribe', hasDropdown: false }
     ];
 
     type FeatureMap = {
         name: string;
-        weekly: string | boolean;
+        plus: string | boolean;
         pro: string | boolean;
     };
 
     const comparisonFeatures: FeatureMap[] = [
-        { name: 'AI messages per day', weekly: 'Unlimited', pro: 'Unlimited' },
-        { name: 'Lecture notetaking', weekly: 'Unlimited', pro: 'Unlimited' },
-        { name: 'Desktop Sidekick', weekly: false, pro: true },
-        { name: 'Undetectability to Screen Share', weekly: false, pro: true }
+        { name: 'AI messages per day', plus: 'Unlimited', pro: 'Unlimited' },
+        { name: 'Lecture notetaking', plus: 'Unlimited', pro: 'Unlimited' },
+        { name: 'Desktop Sidekick', plus: false, pro: true },
+        { name: 'Undetectability to Screen Share', plus: false, pro: true }
     ];
 
     return (
@@ -162,7 +158,7 @@ export const Pricing = () => {
                                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
                             />
                         </button>
-                        <span className={`text-sm font-semibold ${billingCycle === 'annual' ? 'text-slate-900' : 'text-slate-400'}`}>Annually <span className="text-[#0ea5e9] text-xs ml-1">(Save 25%)</span></span>
+                        <span className={`text-sm font-semibold ${billingCycle === 'annual' ? 'text-slate-900' : 'text-slate-400'}`}>Annually <span className="text-[#0ea5e9] text-xs ml-1">(Save up to 30%)</span></span>
                     </div>
                 </div>
 
@@ -200,13 +196,13 @@ export const Pricing = () => {
                                         </div>
                                         {billingCycle === 'annual' && (plan as any).annual.label && (
                                             <p className="text-xs text-emerald-600 font-medium bg-emerald-50 inline-block px-2 py-1 rounded-md">
-                                                {(plan as any).annual.label} {plan.id !== 'weekly' && <><span className="opacity-60 mx-1">•</span> Save 25%</>}
+                                                {(plan as any).annual.label} <span className="opacity-60 mx-1">•</span> Save {plan.id === 'pro' ? '30%' : '25%'}
                                             </p>
                                         )}
                                         <p className={`mt-4 text-sm ${plan.id === 'pro' ? 'pro-shimmer font-bold' : 'text-slate-500 font-medium'}`}>
                                             {plan.id === 'pro'
                                                 ? 'Everything, unlimited, no compromises.'
-                                                : 'Unlimited responses and core study features.'}
+                                                : 'Perfect for consistent study sessions.'}
                                         </p>
                                     </div>
 
@@ -217,13 +213,13 @@ export const Pricing = () => {
                                                     isSignedIn ? navigate('/dashboard') : navigate('/signup');
                                                     return;
                                                 }
-                                                const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
+                                                const id = plan.id === 'plus' ? (billingCycle === 'monthly' ? 'weekly' : 'plus_yearly') : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                 handleSubscribe(id);
                                             }}
                                             disabled={!!isRedirecting}
                                             className={`btn btn-black w-full justify-center btn-${plan.id}`}
                                         >
-                                            {isRedirecting === (plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
+                                            {isRedirecting === (plan.id === 'plus' ? (billingCycle === 'monthly' ? 'weekly' : 'plus_yearly') : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                                     <span className="btn-text">Processing...</span>
@@ -300,13 +296,13 @@ export const Pricing = () => {
                                                                             isSignedIn ? navigate('/dashboard') : navigate('/signup');
                                                                             return;
                                                                         }
-                                                                        const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
+                                                                        const id = plan.id === 'plus' ? (billingCycle === 'monthly' ? 'weekly' : 'plus_yearly') : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                                         handleSubscribe(id);
                                                                     }}
                                                                     disabled={!!isRedirecting}
                                                                     className={`btn btn-black w-full flex items-center justify-center gap-2 h-11 transition-all duration-300 btn-${plan.id}`}
                                                                 >
-                                                                    {isRedirecting === (plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
+                                                                    {isRedirecting === (plan.id === 'plus' ? (billingCycle === 'monthly' ? 'weekly' : 'plus_yearly') : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
                                                                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                                                     ) : (
                                                                         <span className="btn-text text-[13px] font-bold tracking-wide">{plan.cta}</span>
@@ -422,13 +418,13 @@ export const Pricing = () => {
                                                                 isSignedIn ? navigate('/dashboard') : navigate('/signup');
                                                                 return;
                                                             }
-                                                            const id = plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
+                                                            const id = plan.id === 'plus' ? (billingCycle === 'monthly' ? 'weekly' : 'plus_yearly') : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`;
                                                             handleSubscribe(id);
                                                         }}
                                                         disabled={!!isRedirecting}
                                                         className="btn btn-black w-full justify-center"
                                                     >
-                                                        {isRedirecting === (plan.id === 'weekly' ? 'weekly' : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
+                                                        {isRedirecting === (plan.id === 'plus' ? (billingCycle === 'monthly' ? 'weekly' : 'plus_yearly') : `${plan.id}_${billingCycle === 'monthly' ? 'monthly' : 'yearly'}`) ? (
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                                                 <span className="btn-text">Processing...</span>

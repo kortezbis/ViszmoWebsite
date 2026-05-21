@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Mail, X } from 'lucide-react';
-import { sendDownloadLinkEmail } from '../services/sendDownloadLinkEmail';
+import { X } from 'lucide-react';
+import { IOS_APP_QR_IMAGE_PATH, IOS_APP_STORE_URL } from '../constants/downloads';
 
 interface DownloadAppModalProps {
     isOpen: boolean;
@@ -9,35 +8,6 @@ interface DownloadAppModalProps {
 }
 
 export const DownloadAppModal = ({ isOpen, onClose }: DownloadAppModalProps) => {
-    const [email, setEmail] = useState('');
-    const [sending, setSending] = useState<'ios' | 'windows' | null>(null);
-    const [formError, setFormError] = useState<string | null>(null);
-    const [successKind, setSuccessKind] = useState<'ios' | 'windows' | null>(null);
-
-    const resetFeedback = () => {
-        setFormError(null);
-        setSuccessKind(null);
-    };
-
-    const handleSend = async (product: 'ios' | 'windows') => {
-        resetFeedback();
-        const trimmed = email.trim();
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-            setFormError('Enter a valid email address.');
-            return;
-        }
-        setSending(product);
-        try {
-            await sendDownloadLinkEmail(trimmed, product);
-            setSuccessKind(product);
-            setEmail('');
-        } catch (e) {
-            setFormError(e instanceof Error ? e.message : 'Something went wrong.');
-        } finally {
-            setSending(null);
-        }
-    };
-
     return (
         <AnimatePresence>
             {isOpen && (
@@ -54,8 +24,8 @@ export const DownloadAppModal = ({ isOpen, onClose }: DownloadAppModalProps) => 
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
-                        className="relative w-full max-w-[440px] bg-white rounded-[2.5rem] p-10 shadow-2xl shadow-slate-900/10 flex flex-col items-center text-center max-h-[min(90vh,720px)] overflow-y-auto"
+                        transition={{ type: 'spring', duration: 0.5, bounce: 0.3 }}
+                        className="relative w-full max-w-[440px] bg-white rounded-[2.5rem] p-10 shadow-2xl shadow-slate-900/10 flex flex-col items-center text-center"
                     >
                         <button
                             type="button"
@@ -70,76 +40,35 @@ export const DownloadAppModal = ({ isOpen, onClose }: DownloadAppModalProps) => 
                             <p className="text-slate-500 font-medium">Available on the App Store</p>
                         </div>
 
-                        <div className="relative mb-6 group transition-all w-full flex justify-center">
-                            <div className="w-52 h-52 relative flex items-center justify-center">
+                        <a
+                            href={IOS_APP_STORE_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="relative mb-6 group transition-all w-full flex justify-center rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0ea5e9]/40"
+                            aria-label="Open Viszmo on the App Store"
+                        >
+                            <div className="w-52 h-52 relative flex items-center justify-center p-2 bg-white rounded-2xl border border-slate-100 shadow-sm">
                                 <img
-                                    src="/viszmo-QRcode.jpg"
-                                    alt="Viszmo QR Code"
+                                    src={IOS_APP_QR_IMAGE_PATH}
+                                    alt="QR code to download Viszmo on the App Store"
+                                    width={512}
+                                    height={512}
                                     className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-opacity"
                                 />
                             </div>
-                        </div>
+                        </a>
 
-                        <p className="text-slate-500 font-semibold text-sm mb-8">
+                        <p className="text-slate-500 font-semibold text-sm mb-2">
                             Point your phone&apos;s camera at the QR code
                         </p>
-
-                        <div className="w-full border-t border-slate-100 pt-8">
-                            <div className="flex items-center justify-center gap-2 text-slate-700 font-bold text-sm mb-4">
-                                <Mail className="w-4 h-4 text-[#0ea5e9]" aria-hidden />
-                                Email yourself the link
-                            </div>
-                            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                                Open the message on your computer to install — handy when you&apos;re on mobile.
-                            </p>
-                            <label className="sr-only" htmlFor="download-email-self">Email</label>
-                            <input
-                                id="download-email-self"
-                                type="email"
-                                autoComplete="email"
-                                placeholder="you@example.com"
-                                value={email}
-                                onChange={(e) => { setEmail(e.target.value); resetFeedback(); }}
-                                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]/30 focus:border-[#0ea5e9] mb-3"
-                            />
-
-                            {formError ? (
-                                <p className="text-xs text-red-600 font-medium mb-3 text-left">{formError}</p>
-                            ) : null}
-
-                            {successKind ? (
-                                <p className="text-xs text-emerald-600 font-semibold mb-3">
-                                    {successKind === 'ios'
-                                        ? 'Check your inbox for the App Store link.'
-                                        : 'Check your inbox for the Windows installer link.'}
-                                </p>
-                            ) : null}
-
-                            <div className="flex flex-col gap-2">
-                                <button
-                                    type="button"
-                                    disabled={sending !== null}
-                                    onClick={() => void handleSend('ios')}
-                                    className="w-full rounded-xl bg-[#0ea5e9] text-white font-bold text-sm py-3 px-4 hover:bg-sky-500 transition-colors disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center gap-2"
-                                >
-                                    {sending === 'ios' ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-                                    ) : null}
-                                    App Store link
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={sending !== null}
-                                    onClick={() => void handleSend('windows')}
-                                    className="w-full rounded-xl bg-slate-900 text-white font-bold text-sm py-3 px-4 hover:bg-slate-800 transition-colors disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center gap-2"
-                                >
-                                    {sending === 'windows' ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-                                    ) : null}
-                                    Windows installer
-                                </button>
-                            </div>
-                        </div>
+                        <a
+                            href={IOS_APP_STORE_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-bold text-[#0ea5e9] hover:underline"
+                        >
+                            Open in App Store
+                        </a>
                     </motion.div>
                 </div>
             )}

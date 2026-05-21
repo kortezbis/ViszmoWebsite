@@ -1,15 +1,16 @@
 /**
- * True when the user is likely on a phone/tablet or a narrow viewport,
- * so we prefer email-me-a-link instead of triggering a raw file download.
+ * localStorage: set when the user dismisses the auto mobile prompt or successfully
+ * receives a desktop download link email — avoids repeating on every visit.
  */
-export function isMobileClient(): boolean {
-  if (typeof window === 'undefined') return false;
-  const narrow = window.matchMedia('(max-width: 767px)').matches;
-  const ua = navigator.userAgent || '';
-  const coarse = window.matchMedia('(pointer: coarse)').matches;
-  const mobileUa =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(
-      ua,
-    );
-  return narrow || mobileUa || coarse;
+export const MOBILE_DESKTOP_LINK_PROMPT_STORAGE_KEY = 'viszmo_mobile_desktop_link_prompt_v1';
+
+export function markMobileDesktopLinkPromptComplete(): void {
+  try {
+    localStorage.setItem(MOBILE_DESKTOP_LINK_PROMPT_STORAGE_KEY, '1');
+  } catch {
+    /* private / blocked storage */
+  }
 }
+
+export { isMobileClient } from './previewMode';
+

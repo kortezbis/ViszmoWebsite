@@ -6,7 +6,6 @@ import {
     FileText,
     Podcast,
     FolderOpen,
-    Sparkles,
     Flame,
     Search,
     Plus
@@ -18,14 +17,9 @@ import { ProfileDropdown } from '../components/ProfileDropdown';
 import { NotificationsDropdown } from '../components/NotificationsDropdown';
 import { CreateModal } from '../components/CreateModal';
 import { SEO } from '../components/SEO';
-
-function WindowsTileIcon({ size = 24, className = '' }: { size?: number; className?: string }) {
-    return (
-        <svg width={size} height={size} className={className} viewBox="0 0 30 30" fill="currentColor" aria-hidden>
-            <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z" />
-        </svg>
-    );
-}
+import { usePreviewMode } from '../../contexts/PreviewModeContext';
+import { AppleLogoActionIcon, WindowsTileIcon } from '../../components/PlatformDownloadIcons';
+import { getDesktopDownloadLabel, isMacDesktopComingSoon } from '../../lib/downloadCta';
 
 export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileModal = () => {} }: { onOpenDownload?: () => void, onOpenMobileModal?: () => void }) {
     const navigate = useNavigate();
@@ -35,24 +29,9 @@ export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileM
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [modalInitialStep, setModalInitialStep] = useState<any>(undefined);
-    const [isNarrowScreen, setIsNarrowScreen] = useState(false);
-    const [isWindowsPlatform, setIsWindowsPlatform] = useState(false);
+    const { isMobile, isApplePlatform } = usePreviewMode();
 
     const first = userName?.split(/\s+/)[0] || userEmail?.split('@')[0] || 'User';
-
-    useEffect(() => {
-        const mq = window.matchMedia('(max-width: 767px)');
-        const sync = () => setIsNarrowScreen(mq.matches);
-        sync();
-        mq.addEventListener('change', sync);
-        return () => mq.removeEventListener('change', sync);
-    }, []);
-
-    useEffect(() => {
-        const p = (navigator.platform || '').toUpperCase();
-        const win = /Win/i.test(navigator.userAgent || '') || p.includes('WIN');
-        setIsWindowsPlatform(win);
-    }, []);
 
     useEffect(() => {
         if (!decksLoading) {
@@ -63,11 +42,13 @@ export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileM
 
     const actionCards = useMemo(
         () => {
-            const desktopIcon = isWindowsPlatform ? WindowsTileIcon : Sparkles;
-            const desktopTitle = isNarrowScreen ? 'Send download link' : 'Download Now';
-            const desktopDescription = isNarrowScreen
+            const desktopIcon = isApplePlatform ? AppleLogoActionIcon : WindowsTileIcon;
+            const desktopTitle = getDesktopDownloadLabel(isApplePlatform, isMobile, 'download-now');
+            const desktopDescription = isMobile
                 ? 'Get an email with a link to install Viszmo on your Windows or Mac computer.'
-                : 'Download the Viszmo app for your desktop to study anywhere.';
+                : isMacDesktopComingSoon(isApplePlatform)
+                  ? 'Viszmo for macOS is coming soon. Tap below to join the waitlist.'
+                  : 'Download the Viszmo app for your desktop to study anywhere.';
 
             return [
                 {
@@ -117,7 +98,7 @@ export default function DashboardPage({ onOpenDownload = () => {}, onOpenMobileM
                 },
             ];
         },
-        [isNarrowScreen, isWindowsPlatform, navigate, onOpenDownload, onOpenMobileModal],
+        [isMobile, isApplePlatform, navigate, onOpenDownload, onOpenMobileModal],
     );
 
     return (

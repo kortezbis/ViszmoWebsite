@@ -19,6 +19,7 @@ import {
     Users
 } from 'lucide-react';
 import { SEO } from '../dashboard/components/SEO';
+import { DownloadCtaButton, useDesktopDownloadLabel } from '../components/DownloadCtaButton';
 import { useNavigate } from 'react-router-dom';
 
 const subjects = [
@@ -73,6 +74,7 @@ const faqs = [
 ];
 
 export const RealTimeAITutorPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
+    const getNowLabel = useDesktopDownloadLabel('get-now');
     const navigate = useNavigate();
 
     return (
@@ -111,9 +113,7 @@ export const RealTimeAITutorPage = ({ onOpenDownload }: { onOpenDownload?: () =>
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                             <div className="btn-wrapper scale-110">
-                                <button className="btn" onClick={onOpenDownload}>
-                                    <span className="btn-text">Get Your AI Tutor Now</span>
-                                </button>
+                                <DownloadCtaButton onClick={onOpenDownload} variant="get-tutor" />
                             </div>
                             <button 
                                 onClick={() => navigate('/how-it-works')}
@@ -287,7 +287,7 @@ export const RealTimeAITutorPage = ({ onOpenDownload }: { onOpenDownload?: () =>
                             onClick={onOpenDownload}
                             className="px-10 py-5 bg-white text-[#0ea5e9] font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-xl"
                         >
-                            Get Viszmo Now
+                            {getNowLabel}
                         </button>
                     </div>
                 </section>

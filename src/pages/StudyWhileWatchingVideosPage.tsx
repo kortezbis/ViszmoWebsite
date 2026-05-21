@@ -18,6 +18,7 @@ import {
     Pause
 } from 'lucide-react';
 import { SEO } from '../dashboard/components/SEO';
+import { DownloadCtaButton, useDesktopDownloadLabel } from '../components/DownloadCtaButton';
 import { useNavigate } from 'react-router-dom';
 
 const platforms = [
@@ -84,6 +85,7 @@ const faqs = [
 ];
 
 export const StudyWhileWatchingVideosPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
+    const addFreeLabel = useDesktopDownloadLabel('add-free');
     const navigate = useNavigate();
 
     return (
@@ -117,9 +119,7 @@ export const StudyWhileWatchingVideosPage = ({ onOpenDownload }: { onOpenDownloa
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                             <div className="btn-wrapper scale-110">
-                                <button className="btn" onClick={onOpenDownload}>
-                                    <span className="btn-text">Add Viszmo Free</span>
-                                </button>
+                                <DownloadCtaButton onClick={onOpenDownload} variant="add-free" />
                             </div>
                             <button 
                                 onClick={() => navigate('/study-overlay')}
@@ -228,7 +228,7 @@ export const StudyWhileWatchingVideosPage = ({ onOpenDownload }: { onOpenDownloa
                                 onClick={onOpenDownload}
                                 className="px-16 py-8 bg-[#0ea5e9] text-white font-black rounded-3xl shadow-2xl shadow-blue-500/20 hover:scale-105 transition-all text-2xl"
                             >
-                                Add Viszmo Free
+                                {addFreeLabel}
                             </button>
                             <p className="text-slate-400 text-xs font-bold tracking-[0.2em] uppercase">No Setup Required</p>
                         </div>

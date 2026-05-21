@@ -17,6 +17,7 @@ import {
     Baby
 } from 'lucide-react';
 import { SEO } from '../dashboard/components/SEO';
+import { DownloadCtaButton, useDesktopDownloadLabel } from '../components/DownloadCtaButton';
 import { useNavigate } from 'react-router-dom';
 
 const subjects = [
@@ -54,6 +55,7 @@ const faqs = [
 ];
 
 export const ElementaryStudyAppPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
+    const tryFreeLabel = useDesktopDownloadLabel('try-free');
     const navigate = useNavigate();
 
     return (
@@ -100,9 +102,7 @@ export const ElementaryStudyAppPage = ({ onOpenDownload }: { onOpenDownload?: ()
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                             <div className="btn-wrapper scale-110">
-                                <button className="btn" onClick={onOpenDownload}>
-                                    <span className="btn-text">Try Viszmo Free</span>
-                                </button>
+                                <DownloadCtaButton onClick={onOpenDownload} variant="try-free" />
                             </div>
                             <button 
                                 onClick={() => navigate('/how-it-works')}
@@ -237,7 +237,7 @@ export const ElementaryStudyAppPage = ({ onOpenDownload }: { onOpenDownload?: ()
                             onClick={onOpenDownload}
                             className="px-12 py-6 bg-[#0ea5e9] text-white font-black rounded-[2rem] shadow-2xl shadow-blue-500/20 hover:scale-105 transition-all text-2xl"
                         >
-                            Try Viszmo Free
+                            {tryFreeLabel}
                         </button>
                     </div>
                 </section>

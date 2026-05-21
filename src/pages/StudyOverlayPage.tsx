@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SEO } from '../dashboard/components/SEO';
+import { DownloadCtaButton } from '../components/DownloadCtaButton';
 
 
 const FAQItem = ({ question, answer, isOpen, onClick }: { question: string; answer: string; isOpen: boolean; onClick: () => void }) => {
@@ -151,9 +152,7 @@ export const StudyOverlayPage = ({ onOpenDownload }: { onOpenDownload?: () => vo
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                             <div className="btn-wrapper">
-                                <button className="btn" onClick={() => onOpenDownload?.()}>
-                                    <span className="btn-text">Download Now</span>
-                                </button>
+                                <DownloadCtaButton onClick={() => onOpenDownload?.()} variant="download-now" />
                             </div>
                             <button 
                                 onClick={() => navigate('/how-it-works')}
@@ -380,9 +379,7 @@ export const StudyOverlayPage = ({ onOpenDownload }: { onOpenDownload?: () => vo
                     
                     <div className="flex flex-col items-center gap-8">
                         <div className="btn-wrapper scale-110">
-                            <button className="btn" onClick={() => onOpenDownload?.()}>
-                                <span className="btn-text">Download Now</span>
-                            </button>
+                            <DownloadCtaButton onClick={() => onOpenDownload?.()} variant="download-now" />
                         </div>
                         <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest uppercase">
                             WINDOWS 10 & 11 • SAFE • SECURE

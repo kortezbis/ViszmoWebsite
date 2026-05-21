@@ -1,15 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { isApplePlatformClient } from '../lib/previewMode';
+import { usePreviewMode } from '../contexts/PreviewModeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Monitor, Smartphone, Mail, Send, X, UserPlus, CheckCircle } from 'lucide-react';
+import { Loader2, Mail, Send, X, Check } from 'lucide-react';
+import { AppleLogoIcon, WindowsTileIcon } from './PlatformDownloadIcons';
 import { sendDownloadLinkEmail } from '../services/sendDownloadLinkEmail';
-import { useAuthModal } from '../contexts/AuthModalContext';
+import { supabase } from '../lib/supabase';
 
 interface DesktopDownloadLinkModalProps {
     isOpen: boolean;
     onClose: () => void;
+    /** Called after an email is sent successfully (e.g. mark first-visit prompt complete). */
+    onSentSuccess?: () => void;
 }
 
-export function DesktopDownloadLinkModal({ isOpen, onClose }: DesktopDownloadLinkModalProps) {
+function defaultModalPlatform(): 'windows' | 'mac' {
+    return isApplePlatformClient() ? 'mac' : 'windows';
+}
+
+export function DesktopDownloadLinkModal({ isOpen, onClose, onSentSuccess }: DesktopDownloadLinkModalProps) {
+    const { isApplePlatform } = usePreviewMode();
+    const [platform, setPlatform] = useState<'windows' | 'mac'>(defaultModalPlatform);
     const [email, setEmail] = useState('');
     const [sending, setSending] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
@@ -20,6 +31,13 @@ export function DesktopDownloadLinkModal({ isOpen, onClose }: DesktopDownloadLin
         setSent(false);
     };
 
+    useEffect(() => {
+        if (isOpen) {
+            setPlatform(defaultModalPlatform());
+            resetFeedback();
+        }
+    }, [isOpen, isApplePlatform]);
+
     const handleSend = async () => {
         resetFeedback();
         const trimmed = email.trim();
@@ -29,15 +47,35 @@ export function DesktopDownloadLinkModal({ isOpen, onClose }: DesktopDownloadLin
         }
         setSending(true);
         try {
-            await sendDownloadLinkEmail(trimmed, 'desktop');
+            if (platform === 'mac') {
+                const { error: dbError } = await supabase
+                    .from('mac_waitlist')
+                    .insert([{ email: trimmed }]);
+
+                if (dbError && !dbError.message.includes('unique')) {
+                    console.error('Waitlist DB Error:', dbError);
+                }
+
+                await sendDownloadLinkEmail(trimmed, 'mac-waitlist');
+            } else {
+                await sendDownloadLinkEmail(trimmed, 'desktop');
+            }
+
             setSent(true);
-            setEmail('');
+            onSentSuccess?.();
         } catch (e) {
-            setFormError(e instanceof Error ? e.message : 'Something went wrong.');
+            const raw = e instanceof Error ? e.message : 'Something went wrong.';
+            const hint =
+                /domain|verify|resend|from address|not allowed/i.test(raw)
+                    ? ' Ask your admin to verify the sender domain in Resend and set RESEND_FROM + RESEND_API_KEY in Supabase Edge Function secrets.'
+                    : '';
+            setFormError(`${raw}${hint}`);
         } finally {
             setSending(false);
         }
     };
+
+    const isWindows = platform === 'windows';
 
     return (
         <AnimatePresence>
@@ -52,47 +90,112 @@ export function DesktopDownloadLinkModal({ isOpen, onClose }: DesktopDownloadLin
                     />
 
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.94, y: 16 }}
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.94, y: 16 }}
-                        transition={{ type: 'spring', duration: 0.45, bounce: 0.32 }}
-                        className="relative w-full max-w-[400px] rounded-[1.75rem] shadow-2xl shadow-slate-900/15 overflow-hidden bg-white max-h-[min(92vh,640px)] flex flex-col"
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        transition={{ type: 'spring', duration: 0.5, bounce: 0.3 }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full max-w-[440px] bg-white rounded-[2.5rem] p-10 shadow-2xl shadow-slate-900/10 flex flex-col items-center text-center max-h-[min(90vh,720px)] overflow-y-auto"
                     >
-                        <div className="relative bg-gradient-to-b from-sky-400 to-[#0ea5e9] px-6 pt-8 pb-10 text-center shrink-0">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="absolute top-4 right-4 p-2 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
-                                aria-label="Close"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                            <div className="mx-auto mb-4 w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-md">
-                                <Monitor className="w-8 h-8 text-[#0ea5e9]" strokeWidth={2} />
-                            </div>
-                            <h2 className="text-xl font-black text-white tracking-tight mb-1">
-                                Viszmo is a desktop app
-                            </h2>
-                            <p className="text-sm font-semibold text-white/90">
-                                Available for Windows &amp; Mac computers
-                            </p>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="absolute top-6 right-6 p-2 rounded-xl hover:bg-slate-50 transition-colors text-slate-400 hover:text-slate-600"
+                            aria-label="Close"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
 
-                        <div className="px-6 py-6 flex flex-col flex-1 min-h-0 overflow-y-auto">
-                            {!sent ? (
-                                <>
-                                    <div className="flex gap-3 rounded-2xl bg-sky-50 border border-sky-100/80 px-4 py-3 mb-5 text-left">
-                                        <Smartphone className="w-5 h-5 text-[#0ea5e9] shrink-0 mt-0.5" aria-hidden />
-                                        <p className="text-sm font-semibold text-slate-700 leading-snug">
-                                            Want a download link emailed for when you&apos;re on your computer?
-                                        </p>
-                                    </div>
+                        {sent ? (
+                            <>
+                                <motion.div
+                                    initial={{ scale: 0.5, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ type: 'spring', duration: 0.6, bounce: 0.4 }}
+                                    className="w-20 h-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-6 shadow-sm mt-2"
+                                >
+                                    <Check className="w-10 h-10 text-emerald-500" strokeWidth={3} />
+                                </motion.div>
+                                <h2 className="text-2xl font-black text-slate-900 mb-2">
+                                    {isWindows ? 'Email sent!' : "You're on the list!"}
+                                </h2>
+                                <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-[300px] mb-8">
+                                    {isWindows
+                                        ? `Check your inbox at ${email} for the download link.`
+                                        : `We've added ${email} to our Mac waitlist. We'll notify you when macOS launches.`}
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="w-full rounded-xl bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-bold text-sm py-3.5 px-4 shadow-lg shadow-sky-500/20 transition-colors"
+                                >
+                                    Done
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="mb-6 mt-2">
+                                    <h2 className="text-2xl font-black text-slate-900 mb-2">
+                                        {isWindows ? 'Send download link' : 'Mac coming soon'}
+                                    </h2>
+                                    <p className="text-slate-500 font-medium">
+                                        {isWindows
+                                            ? 'Get Viszmo on your computer'
+                                            : 'Join the macOS waitlist'}
+                                    </p>
+                                </div>
 
-                                    <label className="block text-xs font-bold text-slate-600 mb-1.5" htmlFor="desktop-link-email">
+                                <p className="text-slate-500 font-semibold text-sm mb-6 max-w-[320px]">
+                                    {isWindows
+                                        ? "We'll email you a link to install when you're back on your computer."
+                                        : 'Enter your email to get early access when the Mac app launches.'}
+                                </p>
+
+                                <div className="w-full flex p-1 mb-6 rounded-xl bg-slate-100 border border-slate-200/50">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setPlatform('windows');
+                                            resetFeedback();
+                                        }}
+                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-lg transition-all ${
+                                            isWindows
+                                                ? 'bg-white text-[#0ea5e9] shadow-sm'
+                                                : 'text-slate-500 hover:text-slate-800'
+                                        }`}
+                                    >
+                                        <WindowsTileIcon className="w-3.5 h-3.5 shrink-0" size={14} />
+                                        Windows
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setPlatform('mac');
+                                            resetFeedback();
+                                        }}
+                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-lg transition-all ${
+                                            !isWindows
+                                                ? 'bg-white text-[#0ea5e9] shadow-sm'
+                                                : 'text-slate-500 hover:text-slate-800'
+                                        }`}
+                                    >
+                                        <AppleLogoIcon className="w-3.5 h-3.5 shrink-0" size={14} />
+                                        macOS
+                                    </button>
+                                </div>
+
+                                <div className="w-full text-left">
+                                    <label
+                                        className="block text-xs font-bold text-slate-600 mb-1.5"
+                                        htmlFor="desktop-link-email"
+                                    >
                                         Email address
                                     </label>
                                     <div className="relative mb-3">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" aria-hidden />
+                                        <Mail
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"
+                                            aria-hidden
+                                        />
                                         <input
                                             id="desktop-link-email"
                                             type="email"
@@ -103,89 +206,41 @@ export function DesktopDownloadLinkModal({ isOpen, onClose }: DesktopDownloadLin
                                                 setEmail(e.target.value);
                                                 resetFeedback();
                                             }}
-                                            onKeyDown={(e) => { if (e.key === 'Enter') void handleSend(); }}
                                             className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]/30 focus:border-[#0ea5e9]"
                                         />
                                     </div>
 
                                     {formError ? (
-                                        <p className="text-xs text-red-600 font-medium mb-3">{formError}</p>
+                                        <p className="text-xs text-red-600 font-semibold mb-3">{formError}</p>
                                     ) : null}
 
                                     <button
                                         type="button"
                                         disabled={sending}
                                         onClick={() => void handleSend()}
-                                        className="w-full rounded-xl bg-gradient-to-b from-sky-400 to-[#0ea5e9] text-white font-bold text-sm py-3.5 px-4 shadow-lg shadow-sky-500/25 hover:opacity-95 transition-opacity disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center gap-2"
+                                        className="w-full rounded-xl bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-bold text-sm py-3.5 px-4 shadow-lg shadow-sky-500/20 transition-colors disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center gap-2"
                                     >
                                         {sending ? (
                                             <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
                                         ) : (
                                             <Send className="w-4 h-4" aria-hidden />
                                         )}
-                                        Send download link
+                                        {isWindows ? 'Send download link' : 'Join Mac waitlist'}
                                     </button>
 
                                     <button
                                         type="button"
                                         onClick={onClose}
-                                        className="mt-4 text-center text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+                                        className="mt-4 w-full text-center text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors"
                                     >
                                         Maybe later
                                     </button>
-                                </>
-                            ) : (
-                                <>
-                                    {/* Success + signup prompt */}
-                                    <div className="flex flex-col items-center text-center mb-6">
-                                        <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mb-4">
-                                            <CheckCircle className="w-8 h-8 text-emerald-500" />
-                                        </div>
-                                        <h3 className="text-lg font-black text-slate-900 mb-1">Link sent!</h3>
-                                        <p className="text-sm font-medium text-slate-500 leading-snug">
-                                            Check your inbox for the Viszmo desktop download link.
-                                        </p>
-                                    </div>
-
-                                    <div className="rounded-2xl bg-sky-50 border border-sky-100 px-5 py-4 mb-5 text-left">
-                                        <p className="text-sm font-bold text-slate-800 mb-1">🎉 One more step</p>
-                                        <p className="text-sm font-medium text-slate-600 leading-snug">
-                                            Create a free account to unlock AI flashcards, lecture transcription, and more — all saved in your dashboard.
-                                        </p>
-                                    </div>
-
-                                    <SignupButton onClose={onClose} />
-
-                                    <button
-                                        type="button"
-                                        onClick={onClose}
-                                        className="mt-4 text-center text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors"
-                                    >
-                                        Maybe later
-                                    </button>
-                                </>
-                            )}
-                        </div>
+                                </div>
+                            </>
+                        )}
                     </motion.div>
                 </div>
             )}
         </AnimatePresence>
-    );
-}
-
-function SignupButton({ onClose }: { onClose: () => void }) {
-    const { openAuthModal } = useAuthModal();
-    return (
-        <button
-            type="button"
-            onClick={() => {
-                onClose();
-                openAuthModal('signup');
-            }}
-            className="w-full rounded-xl bg-gradient-to-b from-sky-400 to-[#0ea5e9] text-white font-bold text-sm py-3.5 px-4 shadow-lg shadow-sky-500/25 hover:opacity-95 transition-opacity flex items-center justify-center gap-2"
-        >
-            <UserPlus className="w-4 h-4" aria-hidden />
-            Create your free account
-        </button>
     );
 }

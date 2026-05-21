@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { SEO } from '../dashboard/components/SEO';
+import { DownloadCtaButton } from '../components/DownloadCtaButton';
 
 
 import { useNavigate, Link } from 'react-router-dom';
@@ -191,12 +192,7 @@ export const HowItWorksPage = ({ onOpenDownload }: { onOpenDownload?: () => void
                         <div className="flex flex-col items-center gap-6 pt-4">
                             <div className="flex flex-col sm:flex-row items-center gap-4">
                                 <div className="btn-wrapper">
-                                    <button
-                                        className="btn"
-                                        onClick={() => onOpenDownload?.()}
-                                    >
-                                        <span className="btn-text">Download Now</span>
-                                    </button>
+                                    <DownloadCtaButton onClick={() => onOpenDownload?.()} variant="download-now" />
                                 </div>
                                 <div className="explore-btn-wrap" onClick={() => navigate('/pricing')}>
                                     <div className="explore-btn-shadow"></div>

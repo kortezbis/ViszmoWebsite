@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,6 @@ import { StudentLifeFeatures } from './components/StudentLifeFeatures';
 import { Testimonials } from './components/Testimonials';
 
 // SubscriptionModal removed
-import { Footer } from './components/Footer';
 import { PeelSticker } from './components/PeelSticker';
 import { Navbar } from './components/Navbar';
 import { LoginPage } from './pages/LoginPage';
@@ -17,7 +16,11 @@ import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
 import { DownloadAppModal } from './components/DownloadAppModal';
 import { DesktopDownloadLinkModal } from './components/DesktopDownloadLinkModal';
-import { isMobileClient } from './lib/isMobileClient';
+import { isMobileClient, markMobileDesktopLinkPromptComplete, MOBILE_DESKTOP_LINK_PROMPT_STORAGE_KEY } from './lib/isMobileClient';
+import { isApplePlatformClient, isWindowsPlatformClient } from './lib/previewMode';
+import { isMacDesktopComingSoon } from './lib/downloadCta';
+import { usePreviewMode } from './contexts/PreviewModeContext';
+import { DownloadCtaButton } from './components/DownloadCtaButton';
 import { useProfile } from './contexts/ProfileContext';
 import { AuthModalProvider, useAuthModal } from './contexts/AuthModalContext';
 const DashboardApp = lazy(() => import('./dashboard/DashboardApp'));
@@ -26,7 +29,7 @@ const DashboardApp = lazy(() => import('./dashboard/DashboardApp'));
 import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from './lib/auth';
 import { BrowserRouter, Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { PublicLayout } from './components/PublicLayout';
-import { DESKTOP_RELEASES_PAGE_URL, WINDOWS_INSTALLER_URL } from './constants/downloads';
+import { WINDOWS_INSTALLER_URL } from './constants/downloads';
 
 // HowItWorksPage import removed as file is missing
 import { HowItWorksPage } from './pages/HowItWorksPage';
@@ -124,6 +127,7 @@ import { SEO } from './dashboard/components/SEO';
 
 function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => void, onOpenAuth: (view: 'login' | 'signup') => void }) {
     const { isSignedIn } = useAuth();
+    const { isApplePlatform } = usePreviewMode();
     const navigate = useNavigate();
 
 
@@ -339,12 +343,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
           </p>
 
           <div className="btn-wrapper">
-            <button className="btn" onClick={onOpenDownload}>
-              <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
-                <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
-              </svg>
-              <span className="btn-text">Download Now</span>
-            </button>
+            <DownloadCtaButton onClick={onOpenDownload} variant="download-now" />
           </div>
 
           {/* Test Score Stickers - Consolidated */}
@@ -770,12 +769,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
             >
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <div className="btn-wrapper">
-                  <button className="btn" onClick={onOpenDownload}>
-                    <svg className="btn-svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" fill="currentColor">
-                      <path d="M4 4H14V14H4zM16 4H26V14H16zM4 16H14V26H4zM16 16H26V26H16z"></path>
-                    </svg>
-                    <span className="btn-text">Get Viszmo Free</span>
-                  </button>
+                  <DownloadCtaButton onClick={onOpenDownload} variant="get-free" />
                 </div>
 
                 <div className="explore-btn-wrap" onClick={() => navigate('/pricing')}>
@@ -787,9 +781,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
               </div>
 
               <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-widest uppercase">
-                {navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.platform.toUpperCase().indexOf('IPHONE') >= 0 || navigator.platform.toUpperCase().indexOf('IPAD') >= 0 
-                  ? "MACOS 12+ • SAFE"
-                  : "WINDOWS 10 & 11 • SAFE"}
+                {isApplePlatform ? 'MACOS • COMING SOON' : 'WINDOWS 10 & 11 • SAFE'}
               </p>
             </motion.div>
           </div>
@@ -822,6 +814,74 @@ const ScrollToTop = () => {
   return null;
 };
 
+/** Marketing routes where first mobile visit may auto-open the desktop download email modal. */
+const MOBILE_DESKTOP_AUTO_PROMPT_PATHS = new Set([
+  '/',
+  '/features',
+  '/pricing',
+  '/how-it-works',
+  '/study-overlay',
+  '/terms',
+  '/privacy',
+  '/contact',
+  '/help',
+  '/viszmo-vs-quizlet',
+  '/real-time-ai-tutor',
+  '/study-app-for-elementary-students',
+  '/study-app-for-middle-and-high-school-students',
+  '/study-app-for-college-students',
+  '/viszmo-vs-knowt',
+  '/viszmo-vs-gizmo',
+  '/viszmo-vs-anki',
+  '/study-while-watching-videos',
+]);
+
+/** First visit on mobile: offer to email a desktop download link (marketing pages only). */
+function MobileDesktopLinkAutoPrompt({ onOpenAuto }: { onOpenAuto: () => void }) {
+  const location = useLocation();
+  const { isOpen: authModalOpen } = useAuthModal();
+  const { isMobile } = usePreviewMode();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    if (!isMobile) return;
+
+    try {
+      if (localStorage.getItem(MOBILE_DESKTOP_LINK_PROMPT_STORAGE_KEY) === '1') return;
+    } catch {
+      return;
+    }
+
+    if (!MOBILE_DESKTOP_AUTO_PROMPT_PATHS.has(location.pathname)) return;
+    if (authModalOpen) return;
+
+    timerRef.current = window.setTimeout(() => {
+      timerRef.current = null;
+      if (!isMobile) return;
+      try {
+        if (localStorage.getItem(MOBILE_DESKTOP_LINK_PROMPT_STORAGE_KEY) === '1') return;
+      } catch {
+        return;
+      }
+      onOpenAuto();
+    }, 900);
+
+    return () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [location.pathname, authModalOpen, onOpenAuto, isMobile]);
+
+  return null;
+}
+
 const AuthRedirect = ({ view }: { view: 'login' | 'signup' }) => {
   const { openAuthModal } = useAuthModal();
   const navigate = useNavigate();
@@ -832,7 +892,15 @@ const AuthRedirect = ({ view }: { view: 'login' | 'signup' }) => {
   return null;
 };
 
-function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownload: () => void, onOpenMobileDownload: () => void }) {
+function AnimatedRoutes({
+  onOpenDownload,
+  onOpenMobileDownload,
+  onOpenMacWaitlist,
+}: {
+  onOpenDownload: () => void;
+  onOpenMobileDownload: () => void;
+  onOpenMacWaitlist?: () => void;
+}) {
   const location = useLocation();
   const { showSurvey, setShowSurvey } = useProfile();
   const { openAuthModal } = useAuthModal();
@@ -915,7 +983,12 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
   return (
     <>
       {isPublicPath ? (
-        <PublicLayout onOpenDownload={onOpenDownload} onOpenMobileDownload={onOpenMobileDownload} onOpenAuth={openAuthModal}>
+        <PublicLayout
+          onOpenDownload={onOpenDownload}
+          onOpenMobileDownload={onOpenMobileDownload}
+          onOpenAuth={openAuthModal}
+          onOpenMacWaitlist={onOpenMacWaitlist}
+        >
           {routes}
         </PublicLayout>
       ) : (
@@ -931,6 +1004,7 @@ function AnimatedRoutes({ onOpenDownload, onOpenMobileDownload }: { onOpenDownlo
 export default function App() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showDesktopLinkModal, setShowDesktopLinkModal] = useState(false);
+  const desktopLinkModalViaRef = useRef<'auto' | 'user' | null>(null);
   const { isOpen, view, closeAuthModal, openAuthModal } = useAuthModal();
   const { isSignedIn } = useAuth();
   const [pendingDownload, setPendingDownload] = useState(() => {
@@ -938,25 +1012,42 @@ export default function App() {
   });
   const { profile, loading, setShowSurvey } = useProfile();
 
+  const openDesktopLinkModal = useCallback((via: 'auto' | 'user' = 'user') => {
+    desktopLinkModalViaRef.current = via;
+    setShowDesktopLinkModal(true);
+  }, []);
+
+  const closeDesktopLinkModal = useCallback(() => {
+    if (desktopLinkModalViaRef.current === 'auto') {
+      markMobileDesktopLinkPromptComplete();
+    }
+    desktopLinkModalViaRef.current = null;
+    setShowDesktopLinkModal(false);
+  }, []);
+
+  const handleOpenAutoDesktopLinkModal = useCallback(() => {
+    openDesktopLinkModal('auto');
+  }, [openDesktopLinkModal]);
+
   useEffect(() => {
     localStorage.setItem('viszmo_pending_download', pendingDownload.toString());
   }, [pendingDownload]);
 
   const initiateDownload = () => {
-    const isWindows = /Win/i.test(navigator.userAgent) || /Win/i.test(navigator.platform);
-    
-    if (isWindows) {
-      window.location.href = WINDOWS_INSTALLER_URL;
-    } else {
-      // For Mac or other platforms, direct to the releases page instead of showing the QR code modal
-      window.location.href = DESKTOP_RELEASES_PAGE_URL;
-    }
+    if (!isWindowsPlatformClient()) return;
+    window.location.href = WINDOWS_INSTALLER_URL;
   };
 
   const handleDownload = () => {
-    // 1. On mobile, offer to email the desktop link immediately
+    // Mac desktop not released yet — Mac waitlist modal
+    if (isMacDesktopComingSoon(isApplePlatformClient())) {
+      openDesktopLinkModal('user');
+      return;
+    }
+
+    // On mobile, offer to email the desktop link immediately
     if (isMobileClient()) {
-      setShowDesktopLinkModal(true);
+      openDesktopLinkModal('user');
       return;
     }
 
@@ -988,13 +1079,13 @@ export default function App() {
     if (pendingDownload && isSignedIn && !loading && profile?.onboarding_completed) {
       setPendingDownload(false);
       localStorage.removeItem('viszmo_pending_download');
-      if (isMobileClient()) {
-        setShowDesktopLinkModal(true);
+      if (isMacDesktopComingSoon(isApplePlatformClient()) || isMobileClient()) {
+        openDesktopLinkModal('user');
       } else {
         initiateDownload();
       }
     }
-  }, [pendingDownload, isSignedIn, loading, profile]);
+  }, [pendingDownload, isSignedIn, loading, profile, openDesktopLinkModal]);
 
   const handleOpenMobileModal = () => {
     setShowDownloadModal(true);
@@ -1005,14 +1096,17 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <AnimatedRoutes 
-        onOpenDownload={handleDownload} 
+      <MobileDesktopLinkAutoPrompt onOpenAuto={handleOpenAutoDesktopLinkModal} />
+      <AnimatedRoutes
+        onOpenDownload={handleDownload}
         onOpenMobileDownload={handleOpenMobileModal}
+        onOpenMacWaitlist={() => openDesktopLinkModal('user')}
       />
       <DownloadAppModal isOpen={showDownloadModal} onClose={() => setShowDownloadModal(false)} />
       <DesktopDownloadLinkModal
         isOpen={showDesktopLinkModal}
-        onClose={() => setShowDesktopLinkModal(false)}
+        onClose={closeDesktopLinkModal}
+        onSentSuccess={markMobileDesktopLinkPromptComplete}
       />
       <AuthModal 
         isOpen={isOpen} 

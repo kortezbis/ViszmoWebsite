@@ -14,59 +14,57 @@ interface PricingModalProps {
 export function PricingModal({ isOpen, onClose }: PricingModalProps) {
   const { resolvedTheme } = useTheme();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const [selectedPlan, setSelectedPlan] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'plus' | 'pro'>('pro');
   const [isRedirecting, setIsRedirecting] = useState<string | null>(null);
   const { isSignedIn, getToken } = useAuth();
   const { openAuthModal } = useAuthModal();
 
   // Pricing Data
   const plans = {
-    weekly: {
-      id: 'price_weekly',
-      name: 'Weekly',
-      price: '$7.00',
-      interval: 'week',
-      description: 'Perfect for short-term study sessions.',
-      features: ['Full Access to Study Tools', 'Unlimited Sidekick Access', 'Unlimited AI Generations']
-    },
-    monthly: {
-      id: 'price_monthly',
-      name: 'Monthly',
-      price: '$19',
+    plus_monthly: {
+      id: 'plus_monthly',
+      name: 'Plus',
+      price: '$9.99',
       interval: 'month',
-      description: 'Our most popular plan for consistent learners.',
-      features: ['Full Access to Study Tools', 'Unlimited Sidekick Access', 'Unlimited AI Generations', 'Priority Support']
+      description: 'Perfect for consistent study sessions.',
+      features: ['Full access to study dashboard', 'Unlimited lecture notetaking']
     },
-    yearly: {
-      id: 'price_yearly',
-      name: 'Yearly',
-      price: '$168',
+    plus_yearly: {
+      id: 'plus_yearly',
+      name: 'Plus',
+      price: '$89.99',
       interval: 'year',
       savings: 'Save 25%',
+      description: 'Perfect for consistent study sessions.',
+      features: ['Full access to study dashboard', 'Unlimited lecture notetaking']
+    },
+    pro_monthly: {
+      id: 'pro_monthly',
+      name: 'Pro',
+      price: '$19.99',
+      interval: 'month',
+      description: 'Our most popular plan for consistent learners.',
+      features: ['Includes all Plus features', 'Overlay access with unlimited responses', 'Undetectable during screen share']
+    },
+    pro_yearly: {
+      id: 'pro_yearly',
+      name: 'Pro',
+      price: '$167.99',
+      interval: 'year',
+      savings: 'Save 30%',
       description: 'The best value for long-term academic success.',
-      features: ['Full Access to Study Tools', 'Unlimited Sidekick Access', 'Unlimited AI Generations', 'Priority Support', 'Exclusive Beta Features']
+      features: ['Includes all Plus features', 'Overlay access with unlimited responses', 'Undetectable during screen share', 'Exclusive Beta Features']
     }
   };
 
-  const currentPlans = billingCycle === 'monthly' ? [plans.weekly, plans.monthly] : [plans.yearly];
+  const currentPlans = billingCycle === 'monthly' 
+    ? [plans.plus_monthly, plans.pro_monthly] 
+    : [plans.plus_yearly, plans.pro_yearly];
 
-  const handleCheckout = async (planType: string) => {
+  const handleCheckout = async (planId: string) => {
     if (!isSignedIn) {
       openAuthModal('signup');
       return;
-    }
-
-    // Map internal selection to Edge Function plan IDs
-    let planId = '';
-    if (planType === 'weekly') {
-      planId = 'weekly';
-    } else if (planType === 'monthly') {
-      planId = 'pro_monthly';
-    } else if (planType === 'yearly') {
-      planId = 'pro_yearly';
-    } else {
-      // Fallback if planType is already something like 'pro' or 'plus'
-      planId = `${planType}_${billingCycle}`;
     }
 
     setIsRedirecting(planId);
@@ -156,7 +154,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                 <button
                   onClick={() => {
                     setBillingCycle('monthly');
-                    setSelectedPlan('monthly');
+                    setSelectedPlan('pro');
                   }}
                   className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
                     billingCycle === 'monthly'
@@ -164,12 +162,12 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                       : 'text-foreground-secondary hover:text-foreground'
                   }`}
                 >
-                  Monthly & Weekly
+                  Monthly
                 </button>
                 <button
                   onClick={() => {
                     setBillingCycle('yearly');
-                    setSelectedPlan('yearly');
+                    setSelectedPlan('pro');
                   }}
                   className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 relative ${
                     billingCycle === 'yearly'
@@ -216,11 +214,16 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                   <div className="mb-8">
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-black text-foreground">{plan.price}</span>
-                      <span className="text-foreground-secondary font-bold">/{plan.interval}</span>
+                      <span className="text-foreground-secondary font-bold">/{plan.interval === 'year' ? 'yr' : 'mo'}</span>
                     </div>
-                    {plan.savings && (
+                    {plan.savings && plan.price === '$167.99' && (
                       <span className="text-xs font-bold text-emerald-500 mt-1 block">
-                        Equivalent to ${(168/12).toFixed(0)}/mo
+                        Equivalent to $14.00/mo
+                      </span>
+                    )}
+                    {plan.savings && plan.price === '$89.99' && (
+                      <span className="text-xs font-bold text-emerald-500 mt-1 block">
+                        Equivalent to $7.50/mo
                       </span>
                     )}
                   </div>
@@ -243,7 +246,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleCheckout(plan.name.toLowerCase());
+                      handleCheckout(plan.id);
                     }}
                     disabled={!!isRedirecting}
 
@@ -253,7 +256,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                         : 'bg-surface-active text-foreground hover:bg-surface-active/80 border border-border'
                     }`}
                   >
-                    {isRedirecting ? (
+                    {isRedirecting === plan.id ? (
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         <span>Processing...</span>
@@ -264,19 +267,6 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                   </button>
                 </motion.div>
               ))}
-
-              {/* Special Info Card for Yearly if only one plan */}
-              {billingCycle === 'yearly' && (
-                <div className="bg-surface/50 border border-dashed border-border rounded-[2rem] p-8 flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-brand-secondary/10 flex items-center justify-center mb-6">
-                    <Sparkles className="w-8 h-8 text-brand-secondary" />
-                  </div>
-                  <h4 className="text-lg font-bold text-foreground mb-2">Maximize your potential</h4>
-                  <p className="text-sm text-foreground-secondary font-medium leading-relaxed max-w-[240px]">
-                    Join thousands of students using Viszmo Pro to save time and study smarter.
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* Footer */}

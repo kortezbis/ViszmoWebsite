@@ -16,6 +16,7 @@ import {
     MonitorIcon
 } from 'lucide-react';
 import { SEO } from '../dashboard/components/SEO';
+import { DownloadCtaButton, useDesktopDownloadLabel } from '../components/DownloadCtaButton';
 import { useNavigate } from 'react-router-dom';
 
 const comparisonData = [
@@ -51,6 +52,8 @@ const faqs = [
 ];
 
 export const ViszmoVsAnkiPage = ({ onOpenDownload }: { onOpenDownload?: () => void }) => {
+    const tryFreeLabel = useDesktopDownloadLabel('try-free');
+    const getNowLabel = useDesktopDownloadLabel('get-now');
     const navigate = useNavigate();
 
     return (
@@ -84,9 +87,7 @@ export const ViszmoVsAnkiPage = ({ onOpenDownload }: { onOpenDownload?: () => vo
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                             <div className="btn-wrapper scale-110">
-                                <button className="btn" onClick={onOpenDownload}>
-                                    <span className="btn-text">Try Viszmo Free</span>
-                                </button>
+                                <DownloadCtaButton onClick={onOpenDownload} variant="try-free" />
                             </div>
                             <button 
                                 onClick={() => navigate('/pricing')}
@@ -193,7 +194,7 @@ export const ViszmoVsAnkiPage = ({ onOpenDownload }: { onOpenDownload?: () => vo
                             onClick={onOpenDownload}
                             className="px-16 py-8 bg-white text-[#0ea5e9] font-black rounded-[2.5rem] shadow-2xl hover:scale-105 transition-all text-2xl"
                         >
-                            Get Viszmo Now
+                            {getNowLabel}
                         </button>
                     </div>
                 </section>
