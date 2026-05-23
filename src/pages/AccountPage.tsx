@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 // Design System Imports
 import { SetPasswordModal } from '../components/SetPasswordModal';
 import { Navbar } from '../components/Navbar';
+import { SEO } from '../dashboard/components/SEO';
 
 import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
@@ -83,6 +84,7 @@ export const AccountPage = ({ onOpenDownload, onOpenMobileModal }: { onOpenDownl
 
     return (
         <div className="min-h-screen bg-[#ffffff] font-sans text-slate-900 selection:bg-[#0ea5e9]/10 flex flex-col">
+            <SEO title="My Account" noindex={true} />
             <Navbar onOpenModal={onOpenDownload} onOpenMobileModal={onOpenMobileModal} />
 
             <main className="flex-1 relative pt-32 pb-24">

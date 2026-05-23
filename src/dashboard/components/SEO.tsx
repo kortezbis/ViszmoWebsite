@@ -19,7 +19,7 @@ export function SEO({
   ogType = 'website',
   twitterCard = 'summary_large_image',
   canonicalUrl,
-  noindex = false 
+  noindex
 }: SEOProps) {
   useEffect(() => {
     // 1. Title
@@ -38,10 +38,14 @@ export function SEO({
       element.setAttribute('content', content);
     };
 
+    // Determine noindex: default to true for dashboard routes, false for marketing pages
+    const isDashboard = window.location.pathname.startsWith('/dashboard');
+    const shouldNoIndex = noindex !== undefined ? noindex : isDashboard;
+
     // 2. Standard Meta Tags
     if (description) setMetaTag('name', 'description', description);
     if (keywords) setMetaTag('name', 'keywords', keywords);
-    setMetaTag('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
+    setMetaTag('name', 'robots', shouldNoIndex ? 'noindex, nofollow' : 'index, follow');
 
     // 3. Open Graph Tags
     setMetaTag('property', 'og:title', fullTitle);
