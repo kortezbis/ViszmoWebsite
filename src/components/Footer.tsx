@@ -109,8 +109,10 @@ export const Footer = ({
                                 <li><Link to="/study-app-for-elementary-students" className="hover:text-[#0ea5e9] transition-colors">Elementary Students</Link></li>
                                 <li><Link to="/study-app-for-middle-and-high-school-students" className="hover:text-[#0ea5e9] transition-colors">Middle & High School</Link></li>
                                 <li><Link to="/study-app-for-college-students" className="hover:text-[#0ea5e9] transition-colors">College Students</Link></li>
+                                <li><Link to="/ai-homework-helper" className="hover:text-[#0ea5e9] transition-colors">AI Homework Helper</Link></li>
+                                <li><Link to="/ai-math-solver" className="hover:text-[#0ea5e9] transition-colors">AI Math Solver</Link></li>
+                                <li><Link to="/ai-study-assistant" className="hover:text-[#0ea5e9] transition-colors">AI Study Assistant</Link></li>
                                 <li><Link to="/study-while-watching-videos" className="hover:text-[#0ea5e9] transition-colors">Study While Watching Videos</Link></li>
-                                <li><Link to="/real-time-ai-tutor" className="hover:text-[#0ea5e9] transition-colors">Real-Time AI Tutor</Link></li>
                             </ul>
                         </div>
 
