@@ -54,6 +54,9 @@ import { ViszmoVsKnowtPage } from './pages/ViszmoVsKnowtPage';
 import { ViszmoVsGizmoPage } from './pages/ViszmoVsGizmoPage';
 import { ViszmoVsAnkiPage } from './pages/ViszmoVsAnkiPage';
 import { StudyWhileWatchingVideosPage } from './pages/StudyWhileWatchingVideosPage';
+import { AIHomeworkHelperPage } from './pages/AIHomeworkHelperPage';
+import { AIMathSolverPage } from './pages/AIMathSolverPage';
+import { AIStudyAssistantPage } from './pages/AIStudyAssistantPage';
 
 
 // List of school logo filenames
@@ -834,6 +837,9 @@ const MOBILE_DESKTOP_AUTO_PROMPT_PATHS = new Set([
   '/viszmo-vs-gizmo',
   '/viszmo-vs-anki',
   '/study-while-watching-videos',
+  '/ai-homework-helper',
+  '/ai-math-solver',
+  '/ai-study-assistant',
 ]);
 
 /** First visit on mobile: offer to email a desktop download link (marketing pages only). */
@@ -916,7 +922,7 @@ function AnimatedRoutes({
     }
   }, [isSignedIn, isLoading, location.pathname, navigate]);
 
-  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup', '/viszmo-vs-quizlet', '/real-time-ai-tutor', '/study-app-for-elementary-students', '/study-app-for-middle-and-high-school-students', '/study-app-for-college-students', '/viszmo-vs-knowt', '/viszmo-vs-gizmo', '/viszmo-vs-anki', '/study-while-watching-videos'];
+  const publicPaths = ['/', '/features', '/pricing', '/how-it-works', '/study-overlay', '/terms', '/privacy', '/contact', '/help', '/account', '/login', '/signup', '/viszmo-vs-quizlet', '/real-time-ai-tutor', '/study-app-for-elementary-students', '/study-app-for-middle-and-high-school-students', '/study-app-for-college-students', '/viszmo-vs-knowt', '/viszmo-vs-gizmo', '/viszmo-vs-anki', '/study-while-watching-videos', '/ai-homework-helper', '/ai-math-solver', '/ai-study-assistant'];
   const isPublicPath = publicPaths.includes(location.pathname) || location.pathname.startsWith('/login') || location.pathname.startsWith('/signup');
 
   const routes = (
@@ -936,6 +942,9 @@ function AnimatedRoutes({
         <Route path="/viszmo-vs-gizmo" element={<ViszmoVsGizmoPage onOpenDownload={onOpenDownload} />} />
         <Route path="/viszmo-vs-anki" element={<ViszmoVsAnkiPage onOpenDownload={onOpenDownload} />} />
         <Route path="/study-while-watching-videos" element={<StudyWhileWatchingVideosPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/ai-homework-helper" element={<AIHomeworkHelperPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/ai-math-solver" element={<AIMathSolverPage onOpenDownload={onOpenDownload} />} />
+        <Route path="/ai-study-assistant" element={<AIStudyAssistantPage onOpenDownload={onOpenDownload} />} />
 
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />

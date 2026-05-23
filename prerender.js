@@ -89,6 +89,21 @@ const routes = {
     title: "Help Center | Viszmo Troubleshooting & Documentation",
     description: "Search the Viszmo Help Center for guides, desktop app installation tutorials, account setup troubleshooting, and feature walkthroughs.",
     keywords: "help desk, Viszmo FAQ, install desktop app, screen overlay setup guide"
+  },
+  '/ai-homework-helper': {
+    title: "AI Homework Helper — Get Instant Answers While You Study | Viszmo",
+    description: "Viszmo is the AI homework helper that lives on your screen. Get instant answers for any subject — from high school through college.",
+    keywords: "AI homework helper, live homework assistance, step by step homework, multi-subject AI helper"
+  },
+  '/ai-math-solver': {
+    title: "AI Math Solver — Solve Any Math Problem Instantly | Viszmo",
+    description: "Viszmo solves any math problem live on your screen. Step by step answers for algebra, geometry, calculus and more — for high school and college students.",
+    keywords: "AI math solver, graph solver, geometry proof helper, step by step calculus solver"
+  },
+  '/ai-study-assistant': {
+    title: "AI Study Assistant — Your Smart Study Partner | Viszmo",
+    description: "Viszmo is the AI study assistant that works live on your screen. Ask questions, get explanations, and study smarter — built for high school and college students.",
+    keywords: "AI study assistant, spaced repetition study, personal study companion, digital textbook helper"
   }
 };
 
