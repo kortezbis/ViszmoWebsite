@@ -4,10 +4,27 @@ import { motion } from 'framer-motion';
 export const HeroMockup = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      try {
+        videoRef.current.playbackRate = 2.0;
+        videoRef.current.currentTime = 10;
+      } catch (err) {
+        console.warn("Failed to set video properties on loaded metadata", err);
+      }
+    }
+  };
+
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.playbackRate = 2.0; // Play sped up
-      videoRef.current.currentTime = 10; // Start at 10 seconds
+      try {
+        videoRef.current.playbackRate = 2.0;
+        if (videoRef.current.readyState >= 1) {
+          videoRef.current.currentTime = 10;
+        }
+      } catch (err) {
+        console.warn("Failed to set initial video properties on mount", err);
+      }
     }
   }, []);
 
@@ -37,6 +54,7 @@ export const HeroMockup = () => {
             muted
             playsInline
             controls={false}
+            onLoadedMetadata={handleLoadedMetadata}
             className="w-full h-full object-cover"
           />
           {/* Subtle overlay for better visual integration */}

@@ -29,9 +29,23 @@ const Badge = ({ children, color = "blue" }: { children: React.ReactNode, color?
 const VideoContainer = ({ src, children, overlay }: { src?: string, children?: React.ReactNode, overlay?: React.ReactNode }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
+    const handleLoadedMetadata = () => {
+        if (videoRef.current) {
+            try {
+                videoRef.current.playbackRate = 2.0;
+            } catch (err) {
+                console.warn("Failed to set playbackRate on metadata load", err);
+            }
+        }
+    };
+
     useEffect(() => {
         if (videoRef.current) {
-            videoRef.current.playbackRate = 2.0; // Play sped up
+            try {
+                videoRef.current.playbackRate = 2.0; // Play sped up
+            } catch (err) {
+                console.warn("Failed to set playbackRate on mount", err);
+            }
         }
     }, [src]);
 
@@ -47,6 +61,7 @@ const VideoContainer = ({ src, children, overlay }: { src?: string, children?: R
                         muted
                         playsInline
                         controls={false}
+                        onLoadedMetadata={handleLoadedMetadata}
                         className="w-full h-full object-cover"
                     />
                 )}
