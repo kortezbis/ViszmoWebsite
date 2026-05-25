@@ -1,14 +1,24 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+
+const PLAYLIST = [
+  "/demovids/Kortez's video.mp4",
+  "/demovids/Kortez's video (1).mp4"
+];
 
 export const HeroMockup = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       try {
         videoRef.current.playbackRate = 2.0;
-        videoRef.current.currentTime = 10;
+        if (currentVideoIndex === 0) {
+          videoRef.current.currentTime = 10;
+        } else {
+          videoRef.current.currentTime = 0;
+        }
       } catch (err) {
         console.warn("Failed to set video properties on loaded metadata", err);
       }
@@ -19,14 +29,19 @@ export const HeroMockup = () => {
     if (videoRef.current) {
       try {
         videoRef.current.playbackRate = 2.0;
-        if (videoRef.current.readyState >= 1) {
+        if (currentVideoIndex === 0 && videoRef.current.readyState >= 1) {
           videoRef.current.currentTime = 10;
         }
+        videoRef.current.play().catch(() => {});
       } catch (err) {
-        console.warn("Failed to set initial video properties on mount", err);
+        console.warn("Failed to play video on mount or index change", err);
       }
     }
-  }, []);
+  }, [currentVideoIndex]);
+
+  const handleVideoEnded = () => {
+    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % PLAYLIST.length);
+  };
 
   return (
     <div className="relative w-full max-w-7xl mx-auto perspective-1000">
@@ -48,13 +63,13 @@ export const HeroMockup = () => {
         <div className="relative w-full h-full overflow-hidden bg-black">
           <video
             ref={videoRef}
-            src="/demovids/Kortez's video.mp4"
+            src={PLAYLIST[currentVideoIndex]}
             autoPlay
-            loop
             muted
             playsInline
             controls={false}
             onLoadedMetadata={handleLoadedMetadata}
+            onEnded={handleVideoEnded}
             className="w-full h-full object-cover"
           />
           {/* Subtle overlay for better visual integration */}
