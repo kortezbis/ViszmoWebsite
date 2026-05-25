@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { SEO } from '../dashboard/components/SEO';
 import {
@@ -26,14 +26,36 @@ const Badge = ({ children, color = "blue" }: { children: React.ReactNode, color?
     );
 };
 
-const VideoContainer = ({ children, overlay }: { src?: string, children?: React.ReactNode, overlay?: React.ReactNode }) => (
-    <div className="relative group w-full">
-        <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-slate-900/5 backdrop-blur-sm">
-            {overlay}
+const VideoContainer = ({ src, children, overlay }: { src?: string, children?: React.ReactNode, overlay?: React.ReactNode }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.playbackRate = 2.0; // Play sped up
+        }
+    }, [src]);
+
+    return (
+        <div className="relative group w-full">
+            <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-slate-950">
+                {src && (
+                    <video
+                        ref={videoRef}
+                        src={src}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        controls={false}
+                        className="w-full h-full object-cover"
+                    />
+                )}
+                {overlay}
+            </div>
+            {children}
         </div>
-        {children}
-    </div>
-);
+    );
+};
 
 const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: string, description: string }) => (
     <div className="bg-slate-50/80 backdrop-blur-sm rounded-2xl p-5 border border-slate-100 hover:border-slate-200 transition-colors">
@@ -93,7 +115,7 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
                                 className="relative"
                             >
                                 <VideoContainer
-                                    src="https://www.Viszmo.com/assets/AI%20Overlay%20Demo.mp4"
+                                    src="/demovids/Kortez's video.mp4"
                                     overlay={
                                         <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-2xl border border-slate-200/50 w-44 z-20">
                                             <div className="text-[10px] font-black tracking-wider uppercase mb-4 text-slate-400">System Metrics</div>
@@ -181,7 +203,7 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
                                 viewport={{ once: true }}
                                 className="relative"
                             >
-                                <VideoContainer src="https://www.Viszmo.com/assets/Study%20Mode%20Demo.mp4">
+                                <VideoContainer src="/demovids/Video Project 1.mp4">
                                     {/* Bottom Icons Bar */}
                                     <div className="mt-8 bg-white/80 backdrop-blur-md border border-slate-100/60 rounded-2xl p-6 shadow-sm flex justify-between items-center text-center">
                                         <div className="flex-1 border-r border-slate-200/50 last:border-0 px-2 group/icon cursor-pointer">

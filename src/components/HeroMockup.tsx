@@ -1,6 +1,16 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 export const HeroMockup = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 2.0; // Play sped up
+      videoRef.current.currentTime = 10; // Start at 10 seconds
+    }
+  }, []);
+
   return (
     <div className="relative w-full max-w-7xl mx-auto perspective-1000">
       <motion.div
@@ -17,12 +27,23 @@ export const HeroMockup = () => {
           <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/50" />
         </div>
 
-        {/* Hero Area - Blank */}
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a]">
+        {/* Hero Area - Video fills the container */}
+        <div className="relative w-full h-full overflow-hidden bg-black">
+          <video
+            ref={videoRef}
+            src="/demovids/Kortez's video.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls={false}
+            className="w-full h-full object-cover"
+          />
           {/* Subtle overlay for better visual integration */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none z-10" />
         </div>
       </motion.div>
     </div>
   );
 };
+
