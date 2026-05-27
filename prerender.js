@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { pingIndexNow } from './scripts/indexnow-helper.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -107,7 +109,7 @@ const routes = {
   }
 };
 
-function prerender() {
+async function prerender() {
   if (!fs.existsSync(TEMPLATE_PATH)) {
     console.error(`Build template not found at ${TEMPLATE_PATH}. Did you run "npm run build" first?`);
     process.exit(1);
@@ -180,6 +182,16 @@ function prerender() {
   });
 
   console.log('Static pre-rendering successfully completed!');
+
+  // Submit pre-rendered URLs to IndexNow
+  try {
+    const preRenderedUrls = Object.keys(routes).map(route => {
+      return `https://www.viszmo.com${route === '/' ? '' : route}`;
+    });
+    await pingIndexNow(preRenderedUrls);
+  } catch (error) {
+    console.error('[IndexNow] Error pinging IndexNow after pre-rendering:', error);
+  }
 }
 
 prerender();
