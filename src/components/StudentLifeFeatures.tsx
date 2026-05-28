@@ -147,26 +147,128 @@ export const StudentLifeFeatures = () => {
                 {/* Bento Grid Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-auto">
 
-                    {/* FULL WIDTH: Visual Study Sidekick (Overlay) */}
+                    {/* FULL WIDTH: Visual Study Sidekick (Overlay & Lecture Video Showcase) */}
                     <motion.div
                         initial={{ opacity: 0, y: 40 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
-                        className="md:col-span-3 group relative rounded-[2rem] md:rounded-[3rem] overflow-hidden p-8 md:p-14 flex flex-col items-center justify-center text-center hover:shadow-xl transition-all duration-500 min-h-[600px]"
+                        className="md:col-span-3 group relative rounded-[2rem] md:rounded-[3rem] overflow-hidden p-8 md:p-14 hover:shadow-xl transition-all duration-500 text-left"
                         style={{
                             background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF4F9 100%)',
                             border: '1px solid #E2E8F0',
                             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05)'
                         }}
                     >
-                        <div className="max-w-2xl">
-                            <h3 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 uppercase tracking-tight">
-                                Visual Study <span className="text-[#0ea5e9]">Sidekick</span>
-                            </h3>
-                            <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed">
-                                Analyze complex diagrams, text, or equations instantly without ever leaving your browser or textbook. Simply point and learn with real-time AI insights.
-                            </p>
+                        <div className="w-full space-y-12">
+                            {/* Centered Premium Title */}
+                            <div className="text-center w-full max-w-3xl mx-auto space-y-3">
+                                <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                                    Two Powerful Modes. <span className="text-[#0ea5e9]">One Intelligent Sidekick.</span>
+                                </h3>
+                                <p className="text-sm md:text-base text-slate-500 font-medium">
+                                    Adapt Viszmo to exactly how you study, learn, and complete homework—whether working with textbooks, sheets, or attending live lectures.
+                                </p>
+                            </div>
+
+                            {/* Side-by-Side Modes Video Cards */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 w-full">
+                                {/* Mode 1: Overlay Mode */}
+                                <div className="flex flex-col bg-white rounded-3xl border border-slate-100 p-6 md:p-8 hover:shadow-md hover:border-[#0ea5e9]/20 transition-all duration-300">
+                                    {/* Video Container (macOS Style Window) at the top - NO BORDER */}
+                                    <div className="relative rounded-2xl bg-[#0f0f0f] shadow-md overflow-hidden aspect-video w-full mb-6">
+                                        <div className="absolute top-3 left-4 flex gap-1.5 z-20">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
+                                            <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
+                                            <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
+                                        </div>
+                                        <video
+                                            src="/demovids/overlay.mp4"
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                            controls={false}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+
+                                    {/* Title and Badge */}
+                                    <div className="mb-4">
+                                        <h4 className="font-bold text-slate-900 text-2xl leading-none">
+                                            Overlay Mode
+                                        </h4>
+                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-1">Real-time study & homework companion</span>
+                                    </div>
+                                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                                        A smart, transparent layer that lives on your screen. Point to any textbook page, homework problem, PDF, or complex diagram to get instant, step-by-step assistance.
+                                    </p>
+
+                                    {/* Checklist Points */}
+                                    <ul className="space-y-3 mt-auto pt-4 border-t border-slate-50">
+                                        {[
+                                            "Always-On Screen Scanner — Analyzes diagrams, text, and formulas instantly.",
+                                            "Privacy Shield Tech — 100% invisible on Zoom screenshare or recorders.",
+                                            "Instant Homework Helper — Solves and explains complex problems without leaving your active tab."
+                                        ].map((point, idx) => (
+                                            <li key={idx} className="flex gap-2.5 items-start text-xs text-slate-600 font-medium leading-relaxed">
+                                                <svg className="w-4 h-4 text-[#0ea5e9] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span>{point}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Mode 2: Lecture Mode */}
+                                <div className="flex flex-col bg-white rounded-3xl border border-slate-100 p-6 md:p-8 hover:shadow-md hover:border-[#0ea5e9]/20 transition-all duration-300">
+                                    {/* Video Container (macOS Style Window) at the top - NO BORDER */}
+                                    <div className="relative rounded-2xl bg-[#0f0f0f] shadow-md overflow-hidden aspect-video w-full mb-6">
+                                        <div className="absolute top-3 left-4 flex gap-1.5 z-20">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
+                                            <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
+                                            <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
+                                        </div>
+                                        <video
+                                            src="/demovids/lecture.mp4"
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                            controls={false}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+
+                                    {/* Title and Badge */}
+                                    <div className="mb-4">
+                                        <h4 className="font-bold text-slate-900 text-2xl leading-none">
+                                            Lecture Mode
+                                        </h4>
+                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-1">Real-time lecture & classroom transcriber</span>
+                                    </div>
+                                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                                        Captures Zoom meetings, YouTube educational videos, or classroom audio/video live. Synces slides with live transcription for effortless review.
+                                    </p>
+
+                                    {/* Checklist Points */}
+                                    <ul className="space-y-3 mt-auto pt-4 border-t border-slate-50">
+                                        {[
+                                            "Auto-Slide Capture — Snap and integrate lecture presentations automatically.",
+                                            "Multi-Source Recording — Captures Zoom meetings, class audio, or YouTube streams.",
+                                            "Instant Study Decks — Converts lectures into perfectly styled notes and flashcards on the fly."
+                                        ].map((point, idx) => (
+                                            <li key={idx} className="flex gap-2.5 items-start text-xs text-slate-600 font-medium leading-relaxed">
+                                                <svg className="w-4 h-4 text-[#0ea5e9] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span>{point}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </motion.div>
 

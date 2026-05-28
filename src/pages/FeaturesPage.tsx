@@ -163,19 +163,19 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                             >
-                                <Badge color="blue">Visual Study Sidekick</Badge>
+                                <Badge color="blue">Real-time Study & Homework Companion</Badge>
                                 <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight">
                                     Intelligent Screen <br /> Analysis.
                                 </h2>
                                 <p className="text-lg text-slate-600 leading-relaxed mb-10">
-                                    Analyze any document, lecture, or webpage instantly without switching tabs. Viszmo reads what's on your screen so you can focus on learning, not multitasking.
+                                    Get instant, step-by-step homework help, diagram explanations, and real-time screen analysis without switching tabs. Viszmo reads what's on your screen so you can master any concept in your flow.
                                 </p>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
                                     <FeatureCard
                                         icon={MousePointer2}
                                         title="Click-Through Mode"
-                                        description="Interact with windows behind the overlay without moving it. Perfect for focused study sessions."
+                                        description="Interact with windows behind the overlay without moving it. Perfect for solving homework and following guides."
                                     />
                                     <FeatureCard
                                         icon={Keyboard}
@@ -185,9 +185,9 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
                                 </div>
 
                                 <ul className="space-y-4">
-                                    <FeatureListItem icon={MessageSquare} text="Chat with Screen — Ask follow-up questions about what you see" />
+                                    <FeatureListItem icon={MessageSquare} text="Chat with Screen — Ask follow-up questions about homework or diagrams" />
                                     <FeatureListItem icon={Eye} text="Focus Mode — Minimalist UI for distraction-free learning" />
-                                    <FeatureListItem icon={Layers} text="Multi-Image Context — Chain multiple screenshots" />
+                                    <FeatureListItem icon={Layers} text="Multi-Image Context — Chain multiple screenshots and questions" />
                                     <FeatureListItem icon={RefreshCw} text="Auto-Capture — Hands-free scanning every 30s" />
                                     <FeatureListItem icon={Monitor} text="Multi-Monitor — Select any display target" />
                                 </ul>
@@ -253,12 +253,12 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                             >
-                                <Badge color="violet">The Study Dashboard</Badge>
+                                <Badge color="violet">The Study & Homework Hub</Badge>
                                 <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight">
-                                    Study Dashboard, <br /> On Auto-Pilot.
+                                    Study & Homework Hub, <br /> On Auto-Pilot.
                                 </h2>
                                 <p className="text-lg text-slate-600 leading-relaxed mb-10">
-                                    Upload PDFs, paste YouTube links, text snippets, or use transcripts. Turn anything into summaries, flashcards, quizzes, key terms, study guides, and test prep instantly.
+                                    Upload homework worksheets, textbook PDFs, lecture recordings, or paste YouTube links. Instantly generate step-by-step guides, summaries, interactive flashcards, and practice tests.
                                 </p>
 
                                 {/* Feature Pills */}

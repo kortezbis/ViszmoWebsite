@@ -75,7 +75,6 @@ function Sidebar({
     };
     const { resolvedTheme, toggleTheme } = useTheme();
     const [showAllModes, setShowAllModes] = useState(false);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const { workspaces } = useDecks();
     const mainWorkspaces = workspaces.filter(ws => !ws.parentId);
 
@@ -245,15 +244,9 @@ function Sidebar({
                     ) : (
                         <div>
                             <div className="flex items-center justify-between px-4 mb-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-foreground-muted whitespace-nowrap">
+                                <span className="text-xs font-bold text-foreground-muted uppercase tracking-wider whitespace-nowrap">
                                     decks
                                 </span>
-                                <button
-                                    onClick={() => setIsCreateModalOpen(true)}
-                                    className="p-1 rounded-md text-foreground-muted hover:text-foreground hover:bg-surface-hover transition-colors"
-                                >
-                                    <Plus size={16} />
-                                </button>
                             </div>
                             <div className="space-y-1">
                                 {mainWorkspaces.map((ws) => (
@@ -294,12 +287,6 @@ function Sidebar({
                     {!isCollapsed && <span>Upgrade to Pro</span>}
                 </button>
             </div>
-            
-            <CreateModal 
-                isOpen={isCreateModalOpen} 
-                onClose={() => setIsCreateModalOpen(false)}
-                initialStep="create-deck"
-            />
         </aside>
     );
 }
