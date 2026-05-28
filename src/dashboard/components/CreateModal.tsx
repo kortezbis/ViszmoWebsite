@@ -364,7 +364,7 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep, 
             const newDeckId = await createDeck('AI Generated Deck', undefined, cards, selectedWorkspaceId || undefined);
             setActiveDeck(newDeckId);
             handleClose();
-            navigate(`/dashboard/deck/${newDeckId}`);
+            navigate(`/dashboard/edit-deck/${newDeckId}`);
         } catch (e: unknown) {
             if ((e as Error)?.name === 'AbortError') return;
             setGenError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
@@ -405,7 +405,7 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep, 
             const newDeckId = await createDeck(file.name.replace(/\.[^.]+$/, ''), undefined, cards, selectedWorkspaceId || undefined);
             setActiveDeck(newDeckId);
             setUploadStatus('done');
-            setTimeout(() => { handleClose(); navigate(`/dashboard/deck/${newDeckId}`); }, 800);
+            setTimeout(() => { handleClose(); navigate(`/dashboard/edit-deck/${newDeckId}`); }, 800);
         } catch (e: unknown) {
             if ((e as Error)?.name === 'AbortError') return;
             setUploadStatus('error');
@@ -504,7 +504,7 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep, 
             const newDeckId = await createDeck(title, undefined, cards, selectedWorkspaceId || undefined);
             setActiveDeck(newDeckId);
             handleClose();
-            navigate(`/dashboard/decks/${newDeckId}`);
+            navigate(`/dashboard/edit-deck/${newDeckId}`);
         } catch (e: unknown) {
             if ((e as Error)?.name === 'AbortError') return;
             setGenError(e instanceof Error ? e.message : 'Generation failed. Please try again.');
@@ -579,7 +579,7 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep, 
                  const newDeckId = await createDeck(title, undefined, cards, selectedWorkspaceId || undefined);
                  setActiveDeck(newDeckId);
                  setUploadStatus('done');
-                 setTimeout(() => { handleClose(); navigate(`/dashboard/decks/${newDeckId}`); }, 800);
+                 setTimeout(() => { handleClose(); navigate(`/dashboard/edit-deck/${newDeckId}`); }, 800);
             } else {
                 throw new Error("Could not extract content from recording. Try speaking longer or louder.");
             }
@@ -611,7 +611,7 @@ export function CreateModal({ isOpen, onClose, initialWorkspaceId, initialStep, 
             const newDeckId = await createDeck(file.name.replace(/\.[^.]+$/, ''), undefined, cards, selectedWorkspaceId || undefined);
             setActiveDeck(newDeckId);
             handleClose();
-            navigate(`/dashboard/decks/${newDeckId}`);
+            navigate(`/dashboard/edit-deck/${newDeckId}`);
         } catch (e) {
             setGenError(e instanceof Error ? e.message : 'Import failed');
         } finally {

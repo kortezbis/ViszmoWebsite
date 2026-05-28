@@ -151,6 +151,7 @@ export function DecksProvider({ children }: { children: ReactNode }) {
     const [decksError, setDecksError] = useState<string | null>(null);
 
     const cardSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+    const hasLoadedRef = useRef(false);
 
     const persistActiveDeck = useCallback((id: string | null) => {
         try {
@@ -167,8 +168,8 @@ export function DecksProvider({ children }: { children: ReactNode }) {
             setWorkspaces([]);
             return;
         }
-        // Only set loading if we don't have data yet to prevent flickering
-        if (decks.length === 0 && workspaces.length === 0) {
+        // Only show loading skeleton on the very first load, not on background refreshes
+        if (!hasLoadedRef.current) {
             setDecksLoading(true);
         }
         setDecksError(null);
@@ -203,6 +204,7 @@ export function DecksProvider({ children }: { children: ReactNode }) {
 
             setDecks(nextDecks);
             setWorkspaces(nextWorkspaces);
+            hasLoadedRef.current = true;
         } catch (e: unknown) {
             const msg = e instanceof Error ? e.message : 'Failed to load decks';
             console.error('[Decks]', msg);
@@ -457,7 +459,8 @@ export function DecksProvider({ children }: { children: ReactNode }) {
     };
 
     const createWorkspace = async (name: string, color: string, parentId: string | null = null): Promise<string> => {
-        const createdRow = await db.createWorkspace(name, color, parentId);
+        // db.createWorkspace(name, color, iconName?, parentId?) — pass undefined for iconName
+        const createdRow = await db.createWorkspace(name, color, undefined, parentId ?? undefined);
         const newWs = mapRowToWorkspace(createdRow);
         setWorkspaces(prev => [newWs, ...prev]);
         return createdRow.id;

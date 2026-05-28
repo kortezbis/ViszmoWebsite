@@ -38,7 +38,7 @@ export default function WorkspaceDetailPage() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const tabParam = searchParams.get('tab');
-    const { workspaces, decks, decksLoading, getDecksInWorkspace, refreshDecks: refreshContextDecks } = useDecks();
+    const { workspaces, decks, decksLoading, getDecksInWorkspace, refreshDecks: refreshContextDecks, createWorkspace } = useDecks();
 
     const workspace = workspaces.find(w => w.id === workspaceId);
     const [activeTab, setActiveTab] = useState<TabId>(
@@ -125,39 +125,28 @@ export default function WorkspaceDetailPage() {
 
     const load = useCallback(async (opts?: { isRefresh?: boolean }) => {
         if (!workspaceId) return;
-        // Only show skeleton on first load or when workspace changes
-        if (workspaceLectures.length === 0 && workspaceGuides.length === 0) {
-            setLoading(true);
-        }
         setError(null);
         try {
-            // Context handles workspaces and decks. 
-            // We only fetch the "extras" here (Lectures, Guides, etc.)
-            const [l, g, p] = await Promise.all([
-                db.getNotesByWorkspace(workspaceId),
-                db.getStudyGuidesByWorkspace(workspaceId),
-                db.getPodcastsByWorkspace(workspaceId)
-            ]);
-
-            setWorkspaceLectures(l);
-            setWorkspaceGuides(g);
-            setWorkspacePodcasts(p);
-            setHasLoadedLectures(true);
-            setHasLoadedGuides(true);
-            setHasLoadedPodcasts(true);
+            // Only fetch the active tab's data on initial load
+            // Other tabs are fetched lazily when selected
+            if (!hasLoadedLectures || opts?.isRefresh) {
+                const l = await db.getNotesByWorkspace(workspaceId);
+                setWorkspaceLectures(l);
+                setHasLoadedLectures(true);
+            }
         } catch (e: any) {
             console.error('[WorkspaceDetail] Load failed:', e);
             setError('Failed to load library data');
         } finally {
             setLoading(false);
         }
-    }, [workspaceId]);
+    }, [workspaceId, hasLoadedLectures]);
 
     useEffect(() => {
         void load();
     }, [load]);
 
-    // Lazy load cards when tab is selected
+    // Lazy load cards when Cards tab is selected
     useEffect(() => {
         if (activeTab === 'Cards' && workspaceId && !hasLoadedCards && !loadingCards) {
             const loadCards = async () => {
@@ -175,6 +164,38 @@ export default function WorkspaceDetailPage() {
             void loadCards();
         }
     }, [activeTab, workspaceId, hasLoadedCards, loadingCards]);
+
+    // Lazy load guides when Study Guides tab is selected
+    useEffect(() => {
+        if (activeTab === 'Study Guides' && workspaceId && !hasLoadedGuides) {
+            const loadGuides = async () => {
+                try {
+                    const g = await db.getStudyGuidesByWorkspace(workspaceId);
+                    setWorkspaceGuides(g);
+                    setHasLoadedGuides(true);
+                } catch (e) {
+                    console.error('[WorkspaceDetail] Guides load failed:', e);
+                }
+            };
+            void loadGuides();
+        }
+    }, [activeTab, workspaceId, hasLoadedGuides]);
+
+    // Lazy load podcasts when Podcasts tab is selected
+    useEffect(() => {
+        if (activeTab === 'Podcasts' && workspaceId && !hasLoadedPodcasts) {
+            const loadPodcasts = async () => {
+                try {
+                    const p = await db.getPodcastsByWorkspace(workspaceId);
+                    setWorkspacePodcasts(p);
+                    setHasLoadedPodcasts(true);
+                } catch (e) {
+                    console.error('[WorkspaceDetail] Podcasts load failed:', e);
+                }
+            };
+            void loadPodcasts();
+        }
+    }, [activeTab, workspaceId, hasLoadedPodcasts]);
 
     // Calculate total cards for "Study All"
     const totalCardsCount = useMemo(() => {
@@ -237,14 +258,18 @@ export default function WorkspaceDetailPage() {
         try {
             if (modalType === 'rename') {
                 await db.updateWorkspace(workspaceId, { name: modalName.trim() });
+                // Refresh context so sidebar/library reflect rename
+                void refreshContextDecks();
             } else if (modalType === 'subdeck') {
-                // Use parent workspace color for sub-decks as requested
-                await db.createWorkspace(modalName.trim(), workspace?.color || '#3B82F6', undefined, workspaceId);
+                // Use createWorkspace from DecksContext so it appears instantly in context state
+                await createWorkspace(modalName.trim(), workspace?.color || '#3B82F6', workspaceId);
+                // Also refresh context to pick up server stats
+                void refreshContextDecks();
             } else if (modalType === 'deck') {
                 await db.createDeck(modalName.trim(), workspaceId);
+                void refreshContextDecks();
             }
             closeModal();
-            void load({ isRefresh: true });
         } catch (e) {
             alert(e instanceof Error ? e.message : 'Action failed');
         } finally {

@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         user,
         isLoading,
-        isSignedIn: !!session || (!!user && isLoading), // Optimistic sign-in if we have a cached user
+        isSignedIn: !!session || !!user, // Optimistic: trust cached user during loading; Supabase corrects if invalid
         userId: user?.id ?? null,
         userEmail: user?.email ?? null,
         userName: user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? null,
