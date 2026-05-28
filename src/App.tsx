@@ -342,7 +342,7 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
           <div className="w-full max-w-2xl h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-6 md:mb-8"></div>
 
           <p className="text-base md:text-lg text-white/90 mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed font-normal px-4">
-            Viszmo lives on your screen to provide instant AI assistance and perfect notes while you study—all seamlessly synced to an advanced <span className="font-bold text-white">Study Dashboard</span> for your flashcards, quizzes, and personalized guides.
+            Viszmo takes <span className="bg-yellow-300/20 text-[#fde047] px-1.5 py-0.5 rounded font-semibold">perfect Lecture notes</span> and gives <span className="bg-yellow-300/20 text-[#fde047] px-1.5 py-0.5 rounded font-semibold">real-time answers</span> during studies or homework assignments, all while completely <span className="bg-yellow-300/20 text-[#fde047] px-1.5 py-0.5 rounded font-semibold">undetectable</span> and seamlessly synced to your <span className="bg-yellow-300/20 text-[#fde047] px-1.5 py-0.5 rounded font-semibold">Study Dashboard</span>.
           </p>
 
           <div className="btn-wrapper">

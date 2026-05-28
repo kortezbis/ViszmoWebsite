@@ -158,11 +158,10 @@ export function DesktopDownloadLinkModal({ isOpen, onClose, onSentSuccess }: Des
                                             setPlatform('windows');
                                             resetFeedback();
                                         }}
-                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-lg transition-all ${
-                                            isWindows
-                                                ? 'bg-white text-[#0ea5e9] shadow-sm'
-                                                : 'text-slate-500 hover:text-slate-800'
-                                        }`}
+                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-lg transition-all ${isWindows
+                                            ? 'bg-white text-[#0ea5e9] shadow-sm'
+                                            : 'text-slate-500 hover:text-slate-800'
+                                            }`}
                                     >
                                         <WindowsTileIcon className="w-3.5 h-3.5 shrink-0" size={14} />
                                         Windows
@@ -173,11 +172,10 @@ export function DesktopDownloadLinkModal({ isOpen, onClose, onSentSuccess }: Des
                                             setPlatform('mac');
                                             resetFeedback();
                                         }}
-                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-lg transition-all ${
-                                            !isWindows
-                                                ? 'bg-white text-[#0ea5e9] shadow-sm'
-                                                : 'text-slate-500 hover:text-slate-800'
-                                        }`}
+                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold rounded-lg transition-all ${!isWindows
+                                            ? 'bg-white text-[#0ea5e9] shadow-sm'
+                                            : 'text-slate-500 hover:text-slate-800'
+                                            }`}
                                     >
                                         <AppleLogoIcon className="w-3.5 h-3.5 shrink-0" size={14} />
                                         macOS
@@ -233,7 +231,7 @@ export function DesktopDownloadLinkModal({ isOpen, onClose, onSentSuccess }: Des
                                         onClick={onClose}
                                         className="mt-4 w-full text-center text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors"
                                     >
-                                        Maybe later
+
                                     </button>
                                 </div>
                             </>

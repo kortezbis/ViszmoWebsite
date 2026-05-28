@@ -16,14 +16,17 @@ import {
 } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
 import PaperPlane2 from '../../components/PaperPlane2';
-import { chatGeneral, type ChatMessage } from '../../services/aiGateway';
+import { chatGeneral, type ChatMessage as GatewayChatMessage } from '../../services/aiGateway';
 import { 
   getChats, 
   getChatMessages, 
   createChat, 
   saveMessage, 
   deleteChat,
-  type WsChat 
+  subscribeToChatMessages,
+  subscribeToChats,
+  type WsChat,
+  type WsChatMessage,
 } from '../../services/chatData';
 import { db, type LectureNote } from '../../services/database';
 import { chatWithLectureTranscript } from '../../services/lectureChat';
@@ -32,10 +35,11 @@ export default function ChatPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const transcriptId = searchParams.get('transcriptId');
   const seedPromptParam = searchParams.get('seedPrompt');
+  const chatIdParam = searchParams.get('chatId');
 
   const [chats, setChats] = useState<WsChat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<WsChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -56,7 +60,16 @@ export default function ChatPage() {
       setIsLoading(false);
     };
     void loadHistory();
+
+    return subscribeToChats(() => {
+      void loadHistory();
+    });
   }, []);
+
+  useEffect(() => {
+    if (transcriptId || !chatIdParam) return;
+    setActiveChatId(chatIdParam);
+  }, [chatIdParam, transcriptId]);
 
   // 2. Load Lecture Context if transcriptId is present
   useEffect(() => {
@@ -76,25 +89,54 @@ export default function ChatPage() {
     if (transcriptId) {
         // For lecture chat, we might want to start fresh or keep session in memory
         // For now, let's keep it simple and just show the initial greeting
-        setMessages([{ role: 'assistant', text: `Hello! I'm ready to help you with the lecture: "${lectureNote?.title || 'Loading...'}"` }]);
+        setMessages([{
+          id: 'greeting',
+          chatId: '',
+          role: 'assistant',
+          text: `Hello! I'm ready to help you with the lecture: "${lectureNote?.title || 'Loading...'}"`,
+          createdAt: new Date().toISOString(),
+        }]);
         return;
     }
 
     if (!activeChatId) {
-      setMessages([{ role: 'assistant', text: 'Hello! How can I assist you today?' }]);
+      setMessages([{
+        id: 'greeting',
+        chatId: '',
+        role: 'assistant',
+        text: 'Hello! How can I assist you today?',
+        createdAt: new Date().toISOString(),
+      }]);
       return;
     }
 
     const loadMessages = async () => {
       const data = await getChatMessages(activeChatId);
       if (data.length > 0) {
-        setMessages(data.map(m => ({ role: m.role, text: m.text })));
+        setMessages(data);
       } else {
-        setMessages([{ role: 'assistant', text: 'Hello! How can I assist you today?' }]);
+        setMessages([{
+          id: 'greeting',
+          chatId: activeChatId,
+          role: 'assistant',
+          text: 'Hello! How can I assist you today?',
+          createdAt: new Date().toISOString(),
+        }]);
       }
     };
     void loadMessages();
   }, [activeChatId, transcriptId, lectureNote?.title]);
+
+  useEffect(() => {
+    if (!activeChatId || transcriptId) return;
+
+    return subscribeToChatMessages(activeChatId, (message) => {
+      setMessages((prev) => {
+        if (prev.some((item) => item.id === message.id)) return prev;
+        return [...prev, message];
+      });
+    });
+  }, [activeChatId, transcriptId]);
 
   // 4. Handle Seed Prompt
   useEffect(() => {
@@ -120,9 +162,17 @@ export default function ChatPage() {
   const startNewChat = () => {
     if (transcriptId) {
         setSearchParams({}); // Clear transcript context
+    } else if (chatIdParam) {
+        setSearchParams({});
     }
     setActiveChatId(null);
-    setMessages([{ role: 'assistant', text: 'Hello! How can I assist you today?' }]);
+    setMessages([{
+      id: 'greeting',
+      chatId: '',
+      role: 'assistant',
+      text: 'Hello! How can I assist you today?',
+      createdAt: new Date().toISOString(),
+    }]);
     setError(null);
     setInputText('');
   };
@@ -142,9 +192,19 @@ export default function ChatPage() {
     setInputText('');
     setError(null);
     
+    const historyForAi: GatewayChatMessage[] = messages
+      .filter((message) => message.id !== 'greeting')
+      .map((message) => ({ role: message.role, text: message.text }));
+
     // 1. Update local UI
-    const updatedMessages: ChatMessage[] = [...messages, { role: 'user', text: userMsg }];
-    setMessages(updatedMessages);
+    const optimisticUserMessage: WsChatMessage = {
+      id: `pending-user-${Date.now()}`,
+      chatId: activeChatId || '',
+      role: 'user',
+      text: userMsg,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, optimisticUserMessage]);
     setIsTyping(true);
 
     try {
@@ -154,9 +214,15 @@ export default function ChatPage() {
               transcript: lectureNote.content,
               title: lectureNote.title,
               question: userMsg,
-              history: messages,
+              history: historyForAi,
           });
-          setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
+          setMessages((prev) => [...prev, {
+            id: `lecture-assistant-${Date.now()}`,
+            chatId: '',
+            role: 'assistant',
+            text: reply,
+            createdAt: new Date().toISOString(),
+          }]);
       } else {
           // General Chat Logic with History Persistence
           let chatId = activeChatId;
@@ -166,14 +232,25 @@ export default function ChatPage() {
             chatId = newChat.id;
             setActiveChatId(chatId);
             setChats(prev => [newChat, ...prev]);
+            setSearchParams({ chatId }, { replace: true });
           }
 
-          await saveMessage(chatId, 'user', userMsg);
-          const response = await chatGeneral(userMsg, updatedMessages);
-          await saveMessage(chatId, 'assistant', response.reply);
-          setMessages((prev) => [...prev, { role: 'assistant', text: response.reply }]);
+          const savedUserMessage = await saveMessage(chatId, 'user', userMsg);
+          if (savedUserMessage) {
+            setMessages((prev) => [
+              ...prev.filter((message) => message.id !== optimisticUserMessage.id),
+              savedUserMessage,
+            ]);
+          }
+
+          const response = await chatGeneral(userMsg, [...historyForAi, { role: 'user', text: userMsg }]);
+          const savedAssistantMessage = await saveMessage(chatId, 'assistant', response.reply);
+          if (savedAssistantMessage) {
+            setMessages((prev) => [...prev, savedAssistantMessage]);
+          }
       }
     } catch (err) {
+      setMessages((prev) => prev.filter((message) => message.id !== optimisticUserMessage.id));
       setError(err instanceof Error ? err.message : 'Failed to get response');
     } finally {
       setIsTyping(false);
@@ -220,6 +297,7 @@ export default function ChatPage() {
                   onClick={() => {
                       if (transcriptId) setSearchParams({});
                       setActiveChatId(chat.id);
+                      setSearchParams({ chatId: chat.id }, { replace: true });
                   }}
                   className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all group ${
                     activeChatId === chat.id && !transcriptId ? 'bg-brand-primary/10 text-brand-primary' : 'text-foreground-secondary hover:bg-surface-hover'
@@ -276,9 +354,9 @@ export default function ChatPage() {
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-6 space-y-10 scroll-smooth"
         >
-          {messages.map((msg, i) => (
+          {messages.map((msg) => (
             <div 
-              key={i} 
+              key={msg.id} 
               className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-center'} max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500`}
             >
               <div className={`flex gap-4 w-full ${msg.role === 'user' ? 'justify-end' : 'justify-center'}`}>

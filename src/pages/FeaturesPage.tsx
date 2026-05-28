@@ -130,7 +130,7 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
                                 className="relative"
                             >
                                 <VideoContainer
-                                    src="/demovids/Kortez's video.mp4"
+                                    src="/demovids/overlay.mp4"
                                     overlay={
                                         <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-2xl border border-slate-200/50 w-44 z-20">
                                             <div className="text-[10px] font-black tracking-wider uppercase mb-4 text-slate-400">System Metrics</div>
@@ -218,7 +218,7 @@ export const FeaturesPage = ({ onOpenDownload }: { onOpenDownload?: () => void }
                                 viewport={{ once: true }}
                                 className="relative"
                             >
-                                <VideoContainer src="/demovids/Video Project 1.mp4">
+                                <VideoContainer src="/demovids/lecture.mp4">
                                     {/* Bottom Icons Bar */}
                                     <div className="mt-8 bg-white/80 backdrop-blur-md border border-slate-100/60 rounded-2xl p-6 shadow-sm flex justify-between items-center text-center">
                                         <div className="flex-1 border-r border-slate-200/50 last:border-0 px-2 group/icon cursor-pointer">

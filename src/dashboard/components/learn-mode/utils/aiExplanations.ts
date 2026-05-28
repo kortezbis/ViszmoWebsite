@@ -1,12 +1,11 @@
 import { type LearnCard, type TeachingContent } from '../../learn-mode/types';
+import { invokeAiGateway } from '../../../../services/aiGateway';
 
 /**
- * Claude API integration for generating structured teaching content.
+ * AI gateway integration for generating structured teaching content.
  */
 export async function generateTeachingContent(card: LearnCard, testMode: boolean = false): Promise<TeachingContent> {
-    const apiKey = (window as any).CLAUDE_API_KEY || (import.meta as any).env?.VITE_CLAUDE_API_KEY;
-
-    if (testMode || !apiKey) {
+    if (testMode) {
         // Return structured mock data
         return new Promise((resolve) => {
             setTimeout(() => {
@@ -73,27 +72,11 @@ Return a JSON object with this EXACT structure:
 `;
 
     try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey || '',
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-3-5-sonnet-20240620',
-                max_tokens: 1000,
-                messages: [{
-                    role: 'user',
-                    content: prompt
-                }]
-            })
+        const data = await invokeAiGateway<{ reply: string }>('general_chat', {
+            question: prompt,
+            history: [],
         });
-
-        if (!response.ok) throw new Error(`API error: ${response.status}`);
-
-        const data = await response.json();
-        let content = data.content?.[0]?.text;
+        let content = data.reply;
 
         if (!content) throw new Error('Empty response from AI');
 

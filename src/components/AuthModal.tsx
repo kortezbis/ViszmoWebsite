@@ -129,55 +129,10 @@ export const AuthModal = ({ isOpen, onClose, initialView = 'login' }: AuthModalP
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="relative w-full max-w-[800px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+                        className="relative w-full max-w-[500px] bg-white rounded-3xl shadow-2xl overflow-hidden"
                     >
-                        {/* Left Side: Branding/Info (Desktop Only) */}
-                        <div className="hidden md:flex md:w-[35%] bg-slate-50 p-10 flex-col justify-between border-r border-slate-100">
-                            <div className="relative z-10">
-                                <div className="mb-10">
-                                    <div className="[filter:brightness(0)_saturate(100%)_invert(58%)_sepia(89%)_saturate(1583%)_hue-rotate(169deg)_brightness(98%)_contrast(93%)]">
-                                        <Logo variant="icon" size={40} />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="flex gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                                            <Check className="text-[#0ea5e9] w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <div className="text-slate-900 font-bold text-xs">Study Smart</div>
-                                            <div className="text-slate-500 text-[11px] mt-0.5 leading-relaxed">Flashcards and AI drills.</div>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                                            <Check className="text-[#0ea5e9] w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <div className="text-slate-900 font-bold text-xs">AI Assistant</div>
-                                            <div className="text-slate-500 text-[11px] mt-0.5 leading-relaxed">Instant study insights.</div>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                                            <Check className="text-[#0ea5e9] w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <div className="text-slate-900 font-bold text-xs">Live Dashboard</div>
-                                            <div className="text-slate-500 text-[11px] mt-0.5 leading-relaxed">Track your mastery.</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="relative z-10">
-                                <div className="text-slate-400 text-[9px] font-bold uppercase tracking-widest">200,000+ Students</div>
-                            </div>
-                        </div>
-
-                        {/* Right Side: Auth Form */}
-                        <div className="flex-1 p-8 md:p-14 relative">
+                        {/* Auth Form Container */}
+                        <div className="p-8 md:p-12 relative">
                             {/* Close Button */}
                             <button
                                 onClick={onClose}
@@ -209,11 +164,11 @@ export const AuthModal = ({ isOpen, onClose, initialView = 'login' }: AuthModalP
                                 </motion.div>
                             ) : (
                                 <>
-                                    <div className="mb-10 text-center">
-                                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-3">
+                                    <div className="mb-8 text-center">
+                                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">
                                             {view === 'login' ? 'Welcome back' : 'Create account'}
                                         </h2>
-                                        <p className="text-slate-500 font-medium text-lg">
+                                        <p className="text-slate-500 font-medium text-base">
                                             {view === 'login' 
                                                 ? 'Log in to continue your progress.' 
                                                 : 'Start your study journey today.'}

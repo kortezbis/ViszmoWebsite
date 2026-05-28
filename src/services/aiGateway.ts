@@ -10,7 +10,7 @@ type AiGatewayResponse<T> = {
 };
 
 const LEAKY =
-    /openai|supabase|anthropic|gemini|azure|bearer\s|api[_-]?key|service[_-]?role|edge\s*function|ai-gateway|functions\/v1|deno|postgres|jwt|sk-proj|sk_live|sk_test/i;
+    /openai|supabase|gemini|azure|bearer\s|api[_-]?key|service[_-]?role|edge\s*function|ai-gateway|functions\/v1|deno|postgres|jwt|sk-proj|sk_live|sk_test/i;
 
 function gatewayUserMessage(serverError: string | undefined, httpStatus: number): string {
     const raw = (serverError || '').trim();

@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 const PLAYLIST = [
-  "/demovids/Kortez's video.mp4",
-  "/demovids/Kortez's video (1).mp4"
+  "/demovids/overlay.mp4",
+  "/demovids/lecture.mp4"
 ];
 
 export const HeroMockup = () => {
