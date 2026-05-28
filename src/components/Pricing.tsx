@@ -80,6 +80,7 @@ export const Pricing = () => {
             features: [
                 'Full access to study dashboard',
                 'Unlimited lecture notetaking',
+                'Desktop Sidekick / Overlay (10 responses/day)',
             ],
             cta: 'Subscribe',
             popular: false,
@@ -113,9 +114,8 @@ export const Pricing = () => {
     };
 
     const comparisonFeatures: FeatureMap[] = [
-        { name: 'AI messages per day', plus: 'Unlimited', pro: 'Unlimited' },
+        { name: 'Desktop Sidekick / Overlay', plus: '10 responses/day', pro: 'Unlimited' },
         { name: 'Lecture notetaking', plus: 'Unlimited', pro: 'Unlimited' },
-        { name: 'Desktop Sidekick', plus: false, pro: true },
         { name: 'Undetectability to Screen Share', plus: false, pro: true }
     ];
 
