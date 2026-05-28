@@ -78,7 +78,7 @@ export const Pricing = () => {
             monthly: { price: 9.99, period: '/mo' },
             annual: { price: 7.50, period: '/mo', total: 89.99, label: 'Billed $89.99/year' },
             features: [
-                'Full access to study dashboard',
+                'Unlimited Study Dashboard & Study Modes',
                 'Unlimited lecture notetaking',
                 'Desktop Sidekick / Overlay (10 responses/day)',
             ],
@@ -92,8 +92,8 @@ export const Pricing = () => {
             monthly: { price: 19.99, period: '/mo' },
             annual: { price: 14.00, period: '/mo', total: 167.99, label: 'Billed $167.99/year' },
             features: [
-                'Includes all Plus features',
-                'Overlay access with unlimited responses',
+                'Everything in Plus with unlimited access',
+                'Unlimited Desktop Sidekick / Overlay responses',
                 'Undetectable during screen share',
             ],
             cta: 'Subscribe',
@@ -114,7 +114,8 @@ export const Pricing = () => {
     };
 
     const comparisonFeatures: FeatureMap[] = [
-        { name: 'Desktop Sidekick / Overlay', plus: '10 responses/day', pro: 'Unlimited' },
+        { name: 'Study Dashboard & Study Modes', plus: 'Unlimited Access', pro: 'Unlimited Access' },
+        { name: 'Desktop Sidekick / Overlay', plus: '10 responses/day (Limited)', pro: 'Unlimited' },
         { name: 'Lecture notetaking', plus: 'Unlimited', pro: 'Unlimited' },
         { name: 'Undetectability to Screen Share', plus: false, pro: true }
     ];
