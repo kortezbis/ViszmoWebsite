@@ -52,7 +52,7 @@ export function SEO({
     if (description) setMetaTag('property', 'og:description', description);
     setMetaTag('property', 'og:type', ogType);
     setMetaTag('property', 'og:image', ogImage);
-    setMetaTag('property', 'og:url', window.location.href);
+    setMetaTag('property', 'og:url', canonicalUrl || window.location.href);
 
     // 4. Twitter Card Tags
     setMetaTag('name', 'twitter:card', twitterCard);

@@ -375,7 +375,8 @@ export function DecksProvider({ children }: { children: ReactNode }) {
 
     const addCard = async (card: Omit<Card, 'id' | 'createdAt'>) => {
         if (!activeDeckId) return;
-        const created = await db.addFlashcard(activeDeckId, {
+        const created = await db.createCard({
+            deckId: activeDeckId,
             front: card.front,
             back: card.back,
             frontImage: card.image,

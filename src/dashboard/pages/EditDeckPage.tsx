@@ -131,6 +131,7 @@ export default function EditDeckPage() {
         setActiveDeck,
         updateDeckTitle,
         addCard,
+        addCards,
         updateCard,
         deleteCard,
         setCards,

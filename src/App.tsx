@@ -254,8 +254,8 @@ function LandingPage({ onOpenDownload, onOpenAuth }: { onOpenDownload: () => voi
       }}
     >
       <SEO 
-        title="Viszmo | #1 AI Study Sidekick with Screen Overlay" 
-        description="The ultimate AI study tool with screen overlay and live lecture transcription. Access exclusive AI study modes found nowhere else." 
+        title="Viszmo | The #1 AI Study & Homework Sidekick" 
+        description="The #1 AI study & homework sidekick with screen overlay and live lecture transcription. Access exclusive AI study modes found nowhere else." 
         canonicalUrl="https://www.viszmo.com/"
         noindex={false} 
       />

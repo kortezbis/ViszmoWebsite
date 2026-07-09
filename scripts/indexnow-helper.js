@@ -3,7 +3,7 @@
  * Sends URL submission requests to the IndexNow API.
  */
 
-export const INDEXNOW_KEY = '7d04e578c772421db028b3e8e2fa51c8';
+export const INDEXNOW_KEY = '8d98c3d6-fcd7-4f4d-9688-c5d94f89ad30';
 export const INDEXNOW_HOST = 'www.viszmo.com';
 export const INDEXNOW_KEY_LOCATION = `https://${INDEXNOW_HOST}/${INDEXNOW_KEY}.txt`;
 export const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/indexnow';
@@ -19,15 +19,23 @@ export async function pingIndexNow(urlList) {
     return false;
   }
 
-  // Ensure all URLs start with the canonical scheme and host
-  const normalizedUrls = urlList.map(url => {
-    if (url.startsWith('/')) {
-      return `https://${INDEXNOW_HOST}${url}`;
+  // Normalize to canonical www URLs
+  const normalizedUrls = urlList.map((url) => {
+    let value = url;
+    if (value.startsWith('/')) {
+      value = `https://${INDEXNOW_HOST}${value}`;
     }
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      return `https://${INDEXNOW_HOST}/${url}`;
+    if (!value.startsWith('http://') && !value.startsWith('https://')) {
+      value = `https://${INDEXNOW_HOST}/${value}`;
     }
-    return url;
+    try {
+      const urlObj = new URL(value);
+      urlObj.protocol = 'https:';
+      urlObj.hostname = INDEXNOW_HOST;
+      return urlObj.toString();
+    } catch {
+      return value;
+    }
   });
 
   const payload = {

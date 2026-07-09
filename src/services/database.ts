@@ -357,8 +357,8 @@ class DatabaseService {
     async addFlashcards(
         deckId: string,
         cards: { front: string; back: string; frontImage?: string; backImage?: string }[],
-    ): Promise<void> {
-        if (cards.length === 0) return;
+    ): Promise<FlashcardRow[]> {
+        if (cards.length === 0) return [];
         await this.ensureSessionReady();
         const insertData = cards.map((c) => ({
             deck_id: deckId,
@@ -368,13 +368,24 @@ class DatabaseService {
             back_image: c.backImage,
         }));
 
-        const { error } = await supabase.from('cards').insert(insertData);
+        const { data, error } = await supabase.from('cards').insert(insertData).select();
 
         if (error) {
             console.error('[DB] addFlashcards:', error.message);
             throw error;
         }
         this.clearCache('decks');
+
+        return (data || []).map((row) => ({
+            id: row.id,
+            deckId: row.deck_id,
+            front: row.front,
+            back: row.back,
+            frontImage: row.image ?? undefined,
+            backImage: row.back_image ?? undefined,
+            isStarred: row.is_starred ?? false,
+            createdAt: new Date(row.created_at).getTime(),
+        }));
     }
 
     async updateFlashcard(

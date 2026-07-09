@@ -29,7 +29,7 @@ const STEPS = [
             { label: '13 to 17' },
             { label: '18 to 24' },
             { label: '25 to 34' },
-            { label: '35 - 44' },
+            { label: '35 to 44' },
             { label: '45 to 54' },
             { label: '55+' }
         ]
@@ -160,7 +160,7 @@ export const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) =>
         } else {
             // Complete onboarding
             if (!userId || isSubmitting) return;
-            
+
             setIsSubmitting(true);
             try {
                 const { error } = await supabase
@@ -175,11 +175,11 @@ export const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) =>
                     .eq('id', userId);
 
                 if (error) throw error;
-                
+
                 // Transition to Preparing state
                 setIsPreparing(true);
                 await new Promise(resolve => setTimeout(resolve, 2500));
-                
+
                 await refreshProfile();
                 onComplete();
             } catch (error) {
@@ -269,10 +269,10 @@ export const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) =>
                                     <p className="text-slate-500 font-medium leading-relaxed">
                                         We're personalizing your Viszmo experience based on your study habits. Just a moment...
                                     </p>
-                                    
+
                                     <div className="absolute bottom-12 left-12 right-12">
                                         <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                            <motion.div 
+                                            <motion.div
                                                 className="h-full bg-gradient-to-r from-[#0ea5e9] to-indigo-500"
                                                 initial={{ width: "0%" }}
                                                 animate={{ width: "100%" }}
@@ -351,7 +351,7 @@ export const OnboardingModal = ({ isOpen, onComplete }: OnboardingModalProps) =>
                                             (stepInfo.options as any[])?.map((option) => {
                                                 const isSelected = data[stepInfo.id as keyof SurveyData] === option.label;
                                                 const isReferral = stepInfo.id === 'referral';
-                                                
+
                                                 return (
                                                     <button
                                                         key={option.label}
