@@ -13,6 +13,7 @@ export const HelpCenterPage = ({ onOpenDownload }: { onOpenDownload?: () => void
             <SEO 
                 title="Help Center & FAQ | Viszmo" 
                 description="Find answers to common questions about Viszmo. Learn how to use the AI overlay, generate study materials, and troubleshoot common issues." 
+                canonicalUrl="https://www.viszmo.com/help"
                 noindex={false} 
             />
         <StaticPageLayout

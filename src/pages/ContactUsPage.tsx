@@ -7,6 +7,7 @@ export const ContactUsPage = () => {
             <SEO
                 title="Contact Support | Viszmo"
                 description="Need help? Contact Viszmo support for any questions about our AI study tools or your account."
+                canonicalUrl="https://www.viszmo.com/contact"
                 noindex={false}
             />
             <StaticPageLayout

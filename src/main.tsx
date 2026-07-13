@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { HelmetProvider } from 'react-helmet-async'
 import './index.css'
 import App from './App.tsx'
 
@@ -22,14 +23,16 @@ document.body.style.padding = '0'
 
 createRoot(rootElement).render(
   <StrictMode>
-    <AuthProvider>
-      <ProfileProvider>
-        <AuthModalProvider>
-          <PreviewModeProvider>
-            <App />
-          </PreviewModeProvider>
-        </AuthModalProvider>
-      </ProfileProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <ProfileProvider>
+          <AuthModalProvider>
+            <PreviewModeProvider>
+              <App />
+            </PreviewModeProvider>
+          </AuthModalProvider>
+        </ProfileProvider>
+      </AuthProvider>
+    </HelmetProvider>
   </StrictMode>,
 )

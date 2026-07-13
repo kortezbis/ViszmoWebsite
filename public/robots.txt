@@ -1,13 +1,10 @@
 # Allow Google to crawl all public marketing pages
 User-agent: *
 Allow: /
-Allow: /library
-Allow: /cybersecurity
 
 # Protect your app dashboard and backend routes from showing up on Google
 Disallow: /dashboard
 Disallow: /api/
-Disallow: /login
 
-# Direct Google to your sitemap (Change to your exact domain)
+# Direct Google to your sitemap
 Sitemap: https://www.viszmo.com/sitemap.xml

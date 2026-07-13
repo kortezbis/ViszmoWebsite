@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 interface SEOProps {
   title: string;
@@ -15,66 +15,43 @@ export function SEO({
   title, 
   description, 
   keywords,
-  ogImage = '/viszmofull.png',
+  ogImage = 'https://www.viszmo.com/viszmofull.png',
   ogType = 'website',
   twitterCard = 'summary_large_image',
   canonicalUrl,
   noindex
 }: SEOProps) {
-  useEffect(() => {
-    // 1. Title
-    const fullTitle = title.includes('Viszmo') ? title : `${title} | Viszmo`;
-    document.title = fullTitle;
-    
-    const head = document.head;
+  const fullTitle = title.includes('Viszmo') ? title : `${title} | Viszmo`;
 
-    const setMetaTag = (attrName: string, attrValue: string, content: string) => {
-      let element = document.querySelector(`meta[${attrName}="${attrValue}"]`);
-      if (!element) {
-        element = document.createElement('meta');
-        element.setAttribute(attrName, attrValue);
-        head.appendChild(element);
-      }
-      element.setAttribute('content', content);
-    };
+  // Determine noindex: default to true for dashboard routes, false for marketing pages
+  const isDashboard = typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard');
+  const shouldNoIndex = noindex !== undefined ? noindex : isDashboard;
 
-    // Determine noindex: default to true for dashboard routes, false for marketing pages
-    const isDashboard = window.location.pathname.startsWith('/dashboard');
-    const shouldNoIndex = noindex !== undefined ? noindex : isDashboard;
+  const robotsContent = shouldNoIndex ? 'noindex, nofollow' : 'index, follow';
+  const resolvedCanonical = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : undefined);
 
-    // 2. Standard Meta Tags
-    if (description) setMetaTag('name', 'description', description);
-    if (keywords) setMetaTag('name', 'keywords', keywords);
-    setMetaTag('name', 'robots', shouldNoIndex ? 'noindex, nofollow' : 'index, follow');
+  return (
+    <Helmet>
+      <title>{fullTitle}</title>
+      {description && <meta name="description" content={description} />}
+      {keywords && <meta name="keywords" content={keywords} />}
+      <meta name="robots" content={robotsContent} />
 
-    // 3. Open Graph Tags
-    setMetaTag('property', 'og:title', fullTitle);
-    if (description) setMetaTag('property', 'og:description', description);
-    setMetaTag('property', 'og:type', ogType);
-    setMetaTag('property', 'og:image', ogImage);
-    setMetaTag('property', 'og:url', canonicalUrl || window.location.href);
+      {/* Open Graph */}
+      <meta property="og:title" content={fullTitle} />
+      {description && <meta property="og:description" content={description} />}
+      <meta property="og:type" content={ogType} />
+      <meta property="og:image" content={ogImage} />
+      {resolvedCanonical && <meta property="og:url" content={resolvedCanonical} />}
 
-    // 4. Twitter Card Tags
-    setMetaTag('name', 'twitter:card', twitterCard);
-    setMetaTag('name', 'twitter:title', fullTitle);
-    if (description) setMetaTag('name', 'twitter:description', description);
-    setMetaTag('name', 'twitter:image', ogImage);
+      {/* Twitter Card */}
+      <meta name="twitter:card" content={twitterCard} />
+      <meta name="twitter:title" content={fullTitle} />
+      {description && <meta name="twitter:description" content={description} />}
+      <meta name="twitter:image" content={ogImage} />
 
-    // 5. Canonical URL
-    let linkCanonical = document.querySelector('link[rel="canonical"]');
-    if (canonicalUrl || !linkCanonical) {
-      if (!linkCanonical) {
-        linkCanonical = document.createElement('link');
-        linkCanonical.setAttribute('rel', 'canonical');
-        head.appendChild(linkCanonical);
-      }
-      linkCanonical.setAttribute('href', canonicalUrl || window.location.href);
-    }
-
-    return () => {
-      // Optional: Cleanup if necessary
-    };
-  }, [title, description, keywords, ogImage, ogType, twitterCard, canonicalUrl, noindex]);
-
-  return null;
+      {/* Canonical */}
+      {resolvedCanonical && <link rel="canonical" href={resolvedCanonical} />}
+    </Helmet>
+  );
 }
