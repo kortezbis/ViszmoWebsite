@@ -4,9 +4,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ── Webmaster Verification ─────────────────────────────────────────── -->
   <meta name="msvalidate.01" content="A0DCB8868217E02587CDA201C164870E" />
-  <meta name="msvalidate.01" content="8d98c3d6-fcd7-4f4d-9688-c5d94f89ad30" />
   <meta name="google-site-verification" content="sUM8zc_tZqMqpestuyKOODKpE6aVNqbBf_UgLvrJ1gM" />
+
+  <!-- ── Primary SEO ────────────────────────────────────────────────────── -->
+  <title>Viszmo | The #1 AI Study &amp; Homework Sidekick</title>
+  <meta name="description" content="Viszmo is the #1 AI study &amp; homework sidekick with screen overlay and live lecture transcription. Get real-time help with any subject, from any website or video." />
+  <meta name="keywords" content="AI study sidekick, homework sidekick, screen overlay, live transcription, AI tutor, study helper, flashcards, lecture notes" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.viszmo.com/" />
+
+  <!-- ── Open Graph ─────────────────────────────────────────────────────── -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Viszmo" />
+  <meta property="og:title" content="Viszmo | The #1 AI Study &amp; Homework Sidekick" />
+  <meta property="og:description" content="Viszmo is the #1 AI study &amp; homework sidekick with screen overlay and live lecture transcription. Get real-time help with any subject, from any website or video." />
+  <meta property="og:url" content="https://www.viszmo.com/" />
+  <meta property="og:image" content="https://www.viszmo.com/viszmofull.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- ── Twitter / X Card ───────────────────────────────────────────────── -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Viszmo | The #1 AI Study &amp; Homework Sidekick" />
+  <meta name="twitter:description" content="Viszmo is the #1 AI study &amp; homework sidekick with screen overlay and live lecture transcription. Get real-time help with any subject, from any website or video." />
+  <meta name="twitter:image" content="https://www.viszmo.com/viszmofull.png" />
+
   <!-- Google tag (gtag.js) - Only load on production domain -->
   <script>
     if (window.location.hostname === 'www.viszmo.com' || window.location.hostname === 'viszmo.com') {
@@ -21,24 +47,28 @@
       gtag('config', 'G-P4VHMSN0DC');
     }
   </script>
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/google-favicon.png" />
-  <link rel="apple-touch-icon" href="/viszmofull.png" />
-  <link rel="shortcut icon" href="/favicon-32x32.png.png" />
+
+  <!-- ── Favicon ────────────────────────────────────────────────────────── -->
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+  <link rel="apple-touch-icon" href="/favicon-192.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+  <!-- ── Fonts ──────────────────────────────────────────────────────────── -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
+
   <!-- Preload Critical Fonts -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" as="style">
-  
+
   <!-- Preload Hero Background Image -->
   <link rel="preload" href="/hero-background.jpg.png" as="image" fetchpriority="high">
 
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@300;400;700&display=swap"
     rel="stylesheet">
+
+  <!-- ── Dark mode init (must run before paint) ─────────────────────────── -->
   <script>
     (function() {
       try {
@@ -55,22 +85,112 @@
       } catch (e) {}
     })();
   </script>
-  <title>Viszmo | The #1 AI Study & Homework Sidekick</title>
-  <meta name="description" content="Viszmo is the #1 AI study & homework sidekick with screen overlay and live lecture transcription. Get real-time help with any subject, from any website or video." />
-  <meta name="keywords" content="AI study sidekick, homework sidekick, screen overlay, live transcription, AI tutor, study helper, flashcards, lecture notes" />
-  <meta name="robots" content="index, follow" />
-  <!-- Canonical URL is managed per-page by react-helmet-async -->
-  
-  <!-- Open Graph / Facebook (page-specific tags managed by react-helmet-async) -->
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://www.viszmo.com/viszmofull.png" />
 
-  <!-- Twitter (page-specific tags managed by react-helmet-async) -->
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:image" content="https://www.viszmo.com/viszmofull.png" />
+  <!-- ── Structured Data: Organization ─────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://www.viszmo.com/#organization",
+    "name": "Viszmo",
+    "url": "https://www.viszmo.com/",
+    "logo": "https://www.viszmo.com/viszmofull.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "support@viszmo.com",
+      "contactType": "customer support"
+    },
+    "sameAs": [
+      "https://www.instagram.com/viszmo.ai",
+      "https://www.tiktok.com/@viszmostudy",
+      "https://www.youtube.com/@viszmo",
+      "https://www.facebook.com/people/Viszmo/61572037655549/"
+    ]
+  }
+  </script>
+
+  <!-- ── Structured Data: SoftwareApplication ──────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Viszmo",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Windows, iOS",
+    "description": "Viszmo is the #1 AI study sidekick with a transparent screen overlay, live lecture transcription, and automatic flashcard and quiz generation for students.",
+    "url": "https://www.viszmo.com/",
+    "publisher": {
+      "@id": "https://www.viszmo.com/#organization"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Free plan available. Pro plan with unlimited screen analysis and advanced AI tools available for students."
+    }
+  }
+  </script>
+
+  <!-- ── Structured Data: WebSite + SiteNavigation ─────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.viszmo.com/#website",
+        "url": "https://www.viszmo.com/",
+        "name": "Viszmo",
+        "publisher": { "@id": "https://www.viszmo.com/#organization" }
+      },
+      {
+        "@type": "ItemList",
+        "name": "Viszmo Navigation",
+        "itemListElement": [
+          { "@type": "SiteNavigationElement", "position": 1, "name": "Features", "url": "https://www.viszmo.com/features" },
+          { "@type": "SiteNavigationElement", "position": 2, "name": "Pricing", "url": "https://www.viszmo.com/pricing" },
+          { "@type": "SiteNavigationElement", "position": 3, "name": "How It Works", "url": "https://www.viszmo.com/how-it-works" },
+          { "@type": "SiteNavigationElement", "position": 4, "name": "Study Overlay", "url": "https://www.viszmo.com/study-overlay" },
+          { "@type": "SiteNavigationElement", "position": 5, "name": "Real-Time AI Tutor", "url": "https://www.viszmo.com/real-time-ai-tutor" },
+          { "@type": "SiteNavigationElement", "position": 6, "name": "AI Homework Helper", "url": "https://www.viszmo.com/ai-homework-helper" },
+          { "@type": "SiteNavigationElement", "position": 7, "name": "AI Math Solver", "url": "https://www.viszmo.com/ai-math-solver" },
+          { "@type": "SiteNavigationElement", "position": 8, "name": "AI Study Assistant", "url": "https://www.viszmo.com/ai-study-assistant" },
+          { "@type": "SiteNavigationElement", "position": 9, "name": "Help Center", "url": "https://www.viszmo.com/help" },
+          { "@type": "SiteNavigationElement", "position": 10, "name": "Contact", "url": "https://www.viszmo.com/contact" },
+          { "@type": "SiteNavigationElement", "position": 11, "name": "Terms of Service", "url": "https://www.viszmo.com/terms" },
+          { "@type": "SiteNavigationElement", "position": 12, "name": "Privacy Policy", "url": "https://www.viszmo.com/privacy" }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body style="margin: 0; padding: 0;">
+  <!-- Static crawlable links for search engine discovery — all SEO pages -->
+  <nav aria-label="Site navigation" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">
+    <a href="https://www.viszmo.com/">Home — Viszmo AI Study Sidekick</a>
+    <a href="https://www.viszmo.com/features">Viszmo Features</a>
+    <a href="https://www.viszmo.com/pricing">Pricing</a>
+    <a href="https://www.viszmo.com/how-it-works">How It Works</a>
+    <a href="https://www.viszmo.com/study-overlay">Study Overlay</a>
+    <a href="https://www.viszmo.com/study-while-watching-videos">Study While Watching Videos</a>
+    <a href="https://www.viszmo.com/real-time-ai-tutor">Real-Time AI Tutor</a>
+    <a href="https://www.viszmo.com/ai-homework-helper">AI Homework Helper</a>
+    <a href="https://www.viszmo.com/ai-math-solver">AI Math Solver</a>
+    <a href="https://www.viszmo.com/ai-study-assistant">AI Study Assistant</a>
+    <a href="https://www.viszmo.com/study-app-for-elementary-students">Study App for Elementary Students</a>
+    <a href="https://www.viszmo.com/study-app-for-middle-and-high-school-students">Study App for Middle and High School Students</a>
+    <a href="https://www.viszmo.com/study-app-for-college-students">Study App for College Students</a>
+    <a href="https://www.viszmo.com/viszmo-vs-quizlet">Viszmo vs Quizlet</a>
+    <a href="https://www.viszmo.com/viszmo-vs-knowt">Viszmo vs Knowt</a>
+    <a href="https://www.viszmo.com/viszmo-vs-gizmo">Viszmo vs Gizmo</a>
+    <a href="https://www.viszmo.com/viszmo-vs-anki">Viszmo vs Anki</a>
+    <a href="https://www.viszmo.com/help">Help Center</a>
+    <a href="https://www.viszmo.com/contact">Contact Support</a>
+    <a href="https://www.viszmo.com/terms">Terms of Service</a>
+    <a href="https://www.viszmo.com/privacy">Privacy Policy</a>
+  </nav>
   <div id="root" style="min-height: 100vh;"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

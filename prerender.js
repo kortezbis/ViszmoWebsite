@@ -67,9 +67,8 @@ async function prerender() {
     html = upsertMeta(html, 'property', 'og:url', fullUrl);
     html = upsertMeta(html, 'property', 'og:title', meta.title);
     html = upsertMeta(html, 'property', 'og:description', meta.description);
-    html = upsertMeta(html, 'property', 'twitter:url', fullUrl);
-    html = upsertMeta(html, 'property', 'twitter:title', meta.title);
-    html = upsertMeta(html, 'property', 'twitter:description', meta.description);
+    html = upsertMeta(html, 'name', 'twitter:title', meta.title);
+    html = upsertMeta(html, 'name', 'twitter:description', meta.description);
 
     html = upsertLink(html, 'canonical', fullUrl);
 

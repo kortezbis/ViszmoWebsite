@@ -1,7 +1,7 @@
 /** Static SEO copy injected into pre-rendered HTML for crawlers. */
 
 export const SITE_ORIGIN = 'https://www.viszmo.com';
-export const SITEMAP_LASTMOD = '2026-05-21';
+export const SITEMAP_LASTMOD = '2026-07-17';
 
 const coreLinks = [
   { href: '/features', label: 'Features' },

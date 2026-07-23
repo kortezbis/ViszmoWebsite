@@ -57,6 +57,7 @@ import { StudyWhileWatchingVideosPage } from './pages/StudyWhileWatchingVideosPa
 import { AIHomeworkHelperPage } from './pages/AIHomeworkHelperPage';
 import { AIMathSolverPage } from './pages/AIMathSolverPage';
 import { AIStudyAssistantPage } from './pages/AIStudyAssistantPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 
 // List of school logo filenames
@@ -985,6 +986,9 @@ function AnimatedRoutes({
         } />
 
         {/* Dashboard-v2 route removed */}
+
+        {/* Catch-all 404 — noindex so unknown URLs aren't treated as soft-404 duplicates of the homepage */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AnimatePresence>
   );
